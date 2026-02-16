@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajbari Green Gold: 3D Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
+            z-index: 100;
+        }
+
+        #controls-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            width: 300px;
+            user-select: none;
+        }
+
+        input[type=range] {
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .phase-label {
+            font-weight: bold;
+            color: #4caf50;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .phase-desc {
+            font-size: 0.85em;
+            color: #ccc;
+            text-align: center;
+            min-height: 40px;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            pointer-events: none;
+            display: none;
+            font-size: 0.9em;
+            border: 1px solid #4caf50;
+        }
+    </style>
+    <!-- Import Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="info">
+        <h1>Rajbari Green Gold: 3D Farm Model</h1>
+        <p>Left Click: Rotate | Right Click: Pan | Scroll: Zoom</p>
+    </div>
+
+    <div id="controls-container">
+        <div id="phase-title" class="phase-label">Phase 0: Raw Land</div>
+        <input type="range" id="phase-slider" min="0" max="6" step="1" value="0">
+        <div id="phase-desc" class="phase-desc">Current State: Rough land with weeds.</div>
+    </div>
+
+    <div id="tooltip"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- CONFIG ---
+        const PLOT_SIZE = 80; // 80 ft
+        const SEGMENTS = 64; // Grid resolution
+        const GRID_SPACING = 6; // 6 ft
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue
+        scene.fog = new THREE.Fog(0x87CEEB, 20, 150);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 60, 80); // High angle view
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // --- CONTROLS ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 - 0.1; // Don't go below ground
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        sunLight.position.set(50, 100, 50);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 200;
+        sunLight.shadow.camera.left = -50;
+        sunLight.shadow.camera.right = 50;
+        sunLight.shadow.camera.top = 50;
+        sunLight.shadow.camera.bottom = -50;
+        scene.add(sunLight);
+
+        // --- OBJECTS GROUPS ---
+        const groundGroup = new THREE.Group();
+        const drainGroup = new THREE.Group();
+        const pitGroup = new THREE.Group(); // Visual markers for pits
+        const moundGroup = new THREE.Group();
+        const plantGroup = new THREE.Group();
+        const intercropGroup = new THREE.Group();
+
+        scene.add(groundGroup);
+        scene.add(drainGroup); // Visualization of drains
+        scene.add(pitGroup);
+        scene.add(moundGroup);
+        scene.add(plantGroup);
+        scene.add(intercropGroup);
+
+        // --- 1. GROUND (Dynamic Geometry) ---
+        const geometry = new THREE.PlaneGeometry(PLOT_SIZE, PLOT_SIZE, SEGMENTS, SEGMENTS);
+        geometry.rotateX(-Math.PI / 2);
+
+        // Create Noise for Terrain
+        const posAttribute = geometry.attributes.position;
+        const initialZ = []; // Store initial height (which is 'y' in world space due to rotation)
+
+        for (let i = 0; i < posAttribute.count; i++) {
+            // Add random noise for "Raw Land"
+            const y = Math.random() * 0.5;
+            posAttribute.setY(i, y);
+            initialZ.push(y);
+        }
+        geometry.computeVertexNormals();
+
+        // Materials
+        const rawMat = new THREE.MeshStandardMaterial({ color: 0x556b2f, roughness: 1.0 }); // Green/Brown
+        const soilMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 }); // Dark Brown
+        const preparedMat = new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.8 }); // Smooth Dark
+
+        const ground = new THREE.Mesh(geometry, rawMat);
+        ground.receiveShadow = true;
+        groundGroup.add(ground);
+
+        // --- 2. GRID / PLANTS LOGIC ---
+        const plantPositions = [];
+        const rows = Math.floor((PLOT_SIZE - 4) / GRID_SPACING); // Margin of 2ft positions
+        const cols = rows;
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                // Centered grid
+                const x = (c * GRID_SPACING) - (PLOT_SIZE / 2) + GRID_SPACING;
+                const z = (r * GRID_SPACING) - (PLOT_SIZE / 2) + GRID_SPACING;
+                plantPositions.push({ x, z });
+            }
+        }
+
+        // --- 3. CREATE ASSETS (Mounds, Plants, Pits) ---
+
+        // PITS (Visual Markers - Black Cubes sinking slightly)
+        const pitGeo = new THREE.BoxGeometry(1.5, 0.2, 1.5);
+        const pitMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+        // MOUNDS (Cones)
+        const moundGeo = new THREE.ConeGeometry(2, 0.8, 16);
+        const moundMat = new THREE.MeshStandardMaterial({ color: 0x4e342e });
+
+        // PLANTS (Group of meshes)
+        function createPlant() {
+            const pGroup = new THREE.Group();
+
+            // Stem
+            const stemG = new THREE.CylinderGeometry(0.1, 0.15, 3);
+            const stemM = new THREE.MeshStandardMaterial({ color: 0x66bb6a });
+            const stem = new THREE.Mesh(stemG, stemM);
+            stem.position.y = 1.5;
+            pGroup.add(stem);
+
+            // Leaves (Simple)
+            const leafG = new THREE.ConeGeometry(1.5, 0.5, 5);
+            const leafM = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+            const top = new THREE.Mesh(leafG, leafM);
+            top.position.y = 3;
+            pGroup.add(top);
+
+            return pGroup;
+        }
+
+        // Instantiate Objects at Positions
+        plantPositions.forEach(pos => {
+            // Pit
+            const pit = new THREE.Mesh(pitGeo, pitMat);
+            pit.position.set(pos.x, 0.1, pos.z);
+            pit.userData = { type: 'pit', info: '1.5ft Depth' };
+            pitGroup.add(pit);
+
+            // Mound
+            const mound = new THREE.Mesh(moundGeo, moundMat);
+            mound.position.set(pos.x, 0.4, pos.z);
+            moundGroup.add(mound);
+
+            // Plant
+            const plant = createPlant();
+            plant.position.set(pos.x, 0.4, pos.z);
+
+            // Bamboo Stake
+            const stakeG = new THREE.CylinderGeometry(0.05, 0.05, 4);
+            const stakeM = new THREE.MeshStandardMaterial({ color: 0xd2b48c });
+            const stake = new THREE.Mesh(stakeG, stakeM);
+            stake.position.set(pos.x + 0.5, 2, pos.z);
+            stake.rotation.z = 0.1;
+
+            plant.add(stake); // Add stake to plant group
+            plantGroup.add(plant);
+        });
+
+        // INTERCROPPING (Lal Shak)
+        const intercropGeo = new THREE.SphereGeometry(0.5, 6, 6); // Simple low poly veg
+        const intercropMat = new THREE.MeshStandardMaterial({ color: 0xc5e1a5 });
+
+        // Add random veg in alleys (between rows)
+        for (let i = 0; i < 300; i++) {
+            const mesh = new THREE.Mesh(intercropGeo, intercropMat);
+            mesh.position.x = (Math.random() * PLOT_SIZE) - PLOT_SIZE / 2;
+            mesh.position.z = (Math.random() * PLOT_SIZE) - PLOT_SIZE / 2;
+            mesh.position.y = 0.2;
+            mesh.scale.set(1, 0.5, 1);
+
+            // Simple collision check to avoid mounds
+            let safe = true;
+            for (let p of plantPositions) {
+                const dist = Math.sqrt((mesh.position.x - p.x) ** 2 + (mesh.position.z - p.z) ** 2);
+                if (dist < 2.5) safe = false;
+            }
+
+            if (safe) intercropGroup.add(mesh);
+        }
+
+
+        // --- PHASE MANAGEMENT ---
+        const phases = [
+            { id: 0, title: "Raw Land", desc: "Uneven terrain, weeds present.", bg: rawMat },
+            { id: 1, title: "1st Ploughing", desc: "Darker, ploughed soil. Lime (White dust) applied.", bg: soilMat },
+            { id: 2, title: "Drains & Leveling", desc: "1.5ft Drains along border. Soil Leveled.", bg: preparedMat },
+            { id: 3, title: "Pit Digging", desc: "Black markers show 150 pits (1.5x1.5ft).", bg: preparedMat },
+            { id: 4, title: "Mounding", desc: "Pyramid shaped mounds (Dhibi) created.", bg: preparedMat },
+            { id: 5, title: "Planting", desc: "Seedlings planted with Bamboo stakes.", bg: preparedMat },
+            { id: 6, title: "Intercropping", desc: "Lal Shak growing in alleys.", bg: preparedMat }
+        ];
+
+        function updateScene(step) {
+            // Visibility Logic
+            drainGroup.visible = (step >= 2);
+            pitGroup.visible = (step == 3); // Pits visible only during digging phase
+            moundGroup.visible = (step >= 4);
+            plantGroup.visible = (step >= 5);
+            intercropGroup.visible = (step >= 6);
+
+            // Ground Material
+            ground.material = phases[step].bg;
+
+            // Geometry Morphing (Leveling/Drains)
+            const posAttr = ground.geometry.attributes.position;
+
+            for (let i = 0; i < posAttr.count; i++) {
+                const x = posAttr.getX(i);
+                const z = posAttr.getY(i); // Plane is rotated, so Z is Y locally
+                let h = initialZ[i];
+
+                if (step >= 1) {
+                    h = h * 0.5; // Flatten slightly for ploughing
+                }
+                if (step >= 2) {
+                    h = 0; // Perfectly Level
+
+                    // Create Drains at border
+                    const margin = PLOT_SIZE / 2 - 1.5; // 1.5ft drain
+                    if (Math.abs(x) > margin || Math.abs(z) > margin) {
+                        h = -1.5; // Drain Depth
+                    }
+                }
+
+                posAttr.setZ(i, h); // Height is Z locally after rotation? Wait plane geo..
+                // PlaneGeometry is XY. RotateX(-PI/2) makes it XZ. So vertex Z is height.
+                // Wait, default plane normal is +Z.
+                // After rotation, Local Z becomes World -Y? No.
+                // Let's stick to modifying the attribute directly.
+                // Plane created in XY. Rotated to lay flat on XZ. 
+                // Local Z is 'height' relative to plane.
+                posAttr.setZ(i, h);
+            }
+            posAttr.needsUpdate = true;
+            ground.geometry.computeVertexNormals();
+
+            // UI Update
+            document.getElementById('phase-title').innerText = phases[step].title;
+            document.getElementById('phase-desc').innerText = phases[step].desc;
+        }
+
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('phase-slider').addEventListener('input', (e) => {
+            updateScene(parseInt(e.target.value));
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize
+        updateScene(0);
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+    </script>
+</body>
+
+</html>
