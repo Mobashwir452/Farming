@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>কমিউনিটি ও হেল্পডেস্ক | AgriTech</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Moto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/community.css">
+    <!-- Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/community.js" defer></script>
+</head>
+
+<body class="community-body">
+    <!-- Header -->
+    <header class="page-top-header"
+        style="position: sticky; top: 0; z-index: 100; background: white; padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <button class="back-btn" onclick="history.back()" aria-label="Go Back"
+                style="border: none; background: #F1F5F9; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 style="font-size: 18px; margin:0; line-height: 1.2;">কমিউনিটি ও হেল্পডেস্ক</h2>
+        </div>
+        <button class="notification-btn header-action-btn" aria-label="Notifications"
+            style="padding: 8px; border:none; background:none; box-shadow:none; position: relative;">
+            <span class="material-icons-round" style="color: var(--primary);">notifications</span>
+            <span class="badge"
+                style="position: absolute; top:0; right: 0; background: #EF4444; color: white; width: 16px; height: 16px; font-size: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">৩</span>
+        </button>
+    </header>
+
+    <main class="community-main">
+        <!-- Tab Navigation -->
+        <div class="com-tabs-container">
+            <div class="com-tabs">
+                <button class="com-tab active" data-tab="community">কমিউনিটি</button>
+                <button class="com-tab" data-tab="helpdesk">বিশেষজ্ঞ পরামর্শ</button>
+            </div>
+        </div>
+
+        <!-- Tab 1: Community -->
+        <div class="com-tab-content active" id="tab-community">
+            <!-- Create Post Box -->
+            <div class="create-post-box ld-card">
+                <div class="post-input-area">
+                    <img src="https://i.pravatar.cc/100?img=11" alt="Profile" class="user-avatar">
+                    <input type="text" placeholder="আপনার সমস্যা বা অভিজ্ঞতা শেয়ার করুন..." readonly
+                        onclick="showToast('পোস্ট তৈরি করার ফর্ম খুব শিগগিরই আসছে...', 'info');">
+                </div>
+                <div class="post-actions">
+                    <button class="post-action-btn">
+                        <span class="material-icons-round" style="color:#10B981;">image</span> ছবি/ভিডিও
+                    </button>
+                    <button class="post-action-btn">
+                        <span class="material-icons-round" style="color:#3B82F6;">sell</span> ট্যাগ
+                    </button>
+                    <button class="btn-primary btn-sm" style="padding: 6px 16px; font-size: 13px;"
+                        onclick="showToast('পোস্ট তৈরি করার ফর্ম খুব শিগগিরই আসছে...', 'info');">পোস্ট করুন</button>
+                </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="post-feed">
+                <!-- Post 1 -->
+                <div class="feed-card ld-card">
+                    <div class="post-header">
+                        <img src="https://i.pravatar.cc/100?img=33" alt="Rahim Mia" class="post-avatar">
+                        <div class="post-meta">
+                            <h4>রহিম মিয়া</h4>
+                            <span class="post-time">বগুড়া সদর • ২ ঘণ্টা আগে</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>আমার বোরো ধানের জমির কিছু পাতায় হলুদ দাগ দেখা যাচ্ছে। এটা কি কোনো রোগের লক্ষণ? কেউ সমাধান
+                            জানলে দয়া করে জানাবেন।</p>
+                        <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=400&h=250"
+                            alt="Paddy leaf with yellow spots" class="post-image">
+                    </div>
+                    <div class="post-interactions">
+                        <button class="interaction-btn active"><span class="material-icons-round">thumb_up</span>
+                            ১৩</button>
+                        <button class="interaction-btn"><span class="material-icons-round">comment</span> ২
+                            মতামত</button>
+                        <button class="interaction-btn"><span class="material-icons-round">share</span> শেয়ার</button>
+                    </div>
+                </div>
+
+                <!-- Post 2 -->
+                <div class="feed-card ld-card">
+                    <div class="post-header">
+                        <img src="https://i.pravatar.cc/100?img=12" alt="Abdul Karim" class="post-avatar">
+                        <div class="post-meta">
+                            <h4>আব্দুল করিম</h4>
+                            <span class="post-time">গাবতলী • ৫ ঘণ্টা আগে</span>
+                        </div>
+                        <span class="expert-badge">
+                            <span class="material-icons-round" style="font-size:12px;">verified</span> কৃষি কর্মকর্তা
+                        </span>
+                    </div>
+                    <div class="post-content">
+                        <p>বর্তমান আবহাওয়ায় কালবৈশাখী ঝড়ের পূর্বাভাস রয়েছে। কৃষকদের অনুরোধ করা হচ্ছে জমিতে সেচ দেওয়া
+                            আপাতত বন্ধ রাখুন এবং সাবধানে থাকুন।</p>
+                    </div>
+                    <div class="post-interactions">
+                        <button class="interaction-btn"><span class="material-icons-round">thumb_up</span> ৪৫</button>
+                        <button class="interaction-btn"><span class="material-icons-round">comment</span> ৮
+                            মতামত</button>
+                        <button class="interaction-btn"><span class="material-icons-round">share</span> শেয়ার</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Helpdesk -->
+        <div class="com-tab-content" id="tab-helpdesk">
+            <!-- Direct Support Card -->
+            <div class="support-contact-card ld-card"
+                style="background: linear-gradient(135deg, var(--primary-light), #e0f2fe);">
+                <div class="support-icon-large">
+                    <span class="material-icons-round"
+                        style="font-size: 40px; color: var(--primary-dark);">support_agent</span>
+                </div>
+                <div class="support-info" style="flex: 1;">
+                    <h3>কৃষি কল সেন্টার</h3>
+                    <p>যেকোনো কৃষি বিষয়ক পরামর্শের জন্য সরাসরি কথা বলুন (টোল-ফ্রি)</p>
+                    <a href="tel:16162" class="btn-primary call-btn"
+                        style="margin-top: 12px; width: 100%; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);text-decoration: none;">
+                        <span class="material-icons-round" style="margin-right:8px; font-size: 18px;">call</span> সরাসরি
+                        কল করুন (১৬১৬২)
+                    </a>
+                </div>
+            </div>
+
+            <div class="section-header"
+                style="margin: 20px 0 12px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="font-size: 16px; font-weight:700; margin: 0;">আমার প্রশ্নসমূহ</h3>
+            </div>
+
+            <!-- Tickets List -->
+            <div class="ticket-list">
+                <!-- Ticket 1 -->
+                <div class="ticket-card ld-card">
+                    <div class="ticket-header">
+                        <span class="ticket-id">#TK-8042</span>
+                        <span class="ticket-status resolved">সমাধানকৃত</span>
+                    </div>
+                    <h4 class="ticket-title">টমেটো গাছে ফল পচা রোগ</h4>
+                    <p class="ticket-desc">আমার টমেটো গাছের নিচের দিকের ফলগুলোতে কালো ছোপ ছোপ পচন ধরেছে...</p>
+                    <div class="ticket-footer">
+                        <span class="ticket-date">৩ দিন আগে</span>
+                        <button class="view-ticket-btn">বিস্তারিত</button>
+                    </div>
+                </div>
+
+                <!-- Ticket 2 -->
+                <div class="ticket-card ld-card">
+                    <div class="ticket-header">
+                        <span class="ticket-id">#TK-8155</span>
+                        <span class="ticket-status pending">অপেক্ষমান</span>
+                    </div>
+                    <h4 class="ticket-title">সারের পরিমাণ জানতে চাই</h4>
+                    <p class="ticket-desc">বিঘা প্রতি জমিতে ইউরিয়া এবং পটাশ সার কি পরিমাণ ব্যবহার করবো?</p>
+                    <div class="ticket-footer">
+                        <span class="ticket-date">আজ, সকাল ১০:৩০</span>
+                        <button class="view-ticket-btn">বিস্তারিত</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="height: 100px;"></div> <!-- Bottom Padding for Nav & FAB -->
+    </main>
+
+    <!-- Floating Action Button for Helpdesk Tab -->
+    <button class="fab-ask-expert" id="btnAskExpert" style="display: none;">
+        <span class="material-icons-round">add</span>
+        <span>প্রশ্ন করুন</span>
+    </button>
+
+    <!-- Ask Expert Bottom Sheet Modal -->
+    <div class="expert-modal" id="expertModal">
+        <div class="expert-content">
+            <div class="expert-header">
+                <h4>বিশেষজ্ঞকে জিজ্ঞাসা করুন</h4>
+                <button class="close-expert-modal" id="closeExpertModal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="expert-body">
+                <div>
+                    <label>সমস্যার বিবরণ</label>
+                    <textarea rows="4" id="expertQuestionText"
+                        placeholder="আপনার ফসলের সমস্যা বিস্তারিত লিখুন..."></textarea>
+                </div>
+                <div class="upload-box" onclick="showToast('গ্যালারি/ক্যামেরা ওপেন হবে', 'info');">
+                    <span class="material-icons-round">add_a_photo</span>
+                    <p style="margin:0; font-size:13px; font-weight:500;">ছবি যোগ করুন</p>
+                </div>
+            </div>
+            <div class="expert-footer">
+                <button class="btn-primary" id="submitAskExpert"
+                    style="width: 100%; padding: 12px; font-size: 15px; border-radius: 12px;">প্রশ্ন জমা দিন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+
+</body>
+
+</html>

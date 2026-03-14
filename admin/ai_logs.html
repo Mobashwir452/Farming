@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI অডিট লগস - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-ai-audit.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div class="audit-header">
+                <div>
+                    <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        AI অডিট লগস
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 0;">ডিপ অ্যানালাইসিস, কমপ্লায়েন্স ট্র্যাকিং এবং কস্ট অপটিমাইজেশন</p>
+                </div>
+                <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    রিপোর্ট জেনারেট (PDF)
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="audit-tabs">
+                <button class="audit-tab-btn active" onclick="switchAuditTab('tab-analytics')">অ্যানালিটিক্স ও কস্ট</button>
+                <button class="audit-tab-btn" onclick="switchAuditTab('tab-investigation')">ইনভেস্টিগেশন ও ফিল্টার</button>
+                <button class="audit-tab-btn" onclick="switchAuditTab('tab-security')">সিস্টেম ও সিকিউরিটি অডিট</button>
+            </div>
+
+            <!-- TAB: Analytics & Cost -->
+            <div id="tab-analytics" class="audit-tab-pane active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="mc-title">মোট টোকেন খরচ (এই মাসে)</div>
+                        <div class="mc-value">২.৪ মিলিয়ন</div>
+                        <div class="mc-subinfo success">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            <span>বাজেটের মধ্যে আছে (৮০%)</span>
+                        </div>
+                    </div>
+                    <div class="metric-card highlight">
+                        <div class="mc-title">আনুমানিক বিল (Estimate)</div>
+                        <div class="mc-value">$৪২.৫০</div>
+                        <div class="mc-subinfo"><span>১০০ ডলার লিমিটের সাপেক্ষে</span></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="mc-title">মডেল রেসপন্স টাইম (গড়)</div>
+                        <div class="mc-value">১.২ সে.</div>
+                        <div class="mc-subinfo danger">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                            <span>০.২ সে. বেশি গত সপ্তাহের চেয়ে</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="mc-title">সর্বোচ্চ এরর রেট (API)</div>
+                        <div class="mc-value">০.৮%</div>
+                        <div class="mc-subinfo success"><span>স্ট্যাবল (Quota Exceeded Issue Resolved)</span></div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Line Chart Placeholder -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <h3 class="card-title">ডেইলি টোকেন ইউসেজ ট্রেন্ড (মার্চ ২০২৬)</h3>
+                        <div class="chart-container">
+                            [Line Chart Visualization Area]
+                        </div>
+                    </div>
+                    
+                    <!-- Heatmap / Bar Chart Placeholder -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <h3 class="card-title">ভৌগোলিক হিটম্যাপ (রোগ স্ক্যান)</h3>
+                        <div class="chart-container" style="background: #F1F5F9;">
+                            [Regional Bar Chart: Bogra, Rajshahi highest]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Investigation & Filtering -->
+            <div id="tab-investigation" class="audit-tab-pane">
+                <div class="filter-panel">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>ডেট রেঞ্জ</label>
+                            <input type="date" class="form-input" value="2026-03-01">
+                        </div>
+                        <div class="filter-group">
+                            <label>ইউজার / ফার্মার আইডি</label>
+                            <input type="text" class="form-input" placeholder="017... বা Farmer ID">
+                        </div>
+                        <div class="filter-group">
+                            <label>প্রম্পট টাইপ</label>
+                            <select class="form-input">
+                                <option value="all">সব টাইপ</option>
+                                <option value="text">টেক্সট ইনপুট</option>
+                                <option value="voice">ভয়েস ইনপুট</option>
+                                <option value="image">ইমেজ স্ক্যান</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>স্ট্যাটাস</label>
+                            <select class="form-input">
+                                <option value="all">সব স্ট্যাটাস</option>
+                                <option value="success">সফল</option>
+                                <option value="low_confidence">Low Confidence</option>
+                                <option value="error">মডেল এরর</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+                        <span class="status-badge status-warning" style="font-size: 12px; padding: 6px 12px;">২ জন ইউজারের অস্বাভাবিক অ্যাক্টিভিটি পাওয়া গেছে (Rate Limit)</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-outline-primary">ফিল্টার ক্লিয়ার</button>
+                            <button class="btn-primary">সার্চ করুন</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="overflow-x: auto;">
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>টাইমস্ট্যাম্প</th>
+                                    <th>ইউজার সোর্স</th>
+                                    <th>টাইপ ও টপিক</th>
+                                    <th>লগ স্নীপেট / ইনপুট</th>
+                                    <th>স্ট্যাটাস</th>
+                                    <th style="text-align: right;">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 500;">১০ মার্চ ২০২৬</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">১৪:৪৫:১২ BST</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">01712***890</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">বগুড়া (App)</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-info">Text</span>
+                                        <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">Entity: সার</div>
+                                    </td>
+                                    <td>
+                                        <div class="log-snippet">বোরো ধানে ইউরিয়া কতদিন পর দিতে হয়?</div>
+                                        <div class="log-meta">Tokens: 420 | 1.2s</div>
+                                    </td>
+                                    <td><span class="status-badge status-success">Success</span></td>
+                                    <td style="text-align: right;">
+                                        <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">JSON ভিউ</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 500;">১০ মার্চ ২০২৬</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">১৪:২০:০৫ BST</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500;">01844***456</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">রংপুর (Web)</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-warning" style="background: #E0E7FF; color: #4F46E5;">Image</span>
+                                        <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">Entity: Unknown</div>
+                                    </td>
+                                    <td>
+                                        <div class="log-snippet"><i>[Image Scan Data - Blurry]</i></div>
+                                        <div class="log-meta">Tokens: 1024 | 3.5s</div>
+                                    </td>
+                                    <td><span class="status-badge status-warning">Low Confidence (34%)</span></td>
+                                    <td style="text-align: right;">
+                                        <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">JSON ভিউ</button>
+                                    </td>
+                                </tr>
+                                <tr style="background: #FEF2F2;">
+                                    <td>
+                                        <div style="font-weight: 500;">০৯ মার্চ ২০২৬</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">১১:১৫:০০ BST</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500; color: var(--danger);">01677***123 (Flagged)</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">ঢাকা (API)</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-info">Text</span>
+                                        <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">Entity: Abuse</div>
+                                    </td>
+                                    <td>
+                                        <div class="log-snippet">Write me a poem about...</div>
+                                        <div class="log-meta">Tokens: 0 | Blocked</div>
+                                    </td>
+                                    <td><span class="status-badge status-danger">Rate Limit / Policy</span></td>
+                                    <td style="text-align: right;">
+                                        <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">JSON ভিউ</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Security Audit -->
+            <div id="tab-security" class="audit-tab-pane">
+                <div class="card">
+                    <h3 class="card-title">সুপার-অ্যাডমিন অ্যাক্টিভিটি লগস</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">এআই কনফিগারেশন, প্রম্পট আপডেট বা নলেজ বেসে যেসব পরিবর্তন আনা হয়েছে তার রেকর্ড।</p>
+                    
+                    <div class="security-timeline">
+                        <div class="st-item danger">
+                            <div class="st-header">
+                                <span class="st-title" style="color: var(--danger);">API Key Changed (Google Gemini)</span>
+                                <span class="st-time">আজ, ১০:৩০ AM</span>
+                            </div>
+                            <div class="st-body">
+                                <div>Admin: <strong>Mobashwir Rahman (Super Admin)</strong></div>
+                                <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">IP: 103.111.90.15 • User-Agent: Chrome 114.0 (Windows)</div>
+                            </div>
+                        </div>
+
+                        <div class="st-item">
+                            <div class="st-header">
+                                <span class="st-title" style="color: var(--primary);">System Prompt Updated</span>
+                                <span class="st-time">গতকাল, ০৪:১৫ PM</span>
+                            </div>
+                            <div class="st-body">
+                                <div>Admin: <strong>Jane Doe (AI Manager)</strong></div>
+                                <div class="st-diff">
+                                    <div class="diff-sub">- 3. If unsure, tell them to call the helpline.</div>
+                                    <div class="diff-add">+ 3. If unsure, tell them to call the helpline 16162.</div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">IP: 45.120.10.5 • User-Agent: Safari 16.5 (Mac)</div>
+                            </div>
+                        </div>
+
+                        <div class="st-item">
+                            <div class="st-header">
+                                <span class="st-title">Knowledge Base PDF Uploaded</span>
+                                <span class="st-time">০৮ মার্চ ২০২৬, ১১:০০ AM</span>
+                            </div>
+                            <div class="st-body">
+                                <div>Admin: <strong>Mobashwir Rahman</strong></div>
+                                <div style="margin-top: 4px;">File: <em>বাংলাদেশের_কৃষি_ম্যানুয়াল_২০২৪.pdf (2.4 MB)</em> -> Synced to Vectorize DB_1.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim().includes('AI অডিট লগস')) {
+                        item.classList.add('active');
+                    }
+                });
+
+                document.getElementById('headerTitle').textContent = 'AI অডিট লগস';
+            }, 100);
+        });
+
+        function switchAuditTab(tabId) {
+            document.querySelectorAll('.audit-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.audit-tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

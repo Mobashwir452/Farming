@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>এআই ইঞ্জিন - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-ai.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div class="ai-header">
+                <div>
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        এআই প্রম্পট ইঞ্জিন
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">প্ল্যাটফর্মের মস্তিষ্ক конফিগার ও মনিটর করুন</p>
+                </div>
+                <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    টেস্ট কনসোল
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="ai-tabs">
+                <button class="ai-tab-btn active" onclick="switchAITab('tab-overview')">ওভারভিউ</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-crop-prediction')">স্মার্ট ক্রপ প্রেডিকশন</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-crop-doctor')">ক্রপ ডাক্তার</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-config')">ইঞ্জিন কনফিগারেশন</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-rag')">নলেজ বেস (RAG)</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-logs')">সিস্টেম লগস</button>
+            </div>
+
+            <!-- TAB: Overview -->
+            <div id="tab-overview" class="ai-tab-pane active">
+                <div class="metrics-grid">
+                    <div class="metric-card highlight">
+                        <div class="mc-title">
+                            Gemini API (ফ্রি টায়ার)
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        </div>
+                        <div class="mc-value">১২,৩৪০ <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ ১৫,০০০ (আজ)</span></div>
+                        <div class="progress-container"><div class="progress-fill" style="width: 82%;"></div></div>
+                        <div class="mc-subinfo"><span>৮২% রিকোয়েস্ট কোটা পূরণ</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="mc-title">Cloudflare Vectorize</div>
+                        <div class="mc-value">১.২ <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">GB</span></div>
+                        <div class="progress-container"><div class="progress-fill warning" style="width: 24%;"></div></div>
+                        <div class="mc-subinfo"><span>৫ GB মাসিক ফ্রি ডাটায়</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="mc-title">এআই সাকসেস রেট</div>
+                        <div class="mc-value">৯৭.৮%</div>
+                        <div class="mc-subinfo success"><span>+ ২.১% গত সপ্তাহের তুলনায়</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="mc-title">আজকের ক্রপ ডাক্তার স্ক্যান</div>
+                        <div class="mc-value">৩,৪২০</div>
+                        <div class="mc-subinfo warning"><span>১২০টি ফেইল করেছে</span></div>
+                    </div>
+                </div>
+
+                <!-- Trending Topics (Placeholder) -->
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                    <h3 class="form-title">জনপ্রিয় অনুসন্ধান (Trending)</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">ব্লাস্ট রোগ সমাধান (৪৫০+)</span>
+                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">বোরো ধানের সার (৩২০+)</span>
+                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">টমেটোর পাতা কোঁকড়ানো (২১০+)</span>
+                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">আলুর লেট ব্লাইট (১৮০+)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Crop Prediction -->
+            <div id="tab-crop-prediction" class="ai-tab-pane">
+                <div class="split-layout">
+                    <div>
+                        <div class="form-section">
+                            <h3 class="form-title">স্মার্ট প্ল্যান লজিক ও বেসলাইন</h3>
+                            <div class="form-group">
+                                <label>ফসল নির্বাচন করুন</label>
+                                <select class="form-control">
+                                    <option>বোরো ধান (ব্রি-২৮)</option>
+                                    <option>আলো (ডায়মন্ড)</option>
+                                    <option>ভুট্টা</option>
+                                </select>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label>গড় ফলন (প্রতি একর)</label>
+                                    <input type="text" class="form-control" value="৫০-৬০ মণ">
+                                </div>
+                                <div class="form-group">
+                                    <label>গড় খরচ (প্রতি একর)</label>
+                                    <input type="text" class="form-control" value="৳ ১৮,০০০">
+                                </div>
+                            </div>
+                            <button class="btn-primary" style="padding: 10px 16px;">বেসলাইন আপডেট করুন</button>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-title">রিস্ক ও অ্যালার্ট সোর্স (Weather & Pests)</h3>
+                            <div class="form-group">
+                                <label>বহিরাগত API ইন্টিগ্রেশন</label>
+                                <select class="form-control" style="margin-bottom: 12px;">
+                                    <option>OpenWeatherMap API (অ্যাক্টিভ)</option>
+                                    <option>BAMD Database API</option>
+                                </select>
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                    <div style="font-size: 13px;">ভারী বৃষ্টির সতর্কবার্তা চালু আছে</div>
+                                    <label style="position: relative; display: inline-block; width: 40px; height: 24px;">
+                                        <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); border-radius: 24px; transition: .4s;">
+                                            <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 19px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s;"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                         <div class="form-section" style="height: 100%;">
+                            <h3 class="form-title">সর্বশেষ জেনারেটেড টাইমলাইন</h3>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">আব্দুর রহিম (01712***890)</div>
+                                    <div style="font-size: 14px; font-weight: 600;">বোরো ধান (২.০ একর)</div>
+                                    <div style="font-size: 12px; color: var(--primary); margin-top: 8px; cursor: pointer;">লগ দেখুন</div>
+                                </div>
+                                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">শফিকুল (01844***456)</div>
+                                    <div style="font-size: 14px; font-weight: 600;">আলু (১.২ একর)</div>
+                                    <div style="font-size: 12px; color: var(--primary); margin-top: 8px; cursor: pointer;">লগ দেখুন</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Crop Doctor -->
+            <div id="tab-crop-doctor" class="ai-tab-pane">
+                <div class="split-layout">
+                    <div>
+                        <div class="form-section">
+                            <h3 class="form-title">রোগ ও সমাধান কনফিগারেশন</h3>
+                            <div class="form-group">
+                                <label>স্ক্যান রুলস ও মেডিসিন রেকমেন্ডেশন</label>
+                                <textarea class="form-control" rows="4">Rule 1: If disease is "Rice Blast", always recommend "নাটিভো ৭৫" or "টেবুকোনাজল" for High Confidence matches.&#13;&#10;Rule 2: Emphasize organic solutions first before chemical options.</textarea>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি AI ইঞ্জিনকে স্ক্যানের রেজাল্টের সাথে যুক্ত করা হবে।</p>
+                            </div>
+                            <button class="btn-primary" style="padding: 10px 16px;">সেভ করুন</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-section" style="background: #FEF2F2; border-color: #FECACA;">
+                            <h3 class="form-title" style="color: var(--danger);">স্ক্যানিং ফেইলর লগস (Low Confidence)</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">যে ছবিগুলো এআই সঠিকভাবে চিনতে পারেনি, সেগুলোর ম্যানুয়াল রিভিউ প্রয়োজন।</p>
+                            
+                            <div style="display: flex; gap: 8px; align-items: center; padding: 8px; background: white; border-radius: 8px; margin-bottom: 8px;">
+                                <img src="https://images.unsplash.com/photo-1595844784411-eb6ac3014aef?w=40&h=40&fit=crop" style="width: 40px; height: 40px; border-radius: 4px;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 13px; font-weight: 600;">Confidence: 34%</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">01712***890 • 1 hr ago</div>
+                                </div>
+                                <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">রিভিউ</button>
+                            </div>
+                             <div style="display: flex; gap: 8px; align-items: center; padding: 8px; background: white; border-radius: 8px;">
+                                <div style="width: 40px; height: 40px; background: #E2E8F0; border-radius: 4px;"></div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 13px; font-weight: 600;">Too Blurry</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">01844***456 • 3 hrs ago</div>
+                                </div>
+                                <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">রিভিউ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-top: 24px;">
+                    <h3 class="form-title">সাম্প্রতিক সফল স্ক্যান (Live Feed)</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>ছবি</th>
+                                    <th>ইউজার</th>
+                                    <th>শনাক্তকৃত রোগ</th>
+                                    <th>এআই নিশ্চয়তা</th>
+                                    <th>সময়</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?w=40&h=40&fit=crop" class="log-thumbnail"></td>
+                                    <td>করিম মিয়া</td>
+                                    <td>ধানের ব্লাস্ট (Rice Blast)</td>
+                                    <td><span class="ai-badge success">৯২%</span></td>
+                                    <td>১০ মিনিট আগে</td>
+                                </tr>
+                                <tr>
+                                    <td><div style="width:40px; height:40px; background:#e2e8f0; border-radius:6px;"></div></td>
+                                    <td>আশরাফুল</td>
+                                    <td>আলুর লেট ব্লাইট</td>
+                                    <td><span class="ai-badge warning">৭৮%</span></td>
+                                    <td>৩৫ মিনিট আগে</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Config -->
+            <div id="tab-config" class="ai-tab-pane">
+                <div class="form-section">
+                    <h3 class="form-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                        এআই ইমার্জেন্সি কিল-সুইচ
+                    </h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">এপিআই খরচ বেড়ে গেলে বা গ্লোবাল লিমিট ক্রস করলে এখান থেকে সাময়িকভাবে এআই সার্ভিস বন্ধ করতে পারবেন।</p>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: #FEF2F2; border: 1px solid #FECACA; padding: 16px; border-radius: 8px;">
+                        <div>
+                            <div style="font-size: 14px; font-weight: 600; color: #991B1B;">সিস্টেম ওয়াইড এআই এক্সেস (AI Access)</div>
+                            <div style="font-size: 12px; color: #DC2626;">বর্তমান স্ট্যাটাস: চালু আছে (Enabled)</div>
+                        </div>
+                        <label style="position: relative; display: inline-block; width: 48px; height: 28px;">
+                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); border-radius: 28px; transition: .4s;">
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 24px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s;"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-title">API Credentials</h3>
+                    <div class="form-group">
+                        <label>Google Gemini API Key</label>
+                        <input type="password" class="form-control" value="AIzaSyB******************************">
+                        <div style="text-align: right; margin-top: 8px;">
+                            <a href="#" style="font-size: 12px; color: var(--primary); text-decoration: none;">Change Key</a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cloudflare Vectorize DB ID</label>
+                        <input type="text" class="form-control" value="db_agritech_rag_v1">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-title">সিস্টেম প্রম্পট (Master Instruction)</h3>
+                    <div class="form-group">
+                        <textarea class="form-control" rows="6">You are a highly experienced agricultural expert based in Bangladesh.
+Your task is to answer farmers' questions clearly and simply using the provided context (RAG). 
+STRICT RULES:
+1. Always reply in Bengali (বাংলা).
+2. Do not hallucinate or invent crop medicines.
+3. If unsure, tell them to call the helpline 16162.</textarea>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি প্রতিটি রিকোয়েস্টের শুরুতে AI কে পাঠানো হয়।</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>AI উত্তর দিতে ব্যর্থ হলে (Fallback Message)</label>
+                        <input type="text" class="form-control" value="দুঃখিত, আমি আপনার প্রশ্নটি বুঝতে পারিনি অথবা আমার কাছে এর সঠিক তথ্য নেই। অনুগ্রহ করে 16162 হেল্পলাইনে কল করুন।">
+                    </div>
+                    
+                    <button class="btn-primary">পরিবর্তন সেভ করুন</button>
+                </div>
+            </div>
+
+            <!-- TAB: RAG Knowledge Base -->
+            <div id="tab-rag" class="ai-tab-pane">
+                <div class="split-layout">
+                    <!-- Upload -->
+                    <div class="form-section">
+                        <h3 class="form-title">নতুন ডেটা আপলোড করুন</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">পিডিএফ বা টেক্সট আপলোড করলে তা ভেক্টরে রূপান্তর হয়ে AI-এর জ্ঞানভান্ডারে যুক্ত হবে।</p>
+                        
+                        <div class="upload-area">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-bottom: 12px;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <h4 style="font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">ব্রাউজ করুন বা ড্র্যাগ করে আনুন</h4>
+                            <p style="font-size: 13px; color: var(--text-muted);">PDF, TXT, CSV (Max: 10MB)</p>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>অথবা ওয়েবসাইটের লিংক দিন</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="url" class="form-control" placeholder="https://ais.gov.bd/...">
+                                <button class="btn-primary" style="white-space: nowrap;">স্ক্র্যাপ ও সিংক</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indexed List -->
+                    <div class="form-section">
+                        <h3 class="form-title">বর্তমানে যুক্ত ডকুমেন্টস</h3>
+                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">বাংলাদেশের কৃষি ম্যানুয়াল ২০২৪.pdf</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">২.৪ MB • সিংক হয়েছে: ২ দিন আগে</div>
+                                </div>
+                                <span class="ai-badge success">Active</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">ধানের রোগ ও প্রতিকার.txt</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">৪৫ KB • সিংক হয়েছে: ৫ দিন আগে</div>
+                                </div>
+                                <span class="ai-badge success">Active</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">Govt Weather Guidelines link</div>
+                                    <div style="font-size: 12px; color: var(--warning);">Syncing... (80%)</div>
+                                </div>
+                                <span class="ai-badge warning">Processing</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Logs -->
+            <div id="tab-logs" class="ai-tab-pane">
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                    <div class="ai-header" style="margin-bottom: 16px;">
+                        <h3 class="form-title" style="margin: 0;">প্রম্পট ট্র্যাকার</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="form-control" placeholder="সার্চ করুন..." style="width: 200px; padding: 8px 12px;">
+                            <button class="btn-outline-primary" style="padding: 8px 16px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                এক্সপোর্ট CSV
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>সময়</th>
+                                    <th>ইউজার</th>
+                                    <th>টাইপ</th>
+                                    <th style="width: 30%;">প্রম্পট / ইনপুট</th>
+                                    <th style="width: 30%;">AI রেসপন্স</th>
+                                    <th>Tokens</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="white-space: nowrap;">আজ, ১০:৪৫ AM</td>
+                                    <td>01712***890</td>
+                                    <td><span class="ai-badge info">টেক্সট</span></td>
+                                    <td>ইউরিয়া সার কখন দেওয়া উচিত?</td>
+                                    <td>ধান রোপণের ১৫-২০ দিন পর প্রথম...</td>
+                                    <td style="font-family: monospace; color: var(--text-muted);">248</td>
+                                </tr>
+                                <tr>
+                                    <td style="white-space: nowrap;">আজ, ০৯:১২ AM</td>
+                                    <td>01844***456</td>
+                                    <td><span class="ai-badge warning">ভয়েস</span></td>
+                                    <td><em>[Audio transcribed]</em> আলুর পাতায় দাগ, কী করব?</td>
+                                    <td>এটি লেট ব্লাইট হতে পারে। ম্যানকোজেব...</td>
+                                    <td style="font-family: monospace; color: var(--text-muted);">412</td>
+                                </tr>
+                                <tr>
+                                    <td style="white-space: nowrap;">গতকাল, ০৪:৩০ PM</td>
+                                    <td>01677***123</td>
+                                    <td><span class="ai-badge danger">এরর</span></td>
+                                    <td>কীভাবে বোমা বানাবো?</td>
+                                    <td><em>[Fallback]</em> দুঃখিত, কৃষি বিষয়ক...</td>
+                                    <td style="font-family: monospace; color: var(--text-muted);">45</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination Placeholder -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">১-১০ দেখাচ্ছে (মোট ৩,২৪০)</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer; color: var(--text-muted);" disabled>পূর্ববর্তী</button>
+                            <button style="padding: 6px 12px; border: 1px solid var(--primary); background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">১</button>
+                            <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer;">পরবর্তী</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim().includes('AI ইঞ্জিন')) {
+                        item.classList.add('active');
+                    }
+                });
+
+                document.getElementById('headerTitle').textContent = 'এআই প্রম্পট ইঞ্জিন';
+            }, 100);
+        });
+
+        function switchAITab(tabId) {
+            document.querySelectorAll('.ai-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.ai-tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

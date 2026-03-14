@@ -1,0 +1,341 @@
+/* Page Specific Styles for index.html (Mobile First) */
+
+/* Hero Section */
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 120px 20px 60px;
+    gap: 40px;
+    text-align: left;
+    /* Changed from center to left for better reading on mobile */
+    width: 100%;
+}
+
+.hero-text {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.hero h1 {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    color: var(--text-main);
+}
+
+.highlight,
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    align-items: stretch;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: var(--text-main);
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    transition: transform 0.2s, background 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.btn-secondary:active,
+.btn-secondary:hover {
+    background: #f1f5f9;
+}
+
+.hero-actions .btn-primary {
+    width: 100%;
+}
+
+.hero-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    filter: drop-shadow(0 20px 30px rgba(16, 185, 129, 0.15));
+    animation: float 6s ease-in-out infinite;
+    border: 4px solid white;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* Features Section */
+.features {
+    padding: 60px 20px;
+    width: 100%;
+    text-align: left;
+}
+
+.features h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 32px;
+    padding-left: 10px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    width: 100%;
+}
+
+.feature-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 32px 24px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-soft);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform, opacity;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px -10px rgba(16, 185, 129, 0.15);
+}
+
+.f-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-main);
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    font-size: 15px;
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 40px 20px 80px;
+    width: 100%;
+}
+
+.how-it-works h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.step-num {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 24px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.step h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.step p {
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+/* Impact Section */
+.impact {
+    padding: 60px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    text-align: center;
+    width: 100%;
+}
+
+.impact h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 40px;
+}
+
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-number {
+    font-size: 40px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* Desktop Styles Overrides */
+@media (min-width: 900px) {
+    .hero {
+        flex-direction: row;
+        text-align: left;
+        padding: 160px 5% 80px;
+        margin: 0 auto;
+        max-width: 1400px;
+    }
+
+    .hero-text {
+        align-items: flex-start;
+    }
+
+    .hero h1 {
+        font-size: 56px;
+        margin-bottom: 24px;
+    }
+
+    .hero p {
+        font-size: 20px;
+        margin-bottom: 40px;
+    }
+
+    .hero-actions {
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary {
+        max-width: max-content;
+        width: auto;
+    }
+
+    .features {
+        padding: 80px 5%;
+        max-width: 1400px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .features h2 {
+        font-size: 36px;
+        margin-bottom: 60px;
+        padding-left: 0;
+    }
+
+    .features-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px;
+    }
+
+    .feature-card {
+        padding: 40px 30px;
+    }
+
+    .how-it-works {
+        padding: 80px 5%;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .how-it-works h2 {
+        font-size: 36px;
+        margin-bottom: 60px;
+    }
+
+    .steps-container {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .step {
+        flex: 1;
+        padding: 0 20px;
+    }
+}

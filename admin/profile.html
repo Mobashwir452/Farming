@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রোফাইল সেটিংস - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-profile.css">
+</head>
+
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2
+                    style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    আমার প্রোফাইল
+                </h2>
+            </div>
+
+
+
+            <div class="profile-container">
+                <!-- Sidebar Profile Summary -->
+                <div class="profile-sidebar-card">
+                    <div class="profile-avatar-wrapper">
+                        <img src="https://ui-avatars.com/api/?name=Super+Admin&background=10B981&color=fff&size=120"
+                            alt="Admin Avatar" class="profile-avatar">
+                        <div class="avatar-edit-btn" title="ছবি পরিবর্তন করুন"
+                            onclick="alert('File upload window will open')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="profile-name">মোবাশ্বির রহমান</h3>
+                    <div class="profile-role">Super Admin</div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">অ্যাডমিন প্যানেলে স্বাগতম!</p>
+
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">২.৪k</div>
+                            <div class="stat-label">মোট অ্যাকশন</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" style="color: var(--primary);">Active</div>
+                            <div class="stat-label">স্ট্যাটাস</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="card" style="box-shadow: none; padding: 24px;">
+
+                    <!-- TAB: Personal Details -->
+                    <div id="tab-personal" class="sub-tab-pane active">
+                        <div class="profile-form-grid">
+                            <div class="form-group">
+                                <label class="form-label">পুরো নাম <span style="color: var(--danger);">*</span></label>
+                                <input type="text" class="form-input" value="মোবাশ্বির রহমান">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ইমেইল অ্যাড্রেস <span
+                                        style="color: var(--danger);">*</span></label>
+                                <input type="email" class="form-input" value="admin@agritech.com.bd">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ফোন নম্বর</label>
+                                <input type="tel" class="form-input" value="01712345678">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ভূমিকা (Role)</label>
+                                <input type="text" class="form-input" value="Super Admin" disabled
+                                    title="আপনার রোল পরিবর্তনের ক্ষমতা আপনার নেই">
+                            </div>
+                        </div>
+                        <div style="margin-top: 24px; text-align: right;">
+                            <button class="btn-primary" onclick="alert('প্রোফাইল আপডেট হয়েছে!')">সেইভ চেঞ্জেস</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB: Security -->
+                    <div id="tab-security" class="sub-tab-pane">
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0;">পাসওয়ার্ড পরিবর্তন</h3>
+                        <div class="profile-form-grid" style="margin-bottom: 32px;">
+                            <div class="form-group">
+                                <label class="form-label">বর্তমান পাসওয়ার্ড</label>
+                                <input type="password" class="form-input" placeholder="********">
+                            </div>
+                            <div class="form-group">
+                                <!-- Empty for grid alignment -->
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">নতুন পাসওয়ার্ড</label>
+                                <input type="password" class="form-input" placeholder="নতুন পাসওয়ার্ড দিন">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
+                                <input type="password" class="form-input" placeholder="আবার টাইপ করুন">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <button class="btn-primary" onclick="alert('পাসওয়ার্ড পরিবর্তন সফল হয়েছে!')">পাসওয়ার্ড
+                                    আপডেট করুন</button>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0;">অ্যাডভান্সড সিকিউরিটি</h3>
+
+                        <div class="security-box">
+                            <div>
+                                <div
+                                    style="font-weight: 600; color: var(--text-main); font-size: 15px; margin-bottom: 4px;">
+                                    Two-Factor Authentication (2FA)</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">লগ-ইন করার সময় আপনার ফোনে OTP
+                                    পাঠানো হবে। অ্যাকাউন্ট সুরক্ষিত রাখতে এটি চালু রাখুন।</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 24px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="font-size: 16px; font-weight: 600; margin: 0;">অ্যাক্টিভ সেশনস (লগড-ইন
+                                    ডিভাইস)</h3>
+                                <button
+                                    style="background: transparent; color: var(--danger); border: none; font-weight: 600; font-size: 14px; cursor: pointer;"
+                                    onclick="alert('অন্য সব ডিভাইস থেকে লগ-আউট করা হয়েছে!')">Sign out all other
+                                    devices</button>
+                            </div>
+
+                            <div class="session-item">
+                                <div class="session-icon active">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    </svg>
+                                </div>
+                                <div class="session-details" style="flex:1;">
+                                    <div class="session-title">Windows PC - Chrome Browser <span
+                                            class="badge-current">Current Session</span></div>
+                                    <div class="session-meta">IP: 192.168.1.5 • Active now</div>
+                                </div>
+                            </div>
+
+                            <div class="session-item">
+                                <div class="session-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <div class="session-details" style="flex:1;">
+                                    <div class="session-title">iPhone 13 Pro Max</div>
+                                    <div class="session-meta">IP: 103.45.67.89 • Last active: Yesterday, 8:30 PM</div>
+                                </div>
+                                <button
+                                    style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Sign
+                                    out</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: Activity Log -->
+                    <div id="tab-activity" class="sub-tab-pane">
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">আমার সাম্প্রতিক কার্যাবলী
+                        </h3>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <span class="timeline-date">আজ, সকাল ১১:৪৫</span>
+                                    <p class="timeline-title">নতুন ফিচার <strong>"এক্সপার্ট সাপোর্ট"</strong> প্রিমিয়াম
+                                        (৬ মাস) প্যাকেজে যুক্ত করেছেন।</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <span class="timeline-date">আজ, সকাল ১০:২০</span>
+                                    <p class="timeline-title">কৃষক <strong>01712***890</strong>-এর প্রোফাইল ম্যানুয়ালি
+                                        প্রিমিয়াম (৬ মাস) প্যাকেজে আপগ্রেড করেছেন।</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <span class="timeline-date">গতকাল, বিকাল ৩:১০</span>
+                                    <p class="timeline-title">ব্রডকাস্ট থেকে ১০,০০০ জন কৃষককে <strong>"খরা
+                                            সতর্কবার্তা"</strong> এসএমএস পাঠিয়েছেন।</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <span class="timeline-date">১২ মার্চ, দুপুর ২:০৫</span>
+                                    <p class="timeline-title">কমিউনিটি পেজে একটি অটো-ফ্ল্যাগ হওয়া স্প্যাম পোস্ট ডিলিট
+                                        করেছেন।</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 24px;">
+                            <button
+                                style="background: transparent; border: 1px solid #CBD5E1; color: var(--text-main); font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: 8px; cursor: pointer;">আরো
+                                দেখুন</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set active menu item after components load
+            setTimeout(() => {
+                const headerTitle = document.getElementById('headerTitle');
+                if (headerTitle) {
+                    headerTitle.textContent = 'আমার প্রোফাইল';
+                }
+            }, 100);
+        });
+
+        function switchSubTab(tabId) {
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

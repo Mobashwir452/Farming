@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Settings - AgriTech Admin</title>
+    <!-- CSS Links -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-modules.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <!-- Main Content Wrapper -->
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <!-- Dashboard Content -->
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    জেনারেল সেটিংস
+                </h2>
+            </div>
+
+            <!-- Tabs -->
+            <div class="sub-tabs" style="margin-bottom: 24px;">
+                <button class="sub-tab-btn active" onclick="switchSubTab('basic')" id="tab-btn-basic">বেসিক সাইট কনফিগারেশন</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('tracking')" id="tab-btn-tracking">ট্র্যাকিং ও স্ক্রিপ্টস</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('api')" id="tab-btn-api">এপিআই ইন্টিগ্রেশন</button>
+            </div>
+
+            <div class="card" style="box-shadow: none; padding: 24px;">
+                <!-- Pane: Basic Config -->
+                <div id="tab-basic" class="sub-tab-pane active">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">কোম্পানির তথ্য ও সেটিং</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">সাইটের লোগো (PNG/SVG)</label>
+                            <div class="logo-upload-box" onclick="alert('Upload box will open')">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-bottom: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500;">লোগো আপলোড করুন</h4>
+                                <p style="margin: 0; font-size: 12px; color: var(--text-muted);">Recommended size: 200x50px</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">কোম্পানির নাম</label>
+                            <input type="text" class="form-input" value="AgriTech BD">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">সাপোর্ট ইমেইল</label>
+                            <input type="email" class="form-input" value="support@agritech.com.bd">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">হেল্পলাইন নম্বর</label>
+                            <input type="tel" class="form-input" value="01700-000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ডিফল্ট কারেন্সি</label>
+                            <select class="form-input">
+                                <option>BDT ৳</option>
+                                <option>USD $</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">মেইনটেনেন্স মোড</h4>
+                            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">চালু করলে পাবলিক সাইট ডাউন দেখাবে এবং একটি "কাজ চলছে" পেজ শো করবে।</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 32px; text-align: right;">
+                        <button class="btn-primary" onclick="alert('সেটিংস সফলভাবে সেভ হয়েছে!')">সেভ চেঞ্জেস</button>
+                    </div>
+                </div>
+
+                <!-- Pane: Tracking & Scripts -->
+                <div id="tab-tracking" class="sub-tab-pane">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">অ্যানালিটিক্স ও পিক্সেল ডিটেইলস</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">এখানে যুক্ত করা ID গুলো পাবলিক পেজের হেডারে ডাইনামিকালি রেন্ডার হবে।</p>
+
+                    <div class="card" style="margin-bottom: 16px; background: var(--bg-color); border: 1px solid var(--border-color); box-shadow: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Google Analytics 4 (GA4)</h4>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="text" class="form-input" value="G-ABC123XYZ0" placeholder="e.g. G-XXXXXXX">
+                    </div>
+
+                    <div class="card" style="margin-bottom: 16px; background: var(--bg-color); border: 1px solid var(--border-color); box-shadow: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Facebook Meta Pixel</h4>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="text" class="form-input" placeholder="e.g. 192837465012938">
+                    </div>
+
+                    <div class="card" style="margin-bottom: 16px; background: var(--bg-color); border: 1px solid var(--border-color); box-shadow: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Google Tag Manager (GTM)</h4>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="text" class="form-input" value="GTM-NWX829Z" placeholder="e.g. GTM-XXXXXX">
+                    </div>
+
+                    <div style="margin-top: 32px; text-align: right;">
+                        <button class="btn-primary" onclick="alert('ট্র্যাকিং আইডিগুলো সফলভাবে সেভ হয়েছে!')">আপডেট ট্র্যাকিং</button>
+                    </div>
+                </div>
+
+                <!-- Pane: APIs -->
+                <div id="tab-api" class="sub-tab-pane">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">গেটওয়ে এপিআই কিসমূহ</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">SMS এবং Payment provider এর API details এখানে সেটআপ করুন।</p>
+
+                    <div class="form-group">
+                        <label class="form-label">বাল্ক SMS এপিআই কী (BulkSMSBD)</label>
+                        <input type="password" class="form-input" value="1234567890abcdef">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">aamarPay Store ID</label>
+                        <input type="text" class="form-input" value="agritech_store">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">aamarPay Signature Key</label>
+                        <input type="password" class="form-input" value="secret_signature_key">
+                    </div>
+
+                    <div style="margin-top: 32px; text-align: right;">
+                        <button class="btn-primary" onclick="alert('API Keys সফলভাবে সেভ হয়েছে!')">সেভ API Keys</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // Set active menu item after components load
+             setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim() === 'জেনারেল সেটিংস') {
+                        item.classList.add('active');
+                    }
+                });
+                
+                const headerTitle = document.getElementById('headerTitle');
+                if(headerTitle) {
+                    headerTitle.textContent = 'জেনারেল সেটিংস';
+                }
+            }, 100);
+        });
+
+        function switchSubTab(tabId) {
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            document.getElementById('tab-btn-' + tabId).classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

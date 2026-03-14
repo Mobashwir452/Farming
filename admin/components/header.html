@@ -1,0 +1,33 @@
+<header class="admin-header">
+    <div class="header-left">
+        <button class="btn-menu" id="sidebarToggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <h1 class="page-title" id="headerTitle">ড্যাশবোর্ড</h1>
+    </div>
+    
+    <div class="header-right">
+        <!-- Notification Bell -->
+        <button style="background: none; border: none; cursor: pointer; color: var(--text-muted); position: relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span style="position: absolute; top: -2px; right: -2px; background: var(--danger); width: 8px; height: 8px; border-radius: 50%;"></span>
+        </button>
+        
+        <!-- Profile Dropdown (static for now) -->
+        <div class="admin-profile" onclick="window.location.href='profile.html'">
+            <div style="width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">
+                এস
+            </div>
+            <span style="display: none;">সুপার অ্যাডমিন</span>
+        </div>
+    </div>
+</header>
+<!-- Live Server Injection Target -->
+<template></body></template>

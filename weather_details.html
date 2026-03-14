@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>আবহাওয়া ও পূর্বাভাস | AgriTech</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/weather_details.css">
+
+    <!-- Web Components & Scripts -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/weather_details.js" defer></script>
+</head>
+
+<body class="weather-body">
+
+    <!-- Header -->
+    <header class="weather-header">
+        <button class="back-btn" onclick="history.back()" aria-label="Go Back">
+            <span class="material-icons-round">arrow_back</span>
+        </button>
+        <div class="header-titles">
+            <h1 class="header-main-title">আবহাওয়া ও পূর্বাভাস</h1>
+            <div class="header-location">
+                <span class="material-icons-round location-icon">location_on</span>
+                <span>বগুড়া সদর, রাজশাহী</span>
+                <button class="edit-location-btn" aria-label="Edit Location">
+                    <span class="material-icons-round">edit</span>
+                </button>
+            </div>
+        </div>
+        <div class="header-right"></div>
+    </header>
+
+    <main class="weather-main" id="weather-main">
+
+        <!-- Pull to Refresh Indicator (Hidden initially) -->
+        <div class="ptr-indicator" id="ptr-indicator">
+            <div class="spinner"></div>
+            <span>রিফ্রেশ করা হচ্ছে...</span>
+        </div>
+
+        <!-- Section 1: Today's Weather Banner -->
+        <section class="today-weather-card">
+            <div class="current-weather">
+                <div class="weather-icon-large">☀️</div>
+                <div class="temp-display">
+                    <span class="current-temp">৩২°C</span>
+                    <span class="condition-text">আংশিক রোদ</span>
+                </div>
+            </div>
+
+            <div class="temp-ranges">
+                <div class="range-item">
+                    <span class="material-icons-round text-muted">arrow_upward</span>
+                    <span>সর্বোচ্চ ৩৪°</span>
+                </div>
+                <div class="range-item">
+                    <span class="material-icons-round text-muted">arrow_downward</span>
+                    <span>সর্বনিম্ন ২৩°</span>
+                </div>
+                <div class="range-item">
+                    <span>অনুভূত হচ্ছে ৩৫°</span>
+                </div>
+            </div>
+
+            <div class="agri-tip-box success">
+                <span class="material-icons-round tip-icon">lightbulb</span>
+                <p><strong>কৃষি পরামর্শ:</strong> আজকের আবহাওয়া কীটনাশক স্প্রে করার জন্য সম্পূর্ণ অনুকূল।</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Current Details Grid -->
+        <section class="current-details-grid">
+            <div class="detail-card">
+                <span class="material-icons-round text-primary">air</span>
+                <div class="detail-info">
+                    <span class="detail-label">বাতাস</span>
+                    <span class="detail-value">১২ কিমি/ঘন্টা</span>
+                </div>
+            </div>
+            <div class="detail-card">
+                <span class="material-icons-round text-primary">water_drop</span>
+                <div class="detail-info">
+                    <span class="detail-label">আর্দ্রতা</span>
+                    <span class="detail-value">৬৫%</span>
+                </div>
+            </div>
+            <div class="detail-card">
+                <span class="material-icons-round text-primary">umbrella</span>
+                <div class="detail-info">
+                    <span class="detail-label">বৃষ্টির সম্ভাবনা</span>
+                    <span class="detail-value">১০%</span>
+                </div>
+            </div>
+            <div class="detail-card">
+                <span class="material-icons-round text-primary">grass</span>
+                <div class="detail-info">
+                    <span class="detail-label">মাটি</span>
+                    <span class="detail-value">শুষ্ক</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Weather Alert (Conditional) -->
+        <section class="weather-alert-card warning">
+            <div class="alert-header">
+                <span class="material-icons-round">warning</span>
+                <h3>কালবৈশাখী সতর্কতা</h3>
+            </div>
+            <p>আগামীকাল বিকেলে কালবৈশাখী ঝড় ও শিলাবৃষ্টির তীব্র সম্ভাবনা রয়েছে। মাঠে ফসল থাকলে দ্রুত ব্যবস্থা নিন।</p>
+        </section>
+
+        <!-- Section 4: 7-Day Forecast -->
+        <section class="forecast-section">
+            <h3 class="section-title">আগামী ৭ দিনের পূর্বাভাস</h3>
+            <div class="forecast-list">
+
+                <div class="forecast-item today">
+                    <div class="f-day">আজ</div>
+                    <div class="f-icon">☀️</div>
+                    <div class="f-temps">৩৪° <span class="text-muted">/ ২৩°</span></div>
+                    <div class="f-desc">রোদজ্জ্বল ও গরম</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">আগামীকাল</div>
+                    <div class="f-icon">⛈️</div>
+                    <div class="f-temps">৩০° <span class="text-muted">/ ২৩°</span></div>
+                    <div class="f-desc">বজ্রবিদ্যুৎ-সহ বৃষ্টি</div>
+                    <div class="f-extra text-danger">বৃষ্টি: ৮০%</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">রবিবার</div>
+                    <div class="f-icon">🌧️</div>
+                    <div class="f-temps">২৯° <span class="text-muted">/ ২২°</span></div>
+                    <div class="f-desc">মাঝারি বৃষ্টি</div>
+                    <div class="f-extra text-primary">বৃষ্টি: ৬০%</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">সোমবার</div>
+                    <div class="f-icon">⛅</div>
+                    <div class="f-temps">৩২° <span class="text-muted">/ ২৪°</span></div>
+                    <div class="f-desc">মেঘলা আকাশ</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">মঙ্গলবার</div>
+                    <div class="f-icon">☀️</div>
+                    <div class="f-temps">৩৩° <span class="text-muted">/ ২৫°</span></div>
+                    <div class="f-desc">রোদজ্জ্বল</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">বুধবার</div>
+                    <div class="f-icon">🌤️</div>
+                    <div class="f-temps">৩৪° <span class="text-muted">/ ২৫°</span></div>
+                    <div class="f-desc">আংশিক মেঘলা</div>
+                </div>
+
+                <div class="forecast-item">
+                    <div class="f-day">বৃহস্পতিবার</div>
+                    <div class="f-icon">☀️</div>
+                    <div class="f-temps">৩৫° <span class="text-muted">/ ২৬°</span></div>
+                    <div class="f-desc">প্রচণ্ড গরম</div>
+                </div>
+
+            </div>
+        </section>
+
+        <div style="height: 80px;"></div> <!-- Bottom Padding for Nav -->
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+
+</body>
+
+</html>

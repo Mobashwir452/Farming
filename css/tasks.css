@@ -1,0 +1,144 @@
+/* Tasks Inner Page Specific Styles */
+body.tasks-body {
+    background: #F8FAFC;
+    padding-top: 60px;
+    /* Space for inner header */
+    padding-bottom: 90px;
+    /* Space for bottom nav */
+}
+
+/* Inner Page Header */
+.inner-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 100;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    margin-left: -8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.btn-back:active {
+    background: var(--bg-color);
+}
+
+.inner-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 12px;
+    color: var(--text-main);
+}
+
+/* Task Tabs */
+.task-tabs {
+    display: flex;
+    background: white;
+    padding: 12px 16px 0;
+    border-bottom: 1px solid #E2E8F0;
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.task-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 12px 4px;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Tasks Layout */
+.tasks-content {
+    padding: 24px 16px;
+}
+
+.date-group {
+    margin-bottom: 32px;
+}
+
+.date-group h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748B;
+    margin-bottom: 16px;
+    padding-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Override existing timeline item to remove bottom padding on last child inside a group */
+.date-group .timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+/* Desktop override */
+@media (min-width: 900px) {
+    .tasks-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #E2E8F0;
+        min-height: 100vh;
+    }
+
+    .inner-header,
+    .task-tabs {
+        max-width: 480px;
+        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .tasks-content {
+        width: 100%;
+        max-width: 480px;
+        background: #F8FAFC;
+        min-height: calc(100vh - 60px);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+    }
+}

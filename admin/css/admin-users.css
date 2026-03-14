@@ -1,0 +1,268 @@
+/* 
+    users.html specific styles 
+    Focuses on tables, modal slide-overs, and data tabs.
+*/
+
+/* Header Controls */
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.users-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-main);
+    background: white;
+}
+
+.search-box svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.filter-select {
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-main);
+    background: white;
+    cursor: pointer;
+}
+
+/* User Profile Slide-over / Modal */
+.user-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.user-panel-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.user-panel {
+    position: fixed;
+    top: 0;
+    right: -600px;
+    width: 100%;
+    max-width: 600px;
+    height: 100vh;
+    background: var(--bg-main);
+    z-index: 1001;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+}
+
+.user-panel.active {
+    right: 0;
+}
+
+.panel-header {
+    padding: 24px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.panel-title-area {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.user-avatar-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.panel-title h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.btn-close-panel {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.btn-close-panel:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+}
+
+/* Tabs */
+.panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: white;
+    padding: 0 24px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Panel Content */
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Data Grids */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.data-item {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.data-item label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.data-item .val {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+/* Action Buttons inside Card */
+.action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Financial Card */
+.financial-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.financial-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--bg-hover);
+}
+
+.financial-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.f-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.f-stat.expense .val { color: var(--danger); }
+.f-stat.profit .val { color: var(--primary); }
+
+/* Custom Badge colors */
+.badge-premium { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
+.badge-free { background: var(--bg-hover); color: var(--text-muted); }

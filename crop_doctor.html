@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>কৃষি স্ক্যানার | AgriTech</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/crop_doctor.css">
+
+    <!-- Web Components and Scripts -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/crop_doctor.js" defer></script>
+</head>
+
+<body class="doctor-body">
+
+    <!-- Header -->
+    <header class="doctor-header">
+        <button class="back-btn" onclick="history.back()">
+            <span class="material-icons-round">arrow_back</span>
+        </button>
+        <div class="header-title">কৃষি স্ক্যানার</div>
+        <div class="header-right"></div>
+    </header>
+
+    <main class="doctor-main">
+
+        <!-- STATE 1: Landing (Camera) -->
+        <div id="state-landing" class="doctor-state active">
+            <div class="instructions-card">
+                <h3>ক্যামেরা নির্দেশিকা</h3>
+                <ul class="instruction-list">
+                    <li>
+                        <span class="material-icons-round text-primary">filter_center_focus</span>
+                        <span>আক্রান্ত পাতার পরিষ্কার ছবি তুলুন।</span>
+                    </li>
+                    <li>
+                        <span class="material-icons-round text-primary">wb_sunny</span>
+                        <span>ছবিতে যেন রোদের অতিরিক্ত আলো না পড়ে সেদিকে খেয়াল রাখুন।</span>
+                    </li>
+                    <li>
+                        <span class="material-icons-round text-primary">eco</span>
+                        <span>একটি ছবিতে শুধু একটি পাতাই রাখুন।</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="camera-placeholder">
+                <i class="ri-camera-lens-line"></i>
+                <p>ক্যামেরা চালু করতে নিচের বাটনে চাপ দিন</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-primary btn-large btn-scan" id="btn-open-camera">
+                    <span class="material-icons-round">photo_camera</span>
+                    ক্যামেরা চালু করুন
+                </button>
+                <div class="divider"><span>অথবা</span></div>
+                <button class="btn-outline btn-gallery" id="btn-open-gallery">
+                    <span class="material-icons-round">image</span>
+                    গ্যালারি থেকে ছবি আপলোড করুন
+                </button>
+                <input type="file" id="file-upload" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Land Selection Context -->
+            <div class="land-association"
+                style="background:var(--surface-bg); padding:16px; border-radius:var(--radius-lg); margin-top:24px; border:1px solid var(--border-color);">
+                <label for="land-select"
+                    style="display:block; font-size:14px; font-weight:600; margin-bottom:8px; color:var(--text-dark);">কোন
+                    জমির ফসলের ছবি তুলছেন?</label>
+                <select id="land-select"
+                    style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:white; cursor:pointer; outline:none;">
+                    <option value="">জমি নির্বাচন করুন (ঐচ্ছিক)</option>
+                    <option value="1">খালের ধারের জমি (বোরো ধান)</option>
+                    <option value="2">উত্তর পাড়া প্রজেক্ট (টমেটো)</option>
+                </select>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:8px; line-height:1.4;">
+                    <span class="material-icons-round" style="font-size:14px; vertical-align:middle;">info</span>
+                    জমি নির্বাচন করলে এই স্ক্যানের ফলাফলটি আপনার টাস্ক টাইমলাইনে সেভ হবে।
+                </p>
+            </div>
+        </div>
+
+        <!-- STATE 2: Scanning (Processing) -->
+        <div id="state-scanning" class="doctor-state" style="display: none;">
+            <div class="scan-container">
+                <img id="scanned-image" src="" alt="Scanning Crop" class="img-preview">
+                <div class="scan-line"></div>
+                <div class="scan-overlay"></div>
+            </div>
+            <div class="scanning-text">
+                <div class="spinner"></div>
+                <h3>ছবি বিশ্লেষণ করা হচ্ছে...</h3>
+                <p>কৃত্রিম বুদ্ধিমত্তা আপনার ছবি বিশ্লেষণ করছে, অনুগ্রহ করে অপেক্ষা করুন</p>
+            </div>
+        </div>
+
+        <!-- STATE 3: Result -->
+        <div id="state-result" class="doctor-state" style="display: none;">
+            <div class="result-header">
+                <img id="result-image" src="" alt="Analyzed Crop" class="result-thumb">
+                <div class="result-info">
+                    <span class="badge danger">রোগ শনাক্ত হয়েছে</span>
+                    <h2 class="disease-name">ধানের ব্লাস্ট রোগ</h2>
+                    <p class="disease-en">Rice Blast (Magnaporthe oryzae)</p>
+                </div>
+            </div>
+
+            <div class="confidence-bar">
+                <div class="conf-label"><span>এআই নিশ্চয়তা</span> <span>৯২%</span></div>
+                <div class="progress-bg">
+                    <div class="progress-fill" style="width: 92%;"></div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="card-header">
+                    <span class="material-icons-round text-warning">info</span>
+                    <h3>কীভাবে বুঝবেন?</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="symptoms-list">
+                        <li>পাতায় ছোট, ডিম্বাকার বা চোখের ন্যায় দাগ দেখা যায়।</li>
+                        <li>দাগের মাঝে ছাই রঙের ও কিনারা বাদামী হয়।</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="card-header">
+                    <span class="material-icons-round text-success">eco</span>
+                    <h3>জৈব সমাধান</h3>
+                </div>
+                <div class="card-body">
+                    <p>জমিতে পরিমিত সেচ দিন। ইউরিয়া সারের উপরি প্রয়োগ সাময়িকভাবে বন্ধ রাখুন। ছাই ছিটালে আংশিক উপকার
+                        পাওয়া যায়।</p>
+                </div>
+            </div>
+
+            <div class="info-card highlight">
+                <div class="card-header">
+                    <span class="material-icons-round text-danger">science</span>
+                    <h3>রাসায়নিক সমাধান</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>টেবুকোনাজল বা ট্রাইফ্লক্সিস্ট্রোবিন</strong> (যেমন: নাটিভো ৭৫) ১০ লিটার পানিতে ৪ গ্রাম
+                        মিশিয়ে ৫ শতাংশ জমিতে ভালোভাবে স্প্রে করুন।</p>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button class="btn-primary" id="btn-scan-again">
+                    <span class="material-icons-round">refresh</span>
+                    আবার ছবি তুলুন
+                </button>
+                <button class="btn-outline btn-support">
+                    <span class="material-icons-round">headset_mic</span>
+                    বিশেষজ্ঞের সাথে কথা বলুন (১৬১৬২)
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

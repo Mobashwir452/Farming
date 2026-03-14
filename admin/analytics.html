@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analytics - AgriTech Admin</title>
+    <!-- CSS Links -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-modules.css">
+    <!-- Chart.js (Dummy inclusion) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <!-- Main Content Wrapper -->
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <!-- Dashboard Content -->
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    অ্যাডভান্সড অ্যানালিটিক্স
+                </h2>
+                
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <select class="form-input" style="padding: 8px 12px; height: auto;">
+                        <option>গত ৭ দিন</option>
+                        <option>গত ৩০ দিন</option>
+                        <option>এই বছর</option>
+                    </select>
+                    <button class="btn-primary" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 6px;" onclick="alert('Export Data Modal will open')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export PDF/CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard KPIs -->
+            <div class="analytics-kpis">
+                <div class="kpi-card">
+                    <div class="kpi-label">MRR (Monthly Recurring Revenue)</div>
+                    <div class="kpi-value">৳৪৫,০০০</div>
+                    <div class="kpi-trend positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        +১২.৫% (গত মাসের তুলনায়)
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Revenue (Selected Period)</div>
+                    <div class="kpi-value">৳২,১০,৪০০</div>
+                    <div class="kpi-trend positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        +৮.২%
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">New Premium Farmers</div>
+                    <div class="kpi-value">১৪০ জন</div>
+                    <div class="kpi-trend positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        +১৫ জন
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">ARPU (Average Revenue Per User)</div>
+                    <div class="kpi-value">৳৩২১.৪</div>
+                    <div class="kpi-trend negative">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                        -২.১%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="chart-container">
+                    <h3 style="font-size: 15px; font-weight: 600; margin: 0 0 16px 0;">রেভিনিউ গ্রোথ চার্ট</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3 style="font-size: 15px; font-weight: 600; margin: 0 0 16px 0;">জনপ্রিয় ফিচার ব্যবহার</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="featureChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="card" style="box-shadow: none;">
+                <h3 style="font-size: 15px; font-weight: 600; margin: 0 0 16px 0;">ইউজার এনগেজমেন্ট (DAU) ও সাবস্ক্রিপশন ড্রপ-অফ (Churn)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div>
+                        <div style="position: relative; height: 250px; width: 100%;">
+                            <canvas id="dauChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="data-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 500;">Average DAU</td>
+                                    <td>৪,৫২০</td>
+                                    <td style="color: var(--success);">+৩.৪%</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Churn Rate</td>
+                                    <td>২.৪%</td>
+                                    <td style="color: var(--danger);">+০.৫%</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Session Duration</td>
+                                    <td>১২ মি: ৩০ সে:</td>
+                                    <td style="color: var(--success);">+১ মি:</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // Set active menu item after components load
+             setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim() === 'অ্যাডভান্সড অ্যানালিটিক্স') {
+                        item.classList.add('active');
+                    }
+                });
+                
+                const headerTitle = document.getElementById('headerTitle');
+                if(headerTitle) {
+                    headerTitle.textContent = 'অ্যানালিটিক্স ও রিপোর্টস';
+                }
+
+                // Initialize dummy charts
+                initCharts();
+            }, 150);
+        });
+
+        function initCharts() {
+            // Setup base configurations for Chart.js
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748B';
+
+            // 1. Revenue Chart (Area/Line)
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'Total Revenue (BDT)',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000, 45000],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 2. Feature Use Chart (Doughnut)
+            new Chart(document.getElementById('featureChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Crop Doctor', 'Weather alerts', 'Market Price', 'Community'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 3. DAU Chart (Bar)
+            new Chart(document.getElementById('dauChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Active Users',
+                        data: [4200, 4500, 4100, 4800, 5200, 5500, 4900],
+                        backgroundColor: '#3B82F6'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+/* admin-helpdesk.css */
+
+.helpdesk-layout {
+    display: flex;
+    height: calc(100vh - 120px); /* Adjust based on your header height */
+    gap: 20px;
+    margin-top: -10px;
+}
+
+/* Left Sidebar - Ticket List */
+.ticket-list-panel {
+    flex: 0 0 350px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ticket-list-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: #F8FAFC;
+}
+
+.ticket-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.tt-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tt-btn.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.ticket-search {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.ticket-items-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.ticket-item {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.ticket-item:hover {
+    background: #F8FAFC;
+}
+
+.ticket-item.active {
+    background: #F0FDF4;
+    border-left-color: var(--primary);
+}
+
+.ticket-item.unread {
+    background: #FFFBEB;
+}
+
+.ti-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.ti-farmer {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.ti-time {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.ti-body {
+    display: flex;
+    gap: 12px;
+}
+
+.ti-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #E2E8F0;
+}
+
+.ti-content {
+    flex: 1;
+}
+
+.ti-crop {
+    font-size: 11px;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: inline-block;
+    background: #ECFDF5;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.ti-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Right Panel - Ticket Details (Chat) */
+.ticket-detail-panel {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Empty State */
+.td-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.td-empty svg {
+    margin-bottom: 16px;
+    color: #CBD5E1;
+}
+
+/* Active Ticket View */
+.td-active-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.td-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8FAFC;
+}
+
+.td-farmer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.td-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.td-farmer-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.td-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Chat History / Issue Details */
+.td-body {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background: #F1F5F9;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    margin-bottom: 24px;
+}
+
+.cb-farmer {
+    margin-right: auto;
+}
+
+.cb-expert {
+    margin-left: auto;
+    text-align: right;
+}
+
+.cb-content {
+    background: white;
+    padding: 16px;
+    border-radius: 12px 12px 12px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    display: inline-block;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+.cb-expert .cb-content {
+    background: #ECFDF5;
+    border-radius: 12px 12px 0 12px;
+    border-color: #D1FAE5;
+}
+
+.cb-image {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
+
+.cb-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: block;
+}
+
+/* Reply Area */
+.td-reply-area {
+    padding: 20px 24px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+}
+
+.quick-reply-tools {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.reply-textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.reply-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Badges */
+.badge-high-priority {
+    background: #FEF2F2;
+    color: #EF4444;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}

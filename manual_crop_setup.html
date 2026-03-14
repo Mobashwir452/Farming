@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ম্যানুয়াল টাইমলাইন সেটআপ - AgriTech</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/manual_crop_setup.css">
+</head>
+
+<body class="dashboard-body" style="background: #F8FAFC; padding-bottom: 100px;">
+    <!-- Header -->
+    <header class="inner-header"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; padding: 0 16px; z-index: 100;">
+        <button class="btn-back" onclick="window.history.back()"
+            style="background: none; border: none; padding: 8px; margin-left: -8px; cursor: pointer; border-radius: 50%;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <h1 style="font-size: 18px; font-weight: 700; margin-left: 12px; color: var(--text-main);">ম্যানুয়াল সেটআপ</h1>
+    </header>
+
+    <main class="manual-content" style="padding-left: 16px; padding-right: 16px;">
+
+        <!-- AI Floating Suggestion -->
+        <div class="ai-suggestion-banner">
+            <div class="ai-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+            </div>
+            <div class="ai-text">
+                <strong>AI পরামর্শ:</strong> বোরো ধান (ব্রি-২৮)-এর ক্ষেত্রে বীজতলা তৈরির পর ২৫-৩০ দিনের চারা মূল জমিতে
+                রোপণ করা উত্তম এবং রোপণের ১৫ দিন পর প্রথম কিস্তির সার (ইউরিয়া) দেওয়া উচিত।
+            </div>
+        </div>
+
+        <!-- Setup Parameters Form (Seed/Seedling Input) -->
+        <h2 class="section-title">প্রাথমিক উপকরণ</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">ফসল বুনতে কী পরিমাণ
+            বীজ বা চারা ব্যবহার করবেন তা নির্ধারণ করুন।</p>
+
+        <form class="manual-form" style="margin-bottom: 32px;">
+            <div class="form-group">
+                <label>উপকরণের ধরন <span style="color:red;">*</span></label>
+                <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                    <label
+                        style="flex: 1; border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;"
+                        class="type-radio-label active-radio">
+                        <input type="radio" name="input_type" value="seed" checked
+                            style="accent-color: var(--primary); width: 18px; height: 18px;">
+                        <span style="font-size: 15px; font-weight: 500; margin-bottom: 0;">বীজ</span>
+                    </label>
+                    <label
+                        style="flex: 1; border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;"
+                        class="type-radio-label">
+                        <input type="radio" name="input_type" value="seedling"
+                            style="accent-color: var(--primary); width: 18px; height: 18px;">
+                        <span style="font-size: 15px; font-weight: 500; margin-bottom: 0;">চারা</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label id="quantity-label">পরিমাণ (কেজি) <span style="color:red;">*</span></label>
+                <div class="input-with-icon">
+                    <input type="number" id="quantity-input" placeholder="যেমন: ৫" required
+                        style="padding-right: 48px;">
+                    <span id="unit-label"
+                        style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 600; color: var(--text-muted);">কেজি</span>
+                </div>
+            </div>
+        </form>
+
+        <!-- Custom Timeline Builder UI -->
+        <h2 class="section-title">কাস্টম টাইমলাইন তৈরি করুন</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">আপনার সুবিধা
+            অনুযায়ী ফসলের বিভিন্ন ধাপের তারিখ নির্ধারণ করুন।</p>
+
+        <form class="manual-form">
+            <!-- Step 1 -->
+            <div class="form-group">
+                <label>বীজ বপন বা চারা রোপণের তারিখ <span style="color:red;">*</span></label>
+                <div class="input-with-icon" onclick="openCalendar(this.querySelector('input'))">
+                    <input type="text" class="custom-date-picker" readonly value="১০ মার্চ ২০২৬"
+                        placeholder="তারিখ নির্বাচন করুন" style="cursor: pointer;">
+                    <svg class="icon-right" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="form-group">
+                <label>প্রথম সেচের তারিখ</label>
+                <div class="input-with-icon" onclick="openCalendar(this.querySelector('input'))">
+                    <input type="text" class="custom-date-picker" readonly placeholder="তারিখ নির্বাচন করুন"
+                        style="cursor: pointer;">
+                    <svg class="icon-right" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="form-group">
+                <label>প্রথম সার (ইউরিয়া/অন্যান্য) প্রয়োগের তারিখ</label>
+                <div class="input-with-icon" onclick="openCalendar(this.querySelector('input'))">
+                    <input type="text" class="custom-date-picker" readonly placeholder="তারিখ নির্বাচন করুন"
+                        style="cursor: pointer;">
+                    <svg class="icon-right" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="dynamic-steps-container"></div>
+            <!-- Toggle UI is unchanged, placed after dynamic forms via parent reorder -->
+
+            <!-- Step 4 -->
+            <div class="form-group" style="margin-top: 24px;">
+                <div class="toggle-row">
+                    <div>
+                        <label>ফসলের স্বাস্থ্য স্ক্যানিং রিমাইন্ডার</label>
+                        <p class="toggle-desc">প্রতি ১০ দিন পর পর ছবি তুলে স্ক্যান করার নোটিফিকেশন পেতে চান?</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="add-more-btn" onclick="addCustomStep()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                আরো ধাপ যোগ করুন
+            </button>
+        </form>
+
+    </main>
+
+    <!-- Calendar Bottom Sheet Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <h4>তারিখ নির্বাচন করুন</h4>
+                <button class="close-modal" aria-label="Close modal" onclick="closeCalendar()">&times;</button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-month">মার্চ ২০২৬</div>
+                <div class="calendar-weekdays">
+                    <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+            <div class="calendar-footer">
+                <button class="btn-primary w-100" id="confirmDateBtn" onclick="confirmDateSelection()">নির্ধারণ
+                    করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Bottom Nav -->
+    <div class="sticky-bottom-actions">
+        <button class="btn-cancel" onclick="window.history.back()">বাতিল করুন</button>
+        <button class="btn-accept" onclick="saveManualTimeline()">
+            সেভ করুন
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let currentTargetInput = null;
+        let selectedDayElement = null;
+        let selectedDateString = null;
+
+        // Handle Seed vs Seedling Toggle
+        const radioInputs = document.querySelectorAll('input[name="input_type"]');
+        const qtyLabel = document.getElementById('quantity-label');
+        const unitLabel = document.getElementById('unit-label');
+        const qtyInput = document.getElementById('quantity-input');
+
+        radioInputs.forEach(radio => {
+            radio.addEventListener('change', function () {
+                // Update active styles
+                document.querySelectorAll('.type-radio-label').forEach(lbl => {
+                    lbl.style.borderColor = 'var(--border-color)';
+                    lbl.style.background = 'white';
+                });
+                if (this.checked) {
+                    this.parentElement.style.borderColor = 'var(--primary)';
+                    this.parentElement.style.background = '#F0FDF4'; // light green tint
+                }
+
+                // Update text inputs
+                if (this.value === 'seed') {
+                    qtyLabel.innerHTML = 'পরিমাণ (কেজি) <span style="color:red;">*</span>';
+                    unitLabel.textContent = 'কেজি';
+                    qtyInput.placeholder = 'যেমন: ৫';
+                } else {
+                    qtyLabel.innerHTML = 'পরিমাণ (টি) <span style="color:red;">*</span>';
+                    unitLabel.textContent = 'টি';
+                    qtyInput.placeholder = 'যেমন: ৫০০০';
+                }
+            });
+        });
+
+        // Trigger change to set initial active style
+        document.querySelector('input[name="input_type"]:checked').dispatchEvent(new Event('change'));
+
+        // Populate Custom Calendar
+        function renderCalendar() {
+            const daysContainer = document.getElementById('calendarDays');
+            daysContainer.innerHTML = '';
+            // Creating a dummy 31 day month for March 2026
+            for (let i = 1; i <= 31; i++) {
+                const dayDiv = document.createElement('div');
+                const bnDigit = i.toString().replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+                dayDiv.innerHTML = `<span>${bnDigit}</span>`;
+
+                // Add click listener
+                dayDiv.addEventListener('click', function () {
+                    if (selectedDayElement) {
+                        selectedDayElement.classList.remove('selected');
+                    }
+                    this.classList.add('selected');
+                    selectedDayElement = this;
+                    selectedDateString = `${bnDigit} মার্চ ২০২৬`;
+                });
+
+                // Pre-select 10th
+                if (i === 10) {
+                    dayDiv.classList.add('selected', 'today');
+                    selectedDayElement = dayDiv;
+                    selectedDateString = '১০ মার্চ ২০২৬';
+                }
+
+                daysContainer.appendChild(dayDiv);
+            }
+        }
+
+        renderCalendar();
+
+        function openCalendar(inputElement) {
+            currentTargetInput = inputElement;
+            const modal = document.getElementById('calendarModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // If the input already has a value, we could theoretically select it in the calendar here.
+        }
+
+        function closeCalendar() {
+            const modal = document.getElementById('calendarModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function confirmDateSelection() {
+            if (currentTargetInput && selectedDateString) {
+                currentTargetInput.value = selectedDateString;
+            }
+            closeCalendar();
+        }
+
+        // Add more dynamic steps
+        let stepCount = 3;
+        function addCustomStep() {
+            stepCount++;
+            const container = document.getElementById('dynamic-steps-container');
+
+            const bnDigit = stepCount.toString().replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+
+            const newFormGroup = document.createElement('div');
+            newFormGroup.className = 'form-group';
+            newFormGroup.style.position = 'relative';
+            newFormGroup.style.padding = '16px';
+            newFormGroup.style.background = '#ffffff';
+            newFormGroup.style.border = '1px solid #E2E8F0';
+            newFormGroup.style.borderRadius = '12px';
+            newFormGroup.style.marginTop = '16px';
+
+            newFormGroup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <label style="margin-bottom: 0;">নতুন ধাপের নাম</label>
+                    <button type="button" onclick="this.closest('.form-group').remove()" style="background: #FEF2F2; border: 1px solid #FEE2E2; color: #EF4444; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.2s;" title="ধাপটি মুছুন">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <input type="text" placeholder="যেমন: নিড়ানি ও আগাছা পরিষ্কার" style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: #F8FAFC; outline:none;">
+                </div>
+                <label>ধাপের তারিখ</label>
+                <div class="input-with-icon" onclick="openCalendar(this.querySelector('input'))">
+                    <input type="text" class="custom-date-picker" readonly placeholder="তারিখ নির্বাচন করুন" style="cursor: pointer; width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; color: var(--text-main); font-family: inherit; font-weight: 500; outline: none; background: #F8FAFC; transition: all 0.2s;">
+                    <svg class="icon-right" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+            `;
+            container.appendChild(newFormGroup);
+
+            // Scroll to bottom smoothly
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        function saveManualTimeline() {
+            const btn = document.querySelector('.btn-accept');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                তৈরি হচ্ছে...
+            `;
+
+            const style = document.createElement('style');
+            style.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } }';
+            document.head.appendChild(style);
+
+            setTimeout(() => {
+                window.location.href = 'land_details.html';
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

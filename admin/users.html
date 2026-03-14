@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইউজার ও ফার্মার - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-users.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div class="users-header">
+                <div>
+                    <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">ইউজার ও ফার্মার</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 0;">সিস্টেমের সকল নিবন্ধিত কৃষকদের তালিকা ও প্রোফাইল</p>
+                </div>
+                <div class="users-controls">
+                    <div class="search-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" placeholder="নাম বা মোবাইল নম্বর দিয়ে খুঁজুন...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">সব স্ট্যাটাস</option>
+                        <option value="active">অ্যাক্টিভ</option>
+                        <option value="pending">পেন্ডিং যাচাই</option>
+                        <option value="suspended">সাসপেন্ডেড</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="">সব জেলা</option>
+                        <option value="bogra">বগুড়া</option>
+                        <option value="rajshahi">রাজশাহী</option>
+                        <option value="rangpur">রংপুর</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card" style="margin-bottom: 0;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>নাম</th>
+                                <th>ফোন নম্বর</th>
+                                <th>জেলা</th>
+                                <th>মোট জমি</th>
+                                <th>সাবস্ক্রিপশন</th>
+                                <th>স্ট্যাটাস</th>
+                                <th style="text-align: right;">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <img src="https://i.pravatar.cc/150?img=33" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%;">
+                                        <span style="font-weight: 500;">আব্দুর রহিম</span>
+                                    </div>
+                                </td>
+                                <td>01712***890</td>
+                                <td>বগুড়া</td>
+                                <td>৪.৫ একর</td>
+                                <td><span class="badge badge-premium">প্রিমিয়াম</span></td>
+                                <td><span class="badge badge-active">অ্যাক্টিভ</span></td>
+                                <td style="text-align: right;">
+                                    <button class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openUserPanel()">প্রোফাইল দেখুন</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #64748B;">ক</div>
+                                        <span style="font-weight: 500;">করিম মিয়া</span>
+                                    </div>
+                                </td>
+                                <td>01922***123</td>
+                                <td>রাজশাহী</td>
+                                <td>১.২ একর</td>
+                                <td><span class="badge badge-free">ফ্রি</span></td>
+                                <td><span class="badge badge-active">অ্যাক্টিভ</span></td>
+                                <td style="text-align: right;">
+                                    <button class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openUserPanel()">প্রোফাইল দেখুন</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%;">
+                                        <span style="font-weight: 500;">শফিকুল ইসলাম</span>
+                                    </div>
+                                </td>
+                                <td>01844***456</td>
+                                <td>রংপুর</td>
+                                <td>০.০ একর</td>
+                                <td><span class="badge badge-free">ফ্রি</span></td>
+                                <td><span class="badge badge-warning">পেন্ডিং যাচাই</span></td>
+                                <td style="text-align: right;">
+                                    <button class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openUserPanel()">প্রোফাইল দেখুন</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #EF4444;">জ</div>
+                                        <span style="font-weight: 500; color: #EF4444;">জব্বার আলী</span>
+                                    </div>
+                                </td>
+                                <td>01677***789</td>
+                                <td>দিনাজপুর</td>
+                                <td>৩.০ একর</td>
+                                <td><span class="badge badge-free">ফ্রি</span></td>
+                                <td><span class="badge badge-danger">সাসপেন্ডেড</span></td>
+                                <td style="text-align: right;">
+                                    <button class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openUserPanel()">প্রোফাইল দেখুন</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                    <span style="font-size: 13px; color: var(--text-muted);">১-৪ দেখাচ্ছে (মোট ৫,২৪৩)</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer; color: var(--text-muted);" disabled>পূর্ববর্তী</button>
+                        <button style="padding: 6px 12px; border: 1px solid var(--primary); background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">১</button>
+                        <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer;">২</button>
+                        <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer;">৩</button>
+                        <button style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer;">পরবর্তী</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- User Details Slide-over Panel -->
+    <div class="user-panel-overlay" id="userPanelOverlay" onclick="closeUserPanel()"></div>
+    <aside class="user-panel" id="userPanel">
+        <!-- Panel Header -->
+        <div class="panel-header">
+            <div class="panel-title-area">
+                <img src="https://i.pravatar.cc/150?img=33" alt="Avatar" class="user-avatar-large">
+                <div class="panel-title">
+                    <h2>আব্দুর রহিম 
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="fill: #EFF6FF;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </h2>
+                    <p>+880 1712***890 • জয়েন: ১২ ডিসে ২০২৫</p>
+                </div>
+            </div>
+            <button class="btn-close-panel" onclick="closeUserPanel()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- Panel Tabs -->
+        <div class="panel-tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-overview')">ওভারভিউ</button>
+            <button class="tab-btn" onclick="switchTab('tab-lands')">জমি ও ফসল</button>
+            <button class="tab-btn" onclick="switchTab('tab-financials')">খামারের হিসাব</button>
+            <button class="tab-btn" onclick="switchTab('tab-activity')">অ্যাক্টিভিটি</button>
+            <button class="tab-btn" onclick="switchTab('tab-security')">নিরাপত্তা</button>
+        </div>
+
+        <!-- Panel Body Content -->
+        <div class="panel-content">
+            
+            <!-- OVERVIEW TAB -->
+            <div class="tab-pane active" id="tab-overview">
+                <!-- Data Grids -->
+                <div class="data-grid">
+                    <div class="data-item">
+                        <label>পূর্ণ নাম</label>
+                        <div class="val">আব্দুর রহিম</div>
+                    </div>
+                    <div class="data-item">
+                        <label>স্ট্যাটাস</label>
+                        <div class="val" style="color: var(--primary);">অ্যাক্টিভ</div>
+                    </div>
+                    <div class="data-item">
+                        <label>বর্তমান ঠিকানা</label>
+                        <div class="val">শাজাহানপুর, বগুড়া সদর, রাজশাহী</div>
+                    </div>
+                    <div class="data-item">
+                        <label>জাতীয় পরিচয়পত্র</label>
+                        <div class="val">9876543210 (Verified)</div>
+                    </div>
+                    <div class="data-item">
+                        <label>সাবস্ক্রিপশন</label>
+                        <div class="val" style="color: #8B5CF6;">প্রিমিয়াম (মেয়াদ: ১২ মে ২০২৬)</div>
+                    </div>
+                    <div class="data-item">
+                        <label>মোট জমি</label>
+                        <div class="val">৪.৫ একর</div>
+                    </div>
+                </div>
+
+                <!-- Admin Action Buttons inside Overview -->
+                <div class="action-row">
+                    <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        এডিট প্রোফাইল
+                    </button>
+                    <button class="btn-outline-primary" style="display: flex; align-items: center; gap: 8px; color: #8B5CF6; border-color: #8B5CF6;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                        আপগ্রেড প্ল্যান
+                    </button>
+                    <button class="btn-outline-primary" style="display: flex; align-items: center; gap: 8px; color: var(--danger); border-color: var(--danger); margin-left: auto;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                        সাসপেন্ড অ্যাকাউন্ট
+                    </button>
+                </div>
+            </div>
+
+            <!-- LANDS & CROPS TAB -->
+            <div class="tab-pane" id="tab-lands">
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">বাড়ির পেছনের জমি</h3>
+                            <p style="font-size: 13px; color: var(--text-muted);">আয়তন: ২.০ একর</p>
+                        </div>
+                        <span class="badge badge-active">বোরো ধান</span>
+                    </div>
+                    <div style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
+                        <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800&h=300" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">GPS: 24.8456, 89.3662</div>
+                    </div>
+                </div>
+
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">পুকুর পাড়ের জমি</h3>
+                            <p style="font-size: 13px; color: var(--text-muted);">আয়তন: ২.৫ একর</p>
+                        </div>
+                        <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">আলু</span>
+                    </div>
+                    <div style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
+                        <img src="https://images.unsplash.com/photo-1595844784411-eb6ac3014aef?auto=format&fit=crop&q=80&w=800&h=300" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">GPS: 24.8421, 89.3610</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINANCIALS TAB -->
+            <div class="tab-pane" id="tab-financials">
+                <div class="financial-card">
+                    <div class="financial-header">
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 600;">সর্বমোট লাভ/ক্ষতি (এই বছর)</h3>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">সব খামার মিলিয়ে</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 20px; font-weight: 700; color: var(--primary);">+ ৳ ৬৫,০০০</div>
+                        </div>
+                    </div>
+                    <div class="financial-stats">
+                        <div class="f-stat expense">
+                            <label style="font-size: 12px; color: var(--text-muted);">মোট খরচ</label>
+                            <span class="val" style="font-size: 16px; font-weight: 600;">৳ ৪৫,৫০০</span>
+                        </div>
+                        <div class="f-stat profit">
+                            <label style="font-size: 12px; color: var(--text-muted);">মোট আয়</label>
+                            <span class="val" style="font-size: 16px; font-weight: 600;">৳ ১১০,৫০০</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin: 24px 0 12px 0;">সাম্প্রতিক হিসাবখাতা এন্ট্রি</h4>
+                <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                    <table style="margin: 0;">
+                        <thead style="background: #F8FAFC;">
+                            <tr>
+                                <th style="padding: 12px 16px;">তারিখ</th>
+                                <th style="padding: 12px 16px;">খাত</th>
+                                <th style="padding: 12px 16px; text-align: right;">অ্যামাউন্ট</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 12px 16px; font-size: 13px;">১০ মার্চ ২০২৬</td>
+                                <td style="padding: 12px 16px; font-size: 13px;">সার ক্রয় (ইউরিয়া)</td>
+                                <td style="padding: 12px 16px; font-size: 13px; text-align: right; color: var(--danger);">- ৳ ৩,৫০০</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 12px 16px; font-size: 13px;">০৫ ফেব ২০২৬</td>
+                                <td style="padding: 12px 16px; font-size: 13px;">শ্রমিক মজুরি</td>
+                                <td style="padding: 12px 16px; font-size: 13px; text-align: right; color: var(--danger);">- ৳ ৫,০০০</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px 16px; font-size: 13px;">২৮ জানু ২০২৬</td>
+                                <td style="padding: 12px 16px; font-size: 13px;">আলু বিক্রি</td>
+                                <td style="padding: 12px 16px; font-size: 13px; text-align: right; color: var(--primary);">+ ৳ ৬৫,০০০</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ACTIVITY TAB -->
+            <div class="tab-pane" id="tab-activity">
+                <div class="data-grid">
+                    <div class="data-item">
+                        <label>AI স্ক্যান রিকোয়েস্ট (সর্বমোট)</label>
+                        <div class="val">৪৫ বার</div>
+                    </div>
+                    <div class="data-item">
+                        <label>ওপেন হেল্পডেস্ক টিকেট</label>
+                        <div class="val" style="color: var(--warning);">১টি পেন্ডিং</div>
+                    </div>
+                </div>
+
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 0px;">
+                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 16px;">System Logs</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                        <li style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span style="color: var(--text-main);">Logged in via Android App</span>
+                            <span style="color: var(--text-muted);">Today, 10:45 AM</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span style="color: var(--text-main);">Added new land "পুকুর পাড়ের জমি"</span>
+                            <span style="color: var(--text-muted);">Mar 10, 2:30 PM</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span style="color: var(--text-main);">NID Verification Passed</span>
+                            <span style="color: var(--text-muted);">Dec 13, 2025</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SECURITY TAB -->
+            <div class="tab-pane" id="tab-security">
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px; background: #FEF2F2;">
+                    <div style="width: 40px; height: 40px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--danger); flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 15px; font-weight: 600; color: #991B1B; margin-bottom: 4px;">অ্যাকাউন্টের পিন রিসেট করুন</h3>
+                        <p style="font-size: 13px; color: #B91C1C; margin-bottom: 16px; line-height: 1.4;">খামারী যদি তার লগিন পিন ভুলে যায়, তবে অ্যাডমিন অটোমেটিক একটি পিন জেনারেট করে রিসেট করে দিতে পারেন। ব্যবহারকারীর মোবাইলে এসএমএস-এর মাধ্যমে নতুন পিন পাঠানো হবে।</p>
+                        <button class="btn-primary" style="background: var(--danger); display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 16px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
+                            পিন রিসেট ও এসএমএস পাঠান
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px;">
+                     <div style="width: 40px; height: 40px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">ম্যানুয়াল NID ভেরিফিকেশন পেমেন্ট</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">যদি অটোমেটিক NID সার্ভার কাজ না করে, অ্যাডমিন চাইলে ম্যানুয়ালি ইউজারের পরিচয়পত্র ভেরিফাই করে অ্যাপ্রুভ করতে পারেন।</p>
+                        <button class="btn-outline-primary" style="font-size: 13px; padding: 10px 16px;" disabled>
+                            ব্যবহারকারী ইতিমধ্যে ভেরিফাইড
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        // Set the active navigation item
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim() === 'ইউজার ও ফার্মার') {
+                        item.classList.add('active');
+                    }
+                });
+
+                document.getElementById('headerTitle').textContent = 'ইউজার ও ফার্মার';
+            }, 100);
+        });
+
+        // Slide-over logic
+        function openUserPanel() {
+            document.getElementById('userPanelOverlay').classList.add('active');
+            document.getElementById('userPanel').classList.add('active');
+        }
+
+        function closeUserPanel() {
+            document.getElementById('userPanelOverlay').classList.remove('active');
+            document.getElementById('userPanel').classList.remove('active');
+        }
+
+        // Tab Switching logic
+        function switchTab(tabId) {
+            // Remove active from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Remove active from all panes
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            // Add active to clicked tab
+            event.target.classList.add('active');
+            // Add active to selected pane
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

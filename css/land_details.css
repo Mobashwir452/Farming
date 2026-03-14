@@ -1,0 +1,342 @@
+/* CSS for Land Details Page */
+
+.land-details-body {
+    background: #F1F5F9;
+    padding-top: 0;
+}
+
+.land-details-container {
+    padding: 0 0 110px 0; /* Space for bottom nav */
+}
+
+/* Page Header Override (with Back Button) */
+.page-top-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+    justify-content: space-between;
+}
+
+.back-btn {
+    background: #F1F5F9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.header-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.header-action-btn:active {
+    background: #F8FAFC;
+}
+
+.back-btn:active {
+    background: #E2E8F0;
+}
+
+.page-top-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+
+/* Sections Container */
+.ld-sections {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Base Card Style for Land Details */
+.ld-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.ld-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.ld-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Overview Info Grid */
+.ld-overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ld-info-box {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ld-info-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.ld-info-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Crop Info Section */
+.ld-crop-profile {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ld-crop-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.ld-crop-text h4 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.ld-crop-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Financial Snapshot */
+.ld-finance-row {
+    display: flex;
+    gap: 12px;
+    background: #F1F5F9;
+    padding: 16px;
+    border-radius: 16px;
+    margin-top: 16px;
+}
+
+.ld-finance-item {
+    flex: 1;
+}
+
+.ld-finance-item.profit .ld-info-value {
+    color: var(--primary-dark);
+}
+
+/* AI Task Timeline */
+.ld-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.ld-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 24px;
+    width: 2px;
+    background: #E2E8F0;
+}
+
+.ld-task-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.ld-task-item:last-child {
+    margin-bottom: 0;
+}
+
+.ld-task-dot {
+    position: absolute;
+    left: -20px;
+    top: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #E2E8F0;
+    z-index: 1;
+}
+
+.ld-task-item.active .ld-task-dot {
+    border-color: var(--primary);
+    background: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.ld-task-item.warning .ld-task-dot {
+    border-color: #F59E0B;
+    background: #F59E0B;
+    box-shadow: 0 0 0 4px #FEF3C7;
+}
+
+.ld-task-item.completed .ld-task-dot {
+    border-color: var(--primary);
+    background: white;
+}
+
+.ld-task-content {
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ld-task-item.active .ld-task-content {
+    background: white;
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.ld-task-item.warning .ld-task-content {
+    background: #FFFBEB;
+    border-color: #FCD34D;
+}
+
+.task-date {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.task-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* Action Buttons */
+.ld-actions-grid {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.ld-action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    padding: 10px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.ld-action-btn:active {
+    background: #E2E8F0;
+    transform: scale(0.96);
+}
+
+.ld-action-btn.primary-action {
+    background: var(--primary-light);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: var(--primary-dark);
+}
+
+.ld-action-btn.primary-action:active {
+    background: #A7F3D0;
+}
+
+.ld-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.ld-action-btn.primary-action .ld-action-icon {
+    background: white;
+    color: var(--primary-dark);
+}
+
+.ld-action-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: center;
+}

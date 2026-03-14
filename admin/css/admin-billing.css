@@ -1,0 +1,249 @@
+/* admin-billing.css */
+
+/* Tabs */
+.sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sub-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+}
+
+.sub-tab-btn:hover {
+    color: var(--primary);
+}
+
+.sub-tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+.sub-tab-pane {
+    display: none;
+}
+
+.sub-tab-pane.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Layouts */
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.package-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.package-card.premium {
+    border: 2px solid var(--primary);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+}
+
+.premium-badge {
+    position: absolute;
+    top: 16px;
+    right: -32px;
+    background: var(--primary);
+    color: white;
+    padding: 4px 32px;
+    font-size: 12px;
+    font-weight: 600;
+    transform: rotate(45deg);
+}
+
+.pkg-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.pkg-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.pkg-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.pkg-price span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.pkg-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pkg-feature {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pkg-feature label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.pkg-feature input {
+    width: 100%;
+}
+
+.btn-update {
+    width: 100%;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+/* User Card */
+.sub-user-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    margin-bottom: 12px;
+}
+
+.sub-user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sub-user-avatar {
+    width: 48px;
+    height: 48px;
+    background: #E2E8F0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--text-main);
+}
+
+.sub-user-details h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sub-user-details p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.sub-user-stats {
+    text-align: right;
+}
+
+.sub-user-stats .status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.status.active {
+    background: #ECFDF5;
+    color: #10B981;
+}
+
+.status.expired {
+    background: #FEF2F2;
+    color: #EF4444;
+}
+
+.sub-user-stats .scans {
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+/* Manual Upgrade Form */
+.manual-upgrade-card {
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.search-user-wrapper {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.search-user-wrapper input {
+    flex: 1;
+}
+
+.user-preview {
+    background: #F8FAFC;
+    border: 1px dashed #CBD5E1;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.user-preview.found {
+    border-style: solid;
+    border-color: var(--primary);
+    background: #ECFDF5;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-main);
+}

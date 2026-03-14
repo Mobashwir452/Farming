@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>লগইন | AgriTech</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Moto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <!-- JS -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/auth.js" defer></script>
+</head>
+
+<body class="auth-body">
+    <!-- Header/Logo Area -->
+    <div class="auth-header">
+        <div class="auth-logo">
+            <span class="material-icons-round">agriculture</span>
+        </div>
+        <h1>AgriTech-এ স্বাগতম</h1>
+        <p>আপনার মোবাইল নম্বর দিয়ে যুক্ত হোন</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="auth-container">
+
+        <!-- Step 1: Phone Number -->
+        <div class="auth-step active" id="step1">
+            <h2 class="step-title">শুরু করুন</h2>
+            <p class="step-desc">আপনার ১১ ডিজিটের মোবাইল নম্বর দিন</p>
+
+            <div class="auth-form-group">
+                <label>মোবাইল নম্বর</label>
+                <div class="auth-input-wrapper">
+                    <span class="material-icons-round icon">phone_android</span>
+                    <input type="tel" id="phoneNumber" class="auth-input" placeholder="01XXXXXXXXX" maxlength="11"
+                        pattern="[0-9]*" inputmode="numeric">
+                </div>
+            </div>
+
+            <button class="btn-auth" id="btnNextPhone">
+                এগিয়ে যান
+                <span class="material-icons-round">arrow_forward</span>
+            </button>
+        </div>
+
+        <!-- Step 2: Login (PIN) -->
+        <div class="auth-step" id="stepLogin">
+            <button class="back-link" data-target="step1">
+                <span class="material-icons-round">arrow_back</span> নম্বর পরিবর্তন করুন
+            </button>
+            <h2 class="step-title">ফিরে আসার জন্য ধন্যবাদ!</h2>
+            <p class="step-desc" id="loginPhoneDisp">০১৭</p>
+
+            <div class="auth-form-group">
+                <label>আপনার পিন (PIN) দিন</label>
+                <div class="auth-input-wrapper">
+                    <span class="material-icons-round icon">lock</span>
+                    <input type="password" id="loginPin" class="auth-input" placeholder="৪ বা ৬ ডিজিটের পিন"
+                        inputmode="numeric">
+                    <button class="toggle-password" type="button" tabindex="-1" aria-label="Toggle password visibility">
+                        <span class="material-icons-round">visibility_off</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-auth" id="btnLogin">
+                লগইন করুন
+            </button>
+            <div class="auth-footer">
+                <button class="auth-link" id="btnForgotPin">পিন ভুলে গেছেন?</button>
+            </div>
+        </div>
+
+        <!-- Step 3: OTP Verification -->
+        <div class="auth-step" id="stepOtp">
+            <button class="back-link" data-target="step1">
+                <span class="material-icons-round">arrow_back</span> নাম্বার সংশোধন করুন
+            </button>
+            <h2 class="step-title">ওটিপি (OTP) যাচাই করুন</h2>
+            <p class="step-desc">আপনাকে একটি ৪ সংখ্যার ওটিপি পাঠানো হয়েছে <br><strong id="otpPhoneDisp"
+                    style="color:var(--text-main);"></strong> নম্বরে।</p>
+
+            <div class="otp-container" id="otpContainer">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric"
+                    autocomplete="one-time-code">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+            </div>
+
+            <button class="btn-auth" id="btnVerifyOtp">
+                যাচাই করুন
+            </button>
+            <div class="auth-footer" style="margin-top: 16px;">
+                <span id="otpTimer">00:59</span> সেকেন্ড পর আবার পাঠাতে পারবেন<br>
+                <button class="auth-link" id="btnResendOtp" disabled style="margin-top:8px; opacity:0.5;">আবার ওটিপি
+                    পাঠান</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Signup (Name & New PIN) -->
+        <div class="auth-step" id="stepSignup">
+            <h2 class="step-title">প্রোফাইল তৈরি করুন</h2>
+            <p class="step-desc">আপনার নাম এবং একটি নিরাপত্তা পিন দিয়ে অ্যাকাউন্ট চালু করুন।</p>
+
+            <div class="auth-form-group">
+                <label>আপনার নাম</label>
+                <div class="auth-input-wrapper">
+                    <span class="material-icons-round icon">person</span>
+                    <input type="text" id="signupName" class="auth-input" placeholder="যেমন: রহিম মিয়া">
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label>নতুন পিন (PIN)</label>
+                <div class="auth-input-wrapper">
+                    <span class="material-icons-round icon">lock</span>
+                    <input type="password" id="signupPin" class="auth-input" placeholder="৪ বা ৬ ডিজিট"
+                        inputmode="numeric">
+                    <button class="toggle-password" type="button" tabindex="-1" aria-label="Toggle password visibility">
+                        <span class="material-icons-round">visibility_off</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-auth" id="btnSignup">
+                অ্যাকাউন্ট তৈরি করুন
+            </button>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সাবস্ক্রিপশন ও বিলিং - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-billing.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                    </svg>
+                    সাবস্ক্রিপশন ও বিলিং
+                </h2>
+            </div>
+
+            <!-- Tabs -->
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="switchSubTab('packages')">প্যাকেজ ম্যানেজমেন্ট</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('users')">অ্যাক্টিভ সাবস্ক্রাইবার</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('history')">পেমেন্ট হিস্ট্রি</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('manual')">ম্যানুয়াল আপগ্রেড</button>
+            </div>
+
+            <!-- TAB: Packages -->
+            <div id="tab-packages" class="sub-tab-pane active">
+                <div class="packages-grid">
+                    
+                    <!-- Free Plan -->
+                    <div class="package-card">
+                        <div class="pkg-header">
+                            <div class="pkg-title">ফ্রি প্ল্যান (Free Tier)</div>
+                            <div class="pkg-price">৳০ <span>/ মাস</span></div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">যেকোনো সাধারণ কৃষকের জন্য ডিফল্ট প্যাকেজ</p>
+                        </div>
+                        <div class="pkg-body">
+                            <div class="pkg-feature">
+                                <label>মাসিক ক্রপ ডাক্তার স্ক্যান লিমিট</label>
+                                <input type="number" class="form-input" value="5">
+                            </div>
+                            <div class="pkg-feature" style="margin-bottom: 8px;">
+                                <label>মাসিক স্মার্ট ক্রপ প্ল্যান লিমিট</label>
+                                <input type="number" class="form-input" value="1">
+                            </div>
+                            <button style="width: 100%; background: transparent; border: 1px dashed #CBD5E1; color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';" onmouseout="this.style.borderColor='#CBD5E1'; this.style.color='var(--text-muted)';" onclick="addFeatureInput(this)">+ নতুন ফিচার যোগ করুন</button>
+                            <button class="btn-outline-primary btn-update" style="margin-top: 0;">আপডেট করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Premium Plan (6 Months) -->
+                    <div class="package-card premium">
+                        <div class="premium-badge">POPULAR</div>
+                        <div class="pkg-header">
+                            <div class="pkg-title">প্রিমিয়াম প্ল্যান (৬ মাস)</div>
+                            <div class="pkg-price">৳৩০০ <span>/ ৬ মাস</span></div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">বাণিজ্যিক কৃষকের জন্য আনলিমিটেড এক্সেস</p>
+                        </div>
+                        <div class="pkg-body">
+                            <div class="pkg-feature">
+                                <label>মাসিক ক্রপ ডাক্তার স্ক্যান লিমিট</label>
+                                <input type="number" class="form-input" value="9999">
+                                <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">ইচ্ছেমত লিমিট বসিয়ে দিন</span>
+                            </div>
+                            <div class="pkg-feature" style="margin-bottom: 8px;">
+                                <label>প্যাকেজ মূল্য (টাকায়)</label>
+                                <input type="number" class="form-input" value="300">
+                            </div>
+                            <button style="width: 100%; background: transparent; border: 1px dashed #CBD5E1; color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';" onmouseout="this.style.borderColor='#CBD5E1'; this.style.color='var(--text-muted)';" onclick="addFeatureInput(this)">+ নতুন ফিচার যোগ করুন</button>
+                            <button class="btn-primary btn-update" style="margin-top: 0;">প্যাকেজ সেভ করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Premium Plan (1 Year) -->
+                    <div class="package-card premium">
+                        <div class="pkg-header">
+                            <div class="pkg-title">প্রিমিয়াম প্ল্যান (১ বছর)</div>
+                            <div class="pkg-price">৳৫০০ <span>/ ১ বছর</span></div>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">বড় ফার্মের জন্য আনলিমিটেড এক্সেস ও ডিসকাউন্ট</p>
+                        </div>
+                        <div class="pkg-body">
+                            <div class="pkg-feature">
+                                <label>মাসিক ক্রপ ডাক্তার স্ক্যান লিমিট</label>
+                                <input type="number" class="form-input" value="9999">
+                                <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">ইচ্ছেমত লিমিট বসিয়ে দিন</span>
+                            </div>
+                            <div class="pkg-feature" style="margin-bottom: 8px;">
+                                <label>প্যাকেজ মূল্য (টাকায়)</label>
+                                <input type="number" class="form-input" value="500">
+                            </div>
+                            <button style="width: 100%; background: transparent; border: 1px dashed #CBD5E1; color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';" onmouseout="this.style.borderColor='#CBD5E1'; this.style.color='var(--text-muted)';" onclick="addFeatureInput(this)">+ নতুন ফিচার যোগ করুন</button>
+                            <button class="btn-primary btn-update" style="margin-top: 0;">প্যাকেজ সেভ করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Add New Package Card -->
+                    <div class="package-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; border: 2px dashed #94A3B8; background: transparent; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.backgroundColor='#F0FDF4';" onmouseout="this.style.borderColor='#94A3B8'; this.style.backgroundColor='transparent';" onclick="openModal('newPackageModal')">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <div style="font-size: 16px; font-weight: 600; color: var(--text-main);">নতুন প্যাকেজ যোগ করুন</div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; text-align: center;">কাস্টম মেয়াদ ও ফি দিয়ে নতুন সাবস্ক্রিপশন প্ল্যান তৈরি করুন</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB: Active Subscribers -->
+            <div id="tab-users" class="sub-tab-pane">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0;">অ্যাক্টিভ প্রিমিয়াম ইউজার</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">মোট: ১২৪ জন</p>
+                    </div>
+                    <div class="search-bar" style="width: 300px; background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" placeholder="ফোন নম্বর লিখে খুঁজুন..." style="border: none; outline: none; width: 100%;">
+                    </div>
+                </div>
+
+                <div class="sub-user-list">
+                    <div class="sub-user-card">
+                        <div class="sub-user-info">
+                            <div class="sub-user-avatar">আ</div>
+                            <div class="sub-user-details">
+                                <h4>আব্দুল আলীম</h4>
+                                <p>01712***890 • মেয়াদ শেষ: ২০ অক্টোবর ২০২৬</p>
+                            </div>
+                        </div>
+                        <div class="sub-user-stats">
+                            <div class="status active">প্রিমিয়াম ৬ মাস</div>
+                            <div class="scans">এই মাসে স্ক্যান: ১০৪টি</div>
+                        </div>
+                    </div>
+
+                    <div class="sub-user-card">
+                        <div class="sub-user-info">
+                            <div class="sub-user-avatar">ক</div>
+                            <div class="sub-user-details">
+                                <h4>করিম বক্স</h4>
+                                <p>01844***456 • মেয়াদ শেষ: ১৫ মে ২০২৭</p>
+                            </div>
+                        </div>
+                        <div class="sub-user-stats">
+                            <div class="status active" style="background: #FFFBEB; color: #D97706;">প্রিমিয়াম ১ বছর</div>
+                            <div class="scans">এই মাসে স্ক্যান: ২০টি</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Payment History -->
+            <div id="tab-history" class="sub-tab-pane">
+                <div class="card" style="box-shadow: none;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 0;">সাবস্ক্রিপশন ট্রানজেকশন লগ</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>তারিখ ও সময়</th>
+                                    <th>ইউজার আইডি / ফোন</th>
+                                    <th>প্যাকেজ</th>
+                                    <th>টাকার পরিমাণ</th>
+                                    <th>মেথড</th>
+                                    <th>TrxID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>আজ, ১০:২০ AM</td>
+                                    <td>017**345</td>
+                                    <td>৬ মাস প্রিমিয়াম</td>
+                                    <td style="font-weight: 600; color: #10B981;">৳৩০০</td>
+                                    <td><span style="background: #FCE7F3; color: #DB2777; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">bKash</span></td>
+                                    <td style="font-family: monospace;">A8X9K2MQ</td>
+                                </tr>
+                                <tr>
+                                    <td>গতকাল, ০৪:১৫ PM</td>
+                                    <td>019**112</td>
+                                    <td>১ বছর প্রিমিয়াম</td>
+                                    <td style="font-weight: 600; color: #10B981;">৳৫০০</td>
+                                    <td><span style="background: #FEF3C7; color: #D97706; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">Nagad</span></td>
+                                    <td style="font-family: monospace;">NG90LKM</td>
+                                </tr>
+                                <tr>
+                                    <td>১৫ அক্টাবর, ২:০০ PM</td>
+                                    <td>018**000</td>
+                                    <td>৬ মাস প্রিমিয়াম</td>
+                                    <td style="font-weight: 600; color: var(--text-muted);">৳৩০০</td>
+                                    <td><span style="background: #E2E8F0; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">Office Cash</span></td>
+                                    <td style="font-family: monospace;">MANUAL-UPG</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Manual Upgrade -->
+            <div id="tab-manual" class="sub-tab-pane">
+                <div class="manual-upgrade-card">
+                    <h3 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 8px;">নগদ টাকার বিনিময়ে ম্যানুয়্যাল আপডেট</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">যদি কোনো কৃষক অফিসে এসে প্রোফাইল আপডেট করাতে চান, তবে তার ফোন নম্বর দিয়ে এখানে তাকে প্রিমিয়াম করুন।</p>
+
+                    <div class="search-user-wrapper">
+                        <input type="text" class="form-input" placeholder="কৃষকের ফোন নম্বর দিন...">
+                        <button class="btn-primary" style="width: auto;">সার্চ করুন</button>
+                    </div>
+
+                    <!-- Placeholder before search -->
+                    <div class="user-preview" id="userPreviewEmpty">
+                        ফোন নম্বর দিয়ে ইউজার খুঁজুন
+                    </div>
+
+                    <!-- User Found -->
+                    <!-- <div class="user-preview found" id="userPreviewFound" style="display: none;">
+                        <div class="sub-user-avatar" style="width: 40px; height: 40px; font-size: 16px;">র</div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 15px;">রহমত উল্লাহ</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">বর্তমান প্ল্যান: ফ্রি</div>
+                        </div>
+                    </div> -->
+
+                    <div class="form-group">
+                        <label class="form-label">যে প্যাকেজ দিতে চান</label>
+                        <select class="form-input">
+                            <option>প্রিমিয়াম প্ল্যান (৬ মাস) - ৳৩০০</option>
+                            <option>প্রিমিয়াম প্ল্যান (১ বছর) - ৳৫০০</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <label class="form-label">অফিসার বা রেফারেন্স নোট</label>
+                        <input type="text" class="form-input" placeholder="অফিসে এসে টাকা জমা দিয়েছে (রশিদ নং: ১২৩৪)">
+                    </div>
+
+                    <button class="btn-primary" style="width: 100%;" onclick="alert('কৃষকের একাউন্ট সফলভাবে প্রিমিয়াম করা হয়েছে!')">একাউন্ট আপগ্রেড করুন</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- New Package Modal -->
+    <div id="newPackageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin: 0; color: var(--text-main);">নতুন প্যাকেজ তৈরি করুন</h3>
+                <button onclick="closeModal('newPackageModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label">প্যাকেজের নাম</label>
+                <input type="text" class="form-input" placeholder="যেমন: প্রিমিয়াম প্ল্যান (৩ মাস)">
+            </div>
+            
+            <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">মেয়াদ (মাস)</label>
+                    <input type="number" class="form-input" placeholder="3">
+                </div>
+                
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">প্যাকেজ ফি (টাকা)</label>
+                    <input type="number" class="form-input" placeholder="২০০">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label">মাসিক ক্রপ ডাক্তার স্ক্যান লিমিট</label>
+                <input type="number" class="form-input" placeholder="9999">
+            </div>
+            
+            <button style="width: 100%; background: transparent; border: 1px dashed #CBD5E1; color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';" onmouseout="this.style.borderColor='#CBD5E1'; this.style.color='var(--text-muted)';" onclick="addFeatureInput(this)">+ নতুন ফিচার যোগ করুন</button>
+            
+            <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="alert('নতুন প্যাকেজ তৈরি করা হয়েছে!'); closeModal('newPackageModal');">প্যাকেজ সেভ করুন</button>
+        </div>
+    </div>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function addFeatureInput(btn) {
+            const featureHtml = `
+                <div class="form-group pkg-feature" style="margin-bottom: 16px; display: flex; gap: 8px; align-items: flex-end; animation: fadeIn 0.3s ease;">
+                    <div style="flex: 1;">
+                        <input type="text" class="form-input" placeholder="ফিচারের নাম (যেমন: এক্সপার্ট সাপোর্ট)" style="margin-bottom: 8px;">
+                        <input type="text" class="form-input" placeholder="লিমিট বা ভ্যালু (যেমন: আনলিমিটেড)">
+                    </div>
+                    <button style="background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA; border-radius: 8px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; margin-bottom: 2px;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'" onclick="this.parentElement.remove()" title="ফিচার মুছুন">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            `;
+            btn.insertAdjacentHTML('beforebegin', featureHtml);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+             // Set active menu item after components load
+             setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim() === 'সাবস্ক্রিপশন ও বিলিং') {
+                        item.classList.add('active');
+                    }
+                });
+                
+                const headerTitle = document.getElementById('headerTitle');
+                if(headerTitle) {
+                    headerTitle.textContent = 'সাবস্ক্রিপশন ও বিলিং';
+                }
+            }, 100);
+        });
+
+        function switchSubTab(tabId) {
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

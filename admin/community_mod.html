@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কমিউনিটি মডারেশন - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-moderation.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    কমিউনিটি মডারেশন প্যানেল
+                </h2>
+                <div class="search-bar" style="width: 300px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="পোস্ট বা ইউজার আইডি খুঁজুন..." class="search-input">
+                </div>
+            </div>
+
+            <div class="moderation-layout">
+                <!-- Tabs -->
+                <div class="mod-tabs">
+                    <button class="mod-tab-btn active" onclick="switchModTab('flagged')">ফ্ল্যাগড (রিপোর্টেড) পোস্ট</button>
+                    <button class="mod-tab-btn" onclick="switchModTab('all')">সকল পোস্ট ফিড</button>
+                    <button class="mod-tab-btn" onclick="switchModTab('rules')">অটো-ফিল্টার রুলস</button>
+                </div>
+
+                <!-- Tab 1: Flagged Posts -->
+                <div id="tab-flagged" class="mod-tab-content active">
+                    <div class="flagged-grid">
+                        <!-- Post Card 1 -->
+                        <div class="post-card">
+                            <div class="pc-header">
+                                <div class="pc-author">
+                                    <div class="pc-avatar">অ</div>
+                                    <div>
+                                        <div class="pc-name">অজ্ঞাত কৃষক</div>
+                                        <div class="pc-time">আজ, ১০:৩০ AM</div>
+                                    </div>
+                                </div>
+                                <span class="report-badge">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    ১২ টি রিপোর্ট
+                                </span>
+                            </div>
+                            <div class="pc-content">
+                                ভাইসব, আমার এক ওষুধের দোকানে খুব সস্তায় বিষ পাওয়া যাচ্ছে। আপনারা চাইলে আমার সাথে যোগাযোগ করেন। ১০০% গ্যারান্টি!
+                            </div>
+                            <div class="pc-actions">
+                                <button class="btn-action-ignore">উপেক্ষা করুন (Ignore)</button>
+                                <button class="btn-action-warn">সতর্ক করুন (Warn)</button>
+                                <button class="btn-action-delete">মুছে ফেলুন (Delete)</button>
+                            </div>
+                        </div>
+
+                        <!-- Post Card 2 -->
+                        <div class="post-card">
+                            <div class="pc-header">
+                                <div class="pc-author">
+                                    <div class="pc-avatar">ম</div>
+                                    <div>
+                                        <div class="pc-name">মতি মিয়া</div>
+                                        <div class="pc-time">গতকাল, ০৫:২০ PM</div>
+                                    </div>
+                                </div>
+                                <span class="report-badge">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    AI Flagged (Bad Word)
+                                </span>
+                            </div>
+                            <div class="pc-content">
+                                এই আবহাওয়া অ্যাপ সব ফালতু, কোনো কাজের না। সব শা**...
+                            </div>
+                            <div class="pc-actions">
+                                <button class="btn-action-ignore">উপেক্ষা</button>
+                                <button class="btn-action-warn">মিউট করুন (Mute)</button>
+                                <button class="btn-action-delete">পোস্ট ডিলিট</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: All Posts -->
+                <div id="tab-all" class="mod-tab-content">
+                    <div class="metric-card" style="margin-bottom: 20px;">
+                        <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">সর্বশেষ ভিউ: সকল পোস্ট (নতুন থেকে পুরাতন)</div>
+                    </div>
+                    
+                    <!-- Table style representation for all posts (Mockup) -->
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>পোস্ট আইডি</th>
+                                <th>কৃষকের নাম</th>
+                                <th>পোস্টের বিষয়বস্তু</th>
+                                <th>স্ট্যাটাস</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#P-8921</td>
+                                <td>সালাম মোল্লা</td>
+                                <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">আজকে আমার লাউ মাচায় প্রথম ফুল আসলো!</td>
+                                <td><span style="background: #ECFDF5; color: #10B981; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Active</span></td>
+                                <td><button style="border: none; background: none; color: #EF4444; cursor: pointer; text-decoration: underline;">ডিলিট</button></td>
+                            </tr>
+                            <tr>
+                                <td>#P-8920</td>
+                                <td>আহমেদ আলী</td>
+                                <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ধানের পাতা হলুদ হচ্ছে কেন?</td>
+                                <td><span style="background: #ECFDF5; color: #10B981; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Active</span></td>
+                                <td><button style="border: none; background: none; color: #EF4444; cursor: pointer; text-decoration: underline;">ডিলিট</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 3: Moderation Rules -->
+                <div id="tab-rules" class="mod-tab-content">
+                    <div class="rules-container">
+                        <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">কমিউনিটি স্প্যাম লিমিট</h3>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+                            স্প্যাম আটকাতে একজন কৃষক দৈনিক সর্বোচ্চ কতটি পোস্ট করতে পারবেন তা নির্ধারণ করুন।
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">দৈনিক পোস্ট লিমিট (প্রতি ইউজার)</h4>
+                                <span style="font-size: 12px; color: var(--text-muted);">লিমিট অতিক্রম করলে ঐ ইউজার আর নতুন পোস্ট করতে পারবেন না।</span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" class="form-control" value="10" style="width: 80px; text-align: center;">
+                                <button class="btn-primary" style="padding: 8px 16px; width: auto; font-size: 14px;">আপডেট</button>
+                            </div>
+                        </div>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+                        <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">অটো-ফিল্টার (Bad Words / Spam Filter)</h3>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+                            নিচের শব্দগুলো কেউ পোস্টে ব্যবহার করলে ঐ পোস্ট স্বয়ংক্রিয়ভাবে ফ্ল্যাগড (Flagged) হয়ে যাবে অথবা পাবলিশ হতে বাধা দেবে।
+                        </p>
+
+                        <div style="display: flex; align-items: stretch; gap: 12px; max-width: 450px; margin-bottom: 20px;">
+                            <input type="text" class="form-input" placeholder="নতুন বাজে শব্দ যোগ করুন..." id="newBadWord" style="flex: 1;">
+                            <button class="btn-primary" onclick="addBadWord()" style="margin: 0; white-space: nowrap; width: auto; padding: 0 20px;">যোগ করুন</button>
+                        </div>
+
+                        <div class="bad-words-list" id="badWordsContainer">
+                            <!-- Populated dynamically -->
+                            <div class="bad-word-tag">গালমন্ধ <button>&times;</button></div>
+                            <div class="bad-word-tag">ফালতু <button>&times;</button></div>
+                            <div class="bad-word-tag">ভুয়া <button>&times;</button></div>
+                            <div class="bad-word-tag">সস্তায় ঔষধ <button>&times;</button></div>
+                        </div>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+                        <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">ব্যান লিস্ট (Banned Users)</h3>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">যেসব কৃষককে ৭ দিন, ৩০ দিন বা আজীবনের জন্য ব্লক করা হয়েছে তাদের তালিকা।</p>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>কৃষকের নাম</th>
+                                    <th>ইউজার আইডি</th>
+                                    <th>ব্যানের কারণ</th>
+                                    <th>মেয়াদ</th>
+                                    <th>অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 8px;"><div class="pc-avatar" style="width: 32px; height: 32px; font-size: 13px;">র</div>রউফ ব্যাপারী</div></td>
+                                    <td>#F-4512</td>
+                                    <td>বারবার স্প্যাম লিংক শেয়ার</td>
+                                    <td><span class="badge badge-danger">আজীবন (Permanent)</span></td>
+                                    <td><button style="border: none; background: none; color: var(--primary); font-weight: 600; cursor: pointer;">ব্যান তুলুন</button></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 8px;"><div class="pc-avatar" style="width: 32px; height: 32px; font-size: 13px;">জ</div>জব্বার আলী</div></td>
+                                    <td>#F-3098</td>
+                                    <td>অশ্লীল ভাষা ব্যবহার</td>
+                                    <td><span class="badge badge-warning">৭ দিন (৫ দিন বাকি)</span></td>
+                                    <td><button style="border: none; background: none; color: var(--primary); font-weight: 600; cursor: pointer;">ব্যান তুলুন</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim().includes('কমিউনিটি মডারেশন')) {
+                        item.classList.add('active');
+                    }
+                });
+
+                document.getElementById('headerTitle').textContent = 'কমিউনিটি মডারেশন';
+            }, 100);
+        });
+
+        function switchModTab(tabId) {
+            document.querySelectorAll('.mod-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mod-tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function addBadWord() {
+            const input = document.getElementById('newBadWord');
+            const word = input.value.trim();
+            if (word) {
+                const container = document.getElementById('badWordsContainer');
+                const tag = document.createElement('div');
+                tag.className = 'bad-word-tag';
+                tag.innerHTML = `${word} <button onclick="this.parentElement.remove()">&times;</button>`;
+                container.appendChild(tag);
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>

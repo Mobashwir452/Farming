@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>আমার প্রোফাইল | AgriTech</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Moto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <!-- Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/profile.js" defer></script>
+</head>
+
+<body class="profile-body">
+    <!-- Header -->
+    <header class="page-top-header"
+        style="position: sticky; top: 0; z-index: 100; background: white; padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <button class="back-btn" onclick="history.back()" aria-label="Go Back"
+                style="border: none; background: #F1F5F9; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 style="font-size: 18px; margin:0; line-height: 1.2;">আমার প্রোফাইল</h2>
+        </div>
+        <button class="header-action-btn" id="btnEditProfileTop" aria-label="Edit Profile"
+            style="padding: 8px; border:none; background:none; cursor: pointer; color: var(--primary);">
+            <span class="material-icons-round">edit</span>
+        </button>
+    </header>
+
+    <main class="profile-main">
+        <!-- User Info Card -->
+        <div class="user-profile-card">
+            <div class="profile-image-container">
+                <img src="https://i.pravatar.cc/150?img=33" alt="Rahim Mia" class="profile-avatar">
+                <button class="edit-image-btn" aria-label="Change photo">
+                    <span class="material-icons-round">photo_camera</span>
+                </button>
+            </div>
+            <h2 class="user-name">
+                রহিম মিয়া
+                <span class="material-icons-round verified-badge" title="NID Verified">verified</span>
+            </h2>
+            <p class="user-phone">+৮৮০ ১৩২৩ ০০০ ০০০</p>
+            <p class="user-address">
+                <span class="material-icons-round" style="font-size: 16px;">location_on</span>
+                বগুড়া সদর, রাজশাহী
+            </p>
+        </div>
+
+        <!-- Overview Stats -->
+        <div class="overview-stats">
+            <div class="stat-card">
+                <div class="stat-icon land">
+                    <span class="material-icons-round">landscape</span>
+                </div>
+                <div class="stat-info">
+                    <h5>মোট জমি</h5>
+                    <h3>৪.৫ একর</h3>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon sub">
+                    <span class="material-icons-round">star</span>
+                </div>
+                <div class="stat-info">
+                    <h5>সাবস্ক্রিপশন</h5>
+                    <h3>ফ্রি ইউজার</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings List 1 -->
+        <h3 class="settings-section-title">অ্যাকাউন্ট সেটিংস</h3>
+        <div class="settings-list">
+            <button class="setting-item" id="btnEditProfileMenu">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">person</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">ব্যক্তিগত তথ্য</span>
+                        <span class="setting-desc">নাম, এনআইডি এবং ঠিকানা</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </button>
+            <a href="khamar.html" class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">grass</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">আমার খামার</span>
+                        <span class="setting-desc">জমির তালিকা ও বিস্তারিত</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </a>
+            <button class="setting-item" id="btnSecurityMenu">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">lock</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">নিরাপত্তা ও পাসওয়ার্ড</span>
+                        <span class="setting-desc">পাসওয়ার্ড বা পিন পরিবর্তন</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Settings List 2 -->
+        <h3 class="settings-section-title">অন্যান্য</h3>
+        <div class="settings-list">
+            <a href="settings.html" class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">settings</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">অ্যাপ সেটিংস</span>
+                        <span class="setting-desc">অফলাইন সিঙ্ক, নোটিফিকেশন ও ভাষা পরিবর্তন</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </a>
+            <a href="tel:16162" class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">headset_mic</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">সাহায্য ও সাপোর্ট</span>
+                        <span class="setting-desc">১৬১৬২ (কৃষি কল সেন্টার)</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </a>
+            <button class="setting-item danger" id="btnLogout">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">logout</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">লগআউট</span>
+                        <span class="setting-desc">অ্যাকাউন্ট থেকে বের হোন</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Bottom Spacing -->
+        <div style="height: 40px;"></div>
+    </main>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="logout-modal" id="logoutModal">
+        <div class="logout-content">
+            <div class="logout-icon">
+                <span class="material-icons-round">logout</span>
+            </div>
+            <h3>লগআউট করতে চান?</h3>
+            <p>লগআউট করলে আপনাকে আবার ফোন নম্বর দিয়ে লগিন করতে হবে। আপনি কি নিশ্চিত?</p>
+            <div class="logout-actions">
+                <button class="btn-cancel" id="btnCancelLogout">বাতিল করুন</button>
+                <button class="btn-confirm-logout" onclick="window.location.href='index.html'">হ্যাঁ, লগআউট</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="profile-modal" id="editProfileModal">
+        <div class="modal-content-bottom">
+            <div class="modal-header-bottom">
+                <h4>ব্যক্তিগত তথ্য আপডেট</h4>
+                <button class="close-modal-btn" data-close="editProfileModal">&times;</button>
+            </div>
+            <div class="modal-body-form">
+                <div class="form-group-p">
+                    <label>নাম</label>
+                    <input type="text" id="editName" value="রহিম মিয়া">
+                </div>
+                <div class="form-group-p">
+                    <label>ফোন নম্বর</label>
+                    <input type="tel" value="+৮৮০ ১৩২৩ ০০০ ০০০" disabled>
+                </div>
+                <div class="form-group-p">
+                    <label>ঠিকানা</label>
+                    <input type="text" id="editAddress" value="বগুড়া সদর, রাজশাহী">
+                </div>
+                <div class="form-group-p">
+                    <label>জাতীয় পরিচয়পত্র (NID)</label>
+                    <input type="number" id="editNid" value="1234567890" disabled>
+                </div>
+            </div>
+            <div class="modal-footer-bottom">
+                <button class="btn-save-full" id="btnSaveProfile">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Modal -->
+    <div class="profile-modal" id="securityModal">
+        <div class="modal-content-bottom">
+            <div class="modal-header-bottom">
+                <h4>নিরাপত্তা ও পাসওয়ার্ড</h4>
+                <button class="close-modal-btn" data-close="securityModal">&times;</button>
+            </div>
+            <div class="modal-body-form">
+                <div class="form-group-p">
+                    <label>বর্তমান পিন/পাসওয়ার্ড</label>
+                    <input type="password" id="currentPin" placeholder="বর্তমান পিন লিখুন" autocomplete="new-password">
+                </div>
+                <div class="form-group-p">
+                    <label>নতুন পিন</label>
+                    <input type="password" id="newPin" placeholder="৪ বা ৬ ডিজিটের নতুন পিন">
+                </div>
+                <div class="form-group-p">
+                    <label>নতুন পিন নিশ্চিত করুন</label>
+                    <input type="password" id="confirmPin" placeholder="পিন আবার লিখুন">
+                </div>
+            </div>
+            <div class="modal-footer-bottom">
+                <button class="btn-save-full" id="btnSaveSecurity">পিন পরিবর্তন করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+</body>
+
+</html>

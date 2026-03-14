@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>নতুন ফসল যুক্ত করুন - AgriTech</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body class="dashboard-body" style="background: #F8FAFC;">
+    <header class="inner-header"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; padding: 0 16px; z-index: 100;">
+        <button class="btn-back" onclick="window.history.back()"
+            style="background: none; border: none; padding: 8px; margin-left: -8px; cursor: pointer; border-radius: 50%;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <h1 style="font-size: 18px; font-weight: 700; margin-left: 12px; color: var(--text-main);">নতুন ফসল যুক্ত করুন
+        </h1>
+    </header>
+
+    <main class="transactions-content">
+        <div style="padding: 0 20px;">
+
+            <div
+                style="background: white; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.03);">
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label
+                        style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">কোন
+                        জমিতে ফসল বুনবেন?</label>
+                    <input type="text" value="বাড়ির পেছনের জমি (০.৪৫ একর)"
+                        style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); outline: none; background: #F1F5F9;"
+                        readonly>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label
+                        style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">কী
+                        ফসল বুনতে চান?</label>
+                    <div style="position: relative;">
+                        <input type="text" list="cropList" placeholder="ফসলের নাম লিখুন (যেমন: ধান, আলু)"
+                            style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; color: var(--text-main); font-weight: 500; outline: none; background: white;">
+                        <datalist id="cropList">
+                            <option value="বোরো ধান (ব্রি-২৮)"></option>
+                            <option value="আমন ধান (ব্রি-৪৯)"></option>
+                            <option value="টমেটো (মিন্টু সুপার)"></option>
+                            <option value="আলু (ডায়মন্ড)"></option>
+                            <option value="ভুট্টা (বারি-১১)"></option>
+                            <option value="পেঁয়াজ (তাহেরপুরী)"></option>
+                            <option value="রসুন (বারি-১)"></option>
+                            <option value="সরিষা (বারি-১৪)"></option>
+                        </datalist>
+                        <svg style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"
+                            width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Date input removed for the new UX flow -->
+
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <label
+                        style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">
+                        <span>জমির ছবি</span>
+                        <span
+                            style="font-size: 12px; font-weight: 500; color: var(--text-muted); background: #F1F5F9; padding: 2px 8px; border-radius: 8px;">ঐচ্ছিক
+                            (Optional)</span>
+                    </label>
+                    <div style="border: 2px dashed #CBD5E1; background: #F8FAFC; border-radius: 12px; padding: 32px 20px; text-align: center; cursor: pointer; color: #64748B; transition: all 0.2s;"
+                        onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'"
+                        onclick="triggerPhotoUpload(this)">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                            style="margin-bottom: 12px; color: var(--primary);">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <p style="font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">
+                            ক্যামেরা দিয়ে ছবি তুলুন</p>
+                        <p style="font-size: 13px;">অথবা গ্যালারি থেকে সিলেক্ট করুন</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary w-100"
+                style="padding: 16px; font-size: 16px; border-radius: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px;"
+                onclick="openMethodSheet()">
+                পরবর্তী ধাপ
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="successModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: white; border-radius: 24px; padding: 40px 24px 32px; width: 85%; max-width: 360px; text-align: center; transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div
+                style="width: 72px; height: 72px; background: #10B981; border: 4px solid #D1FAE5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 24px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h3 style="font-size: 22px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">সফলভাবে যুক্ত
+                হয়েছে!</h3>
+            <p style="color: var(--text-muted); font-size: 15px; line-height: 1.5; margin-bottom: 32px;">ফসলের প্রোফাইল
+                অনুযায়ী সম্পূর্ণ টাইমলাইন স্বয়ংক্রিয়ভাবে জেনারেট করা হয়েছে।</p>
+            <button class="btn-primary w-100" onclick="window.location.href='khamar.html'"
+                style="border-radius: 12px; padding: 14px; font-weight: 700; font-size: 15px;">খামারে ফিরে যান</button>
+        </div>
+    </div>
+
+    <!-- Method Selection Bottom Sheet -->
+    <div id="methodSheetOverlay" class="bottom-sheet-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 1000; transition: opacity 0.3s;"
+        onclick="closeMethodSheet(event)">
+        <div id="methodSheetContent" class="bottom-sheet-content"
+            style="position: absolute; bottom: -100%; left: 0; width: 100%; background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 32px; transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);"
+            onclick="event.stopPropagation()">
+            <div style="width: 40px; height: 5px; background: #E2E8F0; border-radius: 4px; margin: 0 auto 20px;"></div>
+            <h3
+                style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 24px; text-align: center;">
+                কিভাবে টাইমলাইন তৈরি করতে চান?</h3>
+
+            <!-- Option 1: AI Smart Plan -->
+            <div style="background: linear-gradient(145deg, #F0FDF4, #ECFDF5); border: 1.5px solid #10B981; border-radius: 16px; padding: 16px; margin-bottom: 16px; cursor: pointer; position: relative;"
+                onclick="proceedToAI()">
+                <div
+                    style="position: absolute; top: -10px; right: 16px; background: #10B981; color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                        </polygon>
+                    </svg>
+                    সুপারিশকৃত
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div
+                        style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(16,185,129,0.15); color: #10B981;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 12h4l3-9 5 18 3-9h5" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 700; color: #064E3B; margin-bottom: 6px;">AI স্মার্ট
+                            প্ল্যান</h4>
+                        <p style="font-size: 13px; color: #047857; line-height: 1.4;">জমির আকার, আবহাওয়া এবং সেরা
+                            কৃষি-পদ্ধতি অনুযায়ী AI সম্পূর্ণ টাইমলাইন ও খরচের একটি স্মার্ট হিসাব তৈরি করবে।</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 2: Manual Setup -->
+            <div style="background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.2s;"
+                onmouseover="this.style.borderColor='#CBD5E1'" onmouseout="this.style.borderColor='var(--border-color)'"
+                onclick="proceedToManual()">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="background: #F1F5F9; padding: 10px; border-radius: 12px; color: #64748B;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 6px;">
+                            ম্যানুয়াল সেটআপ</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">নিজেই ধাপে ধাপে বীজ বপন,
+                            সেচ ও সার প্রয়োগের তারিখ এবং খরচ নিজে থেকে নির্ধারণ করুন।</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-cancel w-100"
+                style="margin-top: 16px; padding: 14px; background: #F1F5F9; color: var(--text-main); font-weight: 600; border-radius: 12px;"
+                onclick="closeMethodSheet(event)">বাতিল করুন</button>
+        </div>
+    </div>
+
+    <script>
+        function triggerPhotoUpload(element) {
+            // Mock interaction for photo upload
+            element.innerHTML = `
+                <div style="width: 100%; height: 120px; border-radius: 8px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&q=80&w=400&h=300" alt="Uploaded photo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer;" onclick="event.stopPropagation(); this.parentElement.parentElement.innerHTML = '<svg width=40 height=40...'">✕</div>
+                </div>
+            `;
+            element.style.padding = '8px';
+        }
+
+        function openMethodSheet() {
+            const overlay = document.getElementById('methodSheetOverlay');
+            const content = document.getElementById('methodSheetContent');
+
+            overlay.style.display = 'block';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                content.style.bottom = '0';
+            }, 10);
+        }
+
+        function closeMethodSheet(event) {
+            if (event) {
+                // only close if clicking on overlay or the cancel button, not inside the content
+                if (event.target !== document.getElementById('methodSheetOverlay') && event.target.tagName !== 'BUTTON') {
+                    // return; // We let button trigger it
+                }
+            }
+            const overlay = document.getElementById('methodSheetOverlay');
+            const content = document.getElementById('methodSheetContent');
+
+            content.style.bottom = '-100%';
+            overlay.style.opacity = '0';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+
+        function proceedToAI() {
+            // Add loading state to card
+            const btn = document.querySelector('.btn-primary');
+            btn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                এনালাইসিস করা হচ্ছে...
+            `;
+            const style = document.createElement('style');
+            style.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } }';
+            document.head.appendChild(style);
+
+            closeMethodSheet();
+
+            setTimeout(() => {
+                window.location.href = 'ai_crop_prediction.html';
+            }, 800);
+        }
+
+        function proceedToManual() {
+            closeMethodSheet();
+            setTimeout(() => {
+                window.location.href = 'manual_crop_setup.html';
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>

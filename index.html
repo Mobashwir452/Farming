@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriTech - আধুনিক কৃষিতে আপনার সঙ্গী</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/index.css">
+
+    <!-- JavaScript -> Module for importing components -->
+    <script type="module" src="js/index.js" defer></script>
+</head>
+
+<body>
+    <div class="blob-bg"></div>
+    <div class="blob-bg-2"></div>
+
+    <!-- Web Component Header -->
+    <app-header></app-header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-text">
+                <h1>আধুনিক কৃষিতে আপনার <span class="highlight">বিশ্বস্ত সঙ্গী</span></h1>
+                <p>আমাদের স্মার্ট এগ্রিটেক অ্যাপের মাধ্যমে আপনার ফসলের রোগ নির্ণয় করুন, সঠিক বাজারদর জানুন এবং হিসাব
+                    রাখুন খুব সহজেই। জিরো-টাইপিং এবং আপনার ভাষায় সম্পূর্ণ ডিজিটাল খামার ব্যবস্থাপনা।</p>
+
+                <div class="hero-actions">
+                    <a href="login.html" class="btn-primary">এখুনি শুরু করুন ➔</a>
+                    <a href="#how-it-works" class="btn-secondary">কীভাবে কাজ করে?</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?auto=format&fit=crop&w=800&q=80"
+                    alt="Beautiful Agriculture Scene" loading="lazy">
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <h2>কেন আমাদের অ্যাপ ব্যবহার করবেন?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="f-icon">📷</div>
+                    <h3>AI রোগ নির্ণয়</h3>
+                    <p>ফসলের পাতার ছবি তুলে খুব সহজেই রোগের নাম এবং প্রয়োজনীয় ঔষধের পরামর্শ পান মুহূর্তের মধ্যেই।</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon">📍</div>
+                    <h3>জিপিএস ম্যাপিং</h3>
+                    <p>নিজের জমি হেঁটে খুব সহজেই ম্যাপ তৈরি করুন এবং সঠিক আয়তন ও প্রয়োজনীয় সারের হিসাব রাখুন।</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon">🛒</div>
+                    <h3>কৃষি মার্কেট</h3>
+                    <p>সঠিক বাজারদর যাচাই করুন এবং সরাসরি লোকাল ডিলারের থেকে বীজ বা সার ক্রয় করুন এক ক্লিকেই।</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon">👆</div>
+                    <h3>জিরো টাইপিং</h3>
+                    <p>কীবোর্ড ব্যবহারের কোনো ঝামেলা নেই। কেবল ছবি এবং ভয়েস ব্যবহার করেই অ্যাপ চালানো যাবে।</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Funnel: Impact / Social Proof -->
+        <section class="impact" id="impact">
+            <div class="impact-content">
+                <h2>কৃষকদের বিশ্বস্ত প্ল্যাটফর্ম</h2>
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <div class="stat-number">১০,০০০+</div>
+                        <div class="stat-label">যুক্ত কৃষক</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">৫,০০০+</div>
+                        <div class="stat-label">সফল রোগ নির্ণয়</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">৫০+</div>
+                        <div class="stat-label">কভারেজ জেলা</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="how-it-works" id="how-it-works">
+            <h2>কীভাবে কাজ করে?</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-num">১</div>
+                    <h3>প্রোফাইল তৈরি</h3>
+                    <p>ফোন নম্বর দিয়ে খুব সহজেই অ্যাকাউন্ট খুলুন।</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">২</div>
+                    <h3>জমি যোগ করুন</h3>
+                    <p>আপনার জমির সীমানা ম্যাপ করে যুক্ত করুন।</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">৩</div>
+                    <h3>পরামর্শ নিন</h3>
+                    <p>ছবি তুলে ফসলের সমস্যা জানুন এবং বাজারদর দেখুন।</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Web Component Footer -->
+    <app-footer></app-footer>
+
+</body>
+
+</html>

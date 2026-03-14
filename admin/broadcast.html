@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ব্রডকাস্ট ও লিমিটস - AgriTech Admin</title>
+    <link rel="stylesheet" href="css/admin-global.css">
+    <link rel="stylesheet" href="css/admin-broadcast.css">
+</head>
+<body class="admin-layout">
+
+    <!-- Sidebar Injected Here -->
+    <div id="admin-sidebar-container"></div>
+
+    <main class="admin-main">
+        <!-- Header Injected Here -->
+        <div id="admin-header-container"></div>
+
+        <div class="admin-content">
+            <!-- Page Title Area -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    ব্রডকাস্ট ও নোটিফিকেশন সিস্টেম
+                </h2>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bc-tabs">
+                <button class="bc-tab-btn active" onclick="switchBcTab('send')">নতুন ব্রডকাস্ট মেসেজ</button>
+                <button class="bc-tab-btn" onclick="switchBcTab('history')">ব্রডকাস্ট হিস্ট্রি</button>
+                <button class="bc-tab-btn" onclick="switchBcTab('limits')">সিস্টেম সিকিউরিটি লিমিট</button>
+            </div>
+
+            <!-- TAB: Send Broadcast -->
+            <div id="tab-send" class="bc-tab-pane active">
+                <div class="broadcast-layout">
+                    <!-- Left Column: Create Broadcast -->
+                    <div class="bc-left">
+                        <div class="broadcast-card">
+                            <div class="bc-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                মেসেজ কনফিগারেশন
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">যাকে পাঠাবেন (Audience)</label>
+                                <select class="form-control">
+                                    <option value="all">সকল ব্যবহারকারী (All Users)</option>
+                                    <option value="bogra">শুধুমাত্র বগুড়া জেলার কৃষক</option>
+                                    <option value="rajshahi">শুধুমাত্র রাজশাহী জেলার কৃষক</option>
+                                    <option value="paddy">শুধুমাত্র ধান চাষি</option>
+                                    <option value="potato">শুধুমাত্র আলু চাষি</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">ডেলিভারি মিডিয়াম (Channel)</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="channel" value="push" checked>
+                                        Push Notification (ফ্রি)
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="channel" value="sms">
+                                        SMS Alert (জরুরি অবস্থার জন্য)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">মেসেজের শিরোনাম (Title)</label>
+                                <input type="text" class="form-control" placeholder="যেমন: অতিভারী বৃষ্টির পূর্বাভাস বা নতুন রোগ সতর্কতা!">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Details & Send -->
+                    <div class="bc-right">
+                        <div class="broadcast-card">
+                            <div class="bc-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                মেসেজের মূল বিস্তারিত
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">বিস্তারিত বার্তা (Message Body)</label>
+                                <textarea class="form-control" placeholder="মেসেজের বিস্তারিত এখানে লিখুন... সর্বোচ্চ ৩০০ অক্ষর অনুমোদিত।"></textarea>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 30px;">
+                                <label class="form-label">মিডিয়া লিংক (ঐচ্ছিক)</label>
+                                <input type="url" class="form-control" placeholder="ইউটিউব ভিডিও বা ছবির লিংক (যদি থাকে)">
+                            </div>
+
+                            <button class="btn-primary" onclick="alert('ব্রডকাস্ট মেসেজটি সাফল্যের সাথে পাঠানো হয়েছে!')">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                ব্রডকাস্ট সেন্ড করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Broadcast History -->
+            <div id="tab-history" class="bc-tab-pane">
+                <div class="broadcast-card" style="max-width: 900px; margin: 0 auto;">
+                    <div class="bc-title" style="margin-bottom: 24px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        পূর্বে পাঠানো ব্রডকাস্টের তালিকা
+                    </div>
+
+                    <div class="history-list">
+                        <div class="history-item">
+                            <div class="hi-header">
+                                <div class="hi-title">ঘূর্ণিঝড় 'দানা' এর সতর্কতা!</div>
+                                <div class="hi-time">১ ঘণ্টা আগে</div>
+                            </div>
+                            <span class="hi-audience">সকল ইউজার (Push)</span>
+                            <div class="hi-content">
+                                আগামী ৪৮ ঘণ্টায় উপকূলীয় এলাকায় অতিভারী বৃষ্টির সম্ভাবনা রয়েছে। ধান ক্ষেতের পানি নিস্কাশনের ব্যবস্থা করুন।
+                            </div>
+                        </div>
+
+                        <div class="history-item">
+                            <div class="hi-header">
+                                <div class="hi-title">বগুড়ায় আলুর বীজ বিতরণ</div>
+                                <div class="hi-time">গতকাল, ০৩:১৫ PM</div>
+                            </div>
+                            <span class="hi-audience" style="background:#FEF3C7; color:#D97706;">বগুড়া জেলা (SMS)</span>
+                            <div class="hi-content">
+                                কৃষক ভাইদের জানানো যাচ্ছে যে, উপজেলা পরিষদ থেকে অনুদানের আলুর বীজ বিতরণ আগামীকাল থেকে শুরু হবে।
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="hi-header">
+                                <div class="hi-title">ব্লাস্ট রোগের আক্রমণ প্রতিরোধ</div>
+                                <div class="hi-time">৫ দিন আগে</div>
+                            </div>
+                            <span class="hi-audience" style="background:#ECFDF5; color:#059669;">ধান চাষি (Push)</span>
+                            <div class="hi-content">
+                                আবহাওয়ার পরিবর্তনের কারণে ধানে ব্লাস্ট রোগের সম্ভাবনা দেখা গিয়েছে। জমিতে পরিমিত মাত্রায় পটাশ সার ব্যবহার করুন এবং ছত্রাকনাশক স্প্রে করুন।
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: System Security Limits -->
+            <div id="tab-limits" class="bc-tab-pane">
+                <div class="broadcast-card limits-container">
+                    <div class="bc-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        লগইন ও সিস্টেম এক্সেস লিমিট
+                    </div>
+                    <p style="font-size: 14px; color: var(--text-muted); margin-top: -10px; margin-bottom: 24px;">
+                        বট অ্যাটাক বা স্প্যামিং আটকাতে সিস্টেমের গ্লোবাল রেট লিমিটগুলো নিচে থেকে আপডেট করুন। এখানে কোনো AI লিমিট নেই, শুধুমাত্র সিস্টেম সিকিউরিটি লিমিট।
+                    </p>
+
+                    <div class="limit-item">
+                        <div class="limit-info">
+                            <h4>দৈনিক সর্বাধিক OTP (প্রতি ইউজার)</h4>
+                            <p>লগইন বা রেজিস্ট্রেশনের সময় একজন ইউজার সর্বোচ্চ কতবার OTP রিকোয়েস্ট দিতে পারবে।</p>
+                        </div>
+                        <div class="limit-input-wrap">
+                            <input type="number" class="form-control" value="5">
+                            <button class="btn-save-sm">আপডেট</button>
+                        </div>
+                    </div>
+
+                    <div class="limit-item">
+                        <div class="limit-info">
+                            <h4>প্রতি IP থেকে অ্যাকাউন্ট তৈরি</h4>
+                            <p>দৈনিক একই IP ঠিকানা ব্যবহার করে সর্বোচ্চ কয়টি নতুন অ্যাকাউন্ট খোলা যাবে।</p>
+                        </div>
+                        <div class="limit-input-wrap">
+                            <input type="number" class="form-control" value="3">
+                            <button class="btn-save-sm">আপডেট</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/admin-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             setTimeout(() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if(item.textContent.trim().includes('ব্রডকাস্ট ও লিমিটস')) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                const headerTitle = document.getElementById('headerTitle');
+                if(headerTitle) {
+                    headerTitle.textContent = 'ব্রডকাস্ট ও লিমিটস';
+                }
+            }, 100);
+        });
+
+        function switchBcTab(tabId) {
+            document.querySelectorAll('.bc-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.bc-tab-pane').forEach(pane => pane.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

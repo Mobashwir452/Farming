@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>আমার খামার - AgriTech System</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/khamar.css">
+
+    <!-- Web Components & Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/khamar.js" defer></script>
+</head>
+
+<body class="dashboard-body khamar-body">
+    <!-- Global Layout Components -->
+    <app-dash-header></app-dash-header>
+    <app-sidebar></app-sidebar>
+
+    <!-- Content Area -->
+    <main class="dashboard-container">
+
+        <!-- Header Section for Khamar -->
+        <div class="khamar-page-header">
+            <h2>আমার খামার 🌾</h2>
+            <p>আপনার সকল জমির দৃশ্য এবং ফসলের সার্বিক অবস্থা একনজরে</p>
+        </div>
+
+        <!-- 1. EMPTY STATE (Hidden by default, shown via JS if no land) -->
+        <div class="empty-state-container" id="emptyState" style="display: none;">
+            <div class="es-icon-wrapper">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+            </div>
+            <h3>কোনো জমি যুক্ত করা নেই</h3>
+            <p>নিচের বাটনটি ব্যবহার করে জিপিএস এর সাহায্যে আপনার জমির ম্যাপ তৈরি করুন এবং ফসল যুক্ত করুন।</p>
+            <button class="btn-primary" onclick="window.location.href='add_land.html'" style="margin-top: 16px;">
+                + নতুন জমি যুক্ত করুন
+            </button>
+        </div>
+
+        <!-- 2. FARM LIST (Shown if land exists) -->
+        <div class="farm-cards-container" id="farmList">
+
+            <!-- Partial State Card (Land added, No Crop) -->
+            <div class="farm-card">
+                <div class="fc-header">
+                    <div class="fc-title-group">
+                        <div class="fc-title-inner">
+                            <h3>বাড়ির পেছনের জমি</h3>
+                            <span class="fc-area">০.৪৫ একর</span>
+                        </div>
+                    </div>
+                    <div class="fc-actions-wrapper">
+                        <button class="icon-btn-small" aria-label="Land Options"
+                            onclick="toggleDropdown(event, 'drop1')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="fc-dropdown" id="drop1">
+                            <button class="fc-drop-item"
+                                onclick="window.location.href='add_crop.html'; event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                                নতুন ফসল যুক্ত করুন
+                            </button>
+                            <button class="fc-drop-item" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                                জমির নাম পরিবর্তন
+                            </button>
+                            <button class="fc-drop-item danger" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                জমি বাতিল করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty crop placeholder -->
+                <div class="fc-empty-crop">
+                    <div class="empty-crop-content">
+                        <div class="empty-crop-icon">🌱</div>
+                        <div class="empty-crop-text">
+                            <h4>খালি জমি</h4>
+                            <p>বর্তমানে কোনো ফসল নেই</p>
+                        </div>
+                    </div>
+                    <button class="btn-outline-primary full-width" onclick="window.location.href='add_crop.html'">+ নতুন
+                        ফসল রোপণ করুন</button>
+                </div>
+            </div>
+
+            <!-- Filled State Card (Land + Crop) -->
+            <div class="farm-card" onclick="window.location.href='land_details.html'">
+                <div class="fc-header">
+                    <div class="fc-title-group">
+                        <div class="fc-title-inner">
+                            <h3>খালের ধারের জমি</h3>
+                            <span class="fc-area">১.২ একর</span>
+                        </div>
+                    </div>
+                    <div class="fc-actions-wrapper">
+                        <button class="icon-btn-small" onclick="toggleDropdown(event, 'drop2')"
+                            aria-label="Land Options">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="fc-dropdown" id="drop2">
+                            <button class="fc-drop-item"
+                                onclick="window.location.href='land_details.html'; event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                টাইমলাইন
+                            </button>
+                            <button class="fc-drop-item" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                আয়-ব্যয় যোগ করুন
+                            </button>
+                            <button class="fc-drop-item" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="6" cy="6" r="3"></circle>
+                                    <circle cx="6" cy="18" r="3"></circle>
+                                    <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                                    <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                                    <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                                </svg>
+                                ফসল কর্তন করুন
+                            </button>
+                            <button class="fc-drop-item danger" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                জমি ডিলিট করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fc-crop-info">
+                    <div class="crop-image">
+                        <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=200&h=200"
+                            alt="Boro Paddy">
+                    </div>
+                    <div class="crop-details">
+                        <div class="crop-name-row">
+                            <h4 class="crop-name">বোরো ধান (ব্রি-২৮)</h4>
+                            <span class="crop-badge">হেলদি</span>
+                        </div>
+                        <div class="crop-progress-container">
+                            <div class="progress-info">
+                                <span class="progress-text">রোপণের ২৫ দিন</span>
+                                <span class="progress-stage">ফুল আসার সময়</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: 35%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fc-footer">
+                    <div class="fc-cta warning">
+                        <div class="status-indicator warning"></div>
+                        <span class="cta-text">আগামীকাল সেচ দিতে হবে</span>
+                    </div>
+                    <div class="fc-action">
+                        <span>টাইমলাইন</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Filled State Card -->
+            <div class="farm-card" onclick="window.location.href='land_details.html'">
+                <div class="fc-header">
+                    <div class="fc-title-group">
+                        <div class="fc-title-inner">
+                            <h3>পুকুর পাড়ের জমি</h3>
+                            <span class="fc-area">০.৮ একর</span>
+                        </div>
+                    </div>
+                    <div class="fc-actions-wrapper">
+                        <button class="icon-btn-small" onclick="toggleDropdown(event, 'drop3')"
+                            aria-label="Land Options">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="fc-dropdown" id="drop3">
+                            <button class="fc-drop-item"
+                                onclick="window.location.href='land_details.html'; event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                টাইমলাইন
+                            </button>
+                            <button class="fc-drop-item" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                রোগ নির্ণয় করুন
+                            </button>
+                            <button class="fc-drop-item" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                আয়-ব্যয় যোগ করুন
+                            </button>
+                            <button class="fc-drop-item danger" onclick="event.stopPropagation();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                জমি ডিলিট করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fc-crop-info">
+                    <div class="crop-image">
+                        <img src="https://images.unsplash.com/photo-1592843936856-f4c0840b3cb1?auto=format&fit=crop&q=80&w=200&h=200"
+                            alt="Tomato">
+                    </div>
+                    <div class="crop-details">
+                        <div class="crop-name-row">
+                            <h4 class="crop-name">টমেটো (মিন্টু সুপার)</h4>
+                            <span class="crop-badge danger">রোগাক্রান্ত</span>
+                        </div>
+                        <div class="crop-progress-container">
+                            <div class="progress-info">
+                                <span class="progress-text">রোপণের ৪০ দিন</span>
+                                <span class="progress-stage">ফল ধরার সময়</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill danger" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fc-footer">
+                    <div class="fc-cta danger">
+                        <div class="status-indicator danger"></div>
+                        <span class="cta-text">আজ ওষুধ স্প্রে করুন (লেট ব্লাইট)</span>
+                    </div>
+                    <div class="fc-action">
+                        <span>টাইমলাইন</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab-btn" onclick="window.location.href='add_land.html'" aria-label="Add Land">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+
+</body>
+
+</html>

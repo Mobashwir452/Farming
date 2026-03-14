@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>জমির ইতিহাস - AgriTech System</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/land_details.css"> <!-- Reusing top-header styling -->
+    <link rel="stylesheet" href="css/land_history.css">
+
+    <!-- Web Components & Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/land_details.js" defer></script>
+</head>
+
+<body class="land-history-body">
+
+    <!-- Content Wrapper -->
+    <main class="land-details-wrapper">
+
+        <!-- Top Navigation Header -->
+        <div class="page-top-header" style="justify-content: space-between; align-items: center; padding-right: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="back-btn" onclick="window.history.back()" aria-label="Go Back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <h2>জমির ইতিহাস</h2>
+            </div>
+            <div class="weather-widget">
+                <span class="weather-icon">☀️</span>
+                <span class="weather-temp">৩২°</span>
+            </div>
+        </div>
+
+        <div class="lh-container">
+
+            <!-- 1. All-Time Summary Card -->
+            <div class="lh-summary-card">
+                <div class="lh-summary-header">
+                    <h3>খালের ধারের জমি - সম্পূর্ণ সারসংক্ষেপ</h3>
+                </div>
+
+                <div class="lh-summary-grid">
+                    <div class="lh-summary-item">
+                        <span class="lh-summary-label">মোট চাষাবাদকৃত ফসল</span>
+                        <span class="lh-summary-value">৪ টি</span>
+                    </div>
+                    <div class="lh-summary-item">
+                        <span class="lh-summary-label">সর্বমোট বিনিয়োগ</span>
+                        <span class="lh-summary-value">৳ ৪৫,৫০০</span>
+                    </div>
+                    <div class="lh-summary-item">
+                        <span class="lh-summary-label">সর্বমোট আয়</span>
+                        <span class="lh-summary-value">৳ ৬৪,০০০</span>
+                    </div>
+                </div>
+
+                <div class="lh-summary-net">
+                    <span class="label">নিট প্রফিট</span>
+                    <span class="value">+ ৳ ১৮, ৫০০</span>
+                </div>
+            </div>
+
+            <!-- 2. Crop History List -->
+            <div class="lh-history-list">
+                <div class="lh-history-list-header">
+                    <h3>অতীত ফসলের বিবরণ</h3>
+                </div>
+
+                <!-- History Item 1 -->
+                <div class="lh-crop-card">
+                    <div class="lh-crop-header">
+                        <div class="lh-crop-title">
+                            <h4>বোরো ধান (ব্রি-২৮)</h4>
+                            <p>মার্চ ২০২৩ - জুলাই ২০২৩ (১১০ দিন)</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                            <div class="lh-crop-status success">সফল ফলন</div>
+                            <div
+                                style="font-size: 11px; font-weight: 700; background: #ECFDF5; color: #047857; padding: 2px 8px; border-radius: 12px; border: 1px solid #D1FAE5;">
+                                ফলন হার: ৯৪%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lh-crop-yield">
+                        <span class="lh-yield-label">মোট ফলন:</span>
+                        <span class="lh-yield-value">১২০ মণ (গ্রেড: উৎকৃষ্ট)</span>
+                    </div>
+
+                    <div class="lh-crop-finance">
+                        <div class="lh-finance-col">
+                            <span class="lh-finance-label">খরচ</span>
+                            <span class="lh-finance-val">৳ ১২,০০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">আয়</span>
+                            <span class="lh-finance-val">৳ ২২,০০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">লাভ/ক্ষতি</span>
+                            <span class="lh-finance-val profit">+ ৳ ১০,০০০</span>
+                        </div>
+                    </div>
+
+                    <button class="lh-accordion-btn">
+                        <span>▼ বিস্তারিত হিসাব দেখুন</span>
+                    </button>
+                    <div class="lh-accordion-content">
+                        <!-- New Yield/Plant Details section -->
+                        <h4 style="font-size: 13px; color: var(--text-main); margin-bottom: 8px; margin-top: 12px;">বীজ
+                            ও ফলন বিবরণ</h4>
+                        <ul class="lh-expense-list" style="margin-bottom: 20px;">
+                            <li><span>প্রাথমিক চারা:</span> <span>৫,০০০ টি</span></li>
+                            <li><span style="color: #EF4444;">নষ্ট হয়েছে (পোকামাকড়):</span> <span
+                                    style="color: #EF4444;">৩০০ টি</span></li>
+                            <li class="total" style="color: #047857; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                                <span>সর্বশেষ গাছ:</span> <span>৪,৭০০ টি</span>
+                            </li>
+                        </ul>
+
+                        <h4 style="font-size: 13px; color: var(--text-main); margin-bottom: 8px;">আর্থিক বিবরণ</h4>
+                        <ul class="lh-expense-list">
+                            <li><span>বীজ ক্রয়:</span> <span>৳ ১,২০০</span></li>
+                            <li><span>সার (ইউরিয়া ২ বস্তা, পটাশ ১ বস্তা):</span> <span>৳ ৩,৫০০</span></li>
+                            <li><span>সেচ খরচ (৩ বার):</span> <span>৳ ২,০০০</span></li>
+                            <li><span>কীটনাশক ও স্প্রে:</span> <span>৳ ৭০০</span></li>
+                            <li><span>দিনমজুর (৫ জন):</span> <span>৳ ৪,৬০০</span></li>
+                            <li class="total"><span>সর্বমোট খরচ:</span> <span>৳ ১২,০০০</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="lh-crop-tags" style="margin-top: 12px;">
+                        <span class="lh-tag">ফলন খুব ভালো</span>
+                        <span class="lh-tag">সেচের অভাব হয়নি</span>
+                    </div>
+                </div>
+
+                <!-- History Item 2 -->
+                <div class="lh-crop-card">
+                    <div class="lh-crop-header">
+                        <div class="lh-crop-title">
+                            <h4>শীতকালীন টমেটো</h4>
+                            <p>নভেম্বর ২০২২ - ফেব্রুয়ারি ২০২৩ (৯০ দিন)</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                            <div class="lh-crop-status warning">মাঝারি ফলন</div>
+                            <div
+                                style="font-size: 11px; font-weight: 700; background: #FFFBEB; color: #B45309; padding: 2px 8px; border-radius: 12px; border: 1px solid #FEF3C7;">
+                                ফলন হার: ৭৫%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lh-crop-yield">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <span class="lh-yield-label">বর্তমান সংরক্ষিত ওজন:</span>
+                                <span class="lh-yield-value">৭৮০ কেজি <span
+                                        style="font-size:12px; font-weight:normal; color:#EF4444;">(-২০ কেজি
+                                        শুকানো)</span></span>
+                            </div>
+                            <button
+                                onclick="document.getElementById('weightModal').classList.add('active'); document.body.style.overflow='hidden';"
+                                style="background: transparent; border: 1px solid #E2E8F0; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.background='#F1F5F9'"
+                                onmouseout="this.style.background='transparent'">ওজন আপডেট</button>
+                        </div>
+                    </div>
+
+                    <div class="lh-crop-finance">
+                        <div class="lh-finance-col">
+                            <span class="lh-finance-label">খরচ</span>
+                            <span class="lh-finance-val">৳ ৮,৫০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">আয়</span>
+                            <span class="lh-finance-val">৳ ১৭,০০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">লাভ/ক্ষতি</span>
+                            <span class="lh-finance-val profit">+ ৳ ৮,৫০০</span>
+                        </div>
+                    </div>
+
+                    <button class="lh-accordion-btn">
+                        <span>▼ বিস্তারিত হিসাব দেখুন</span>
+                    </button>
+                    <div class="lh-accordion-content">
+                        <!-- New Yield/Plant Details section -->
+                        <h4 style="font-size: 13px; color: var(--text-main); margin-bottom: 8px; margin-top: 12px;">বীজ
+                            ও ফলন বিবরণ</h4>
+                        <ul class="lh-expense-list" style="margin-bottom: 20px;">
+                            <li><span>প্রাথমিক চারা:</span> <span>২,০০০ টি</span></li>
+                            <li><span style="color: #EF4444;">নষ্ট হয়েছে (অতিবৃষ্টি):</span> <span
+                                    style="color: #EF4444;">৫০০ টি</span></li>
+                            <li class="total" style="color: #047857; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                                <span>সর্বশেষ গাছ:</span> <span>১,৫০০ টি</span>
+                            </li>
+                        </ul>
+
+                        <h4 style="font-size: 13px; color: var(--text-main); margin-bottom: 8px;">আর্থিক বিবরণ</h4>
+                        <ul class="lh-expense-list">
+                            <li><span>চারা ক্রয়:</span> <span>৳ ১,৫০০</span></li>
+                            <li><span>সার:</span> <span>৳ ২,০০০</span></li>
+                            <li><span>সেচ খরচ:</span> <span>৳ ১,০০০</span></li>
+                            <li><span>কীটনাশক ও স্প্রে:</span> <span>৳ ১,৫০০</span></li>
+                            <li><span>দিনমজুর (৩ জন):</span> <span>৳ ২,৫০০</span></li>
+                            <li class="total"><span>সর্বমোট খরচ:</span> <span>৳ ৮,৫০০</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="lh-crop-tags" style="margin-top: 12px;">
+                        <span class="lh-tag">পাতা মোড়া রোগ</span>
+                        <span class="lh-tag">বাজারমূল্য ভালো ছিল</span>
+                    </div>
+                </div>
+
+                <!-- History Item 3 -->
+                <div class="lh-crop-card">
+                    <div class="lh-crop-header">
+                        <div class="lh-crop-title">
+                            <h4>আমন ধান</h4>
+                            <p>জুন ২০২২ - অক্টোবর ২০২২ (১২০ দিন)</p>
+                        </div>
+                        <div class="lh-crop-status success">সফল ফলন</div>
+                    </div>
+
+                    <div class="lh-crop-yield">
+                        <span class="lh-yield-label">মোট ফলন:</span>
+                        <span class="lh-yield-value">১৩৫ মণ (গ্রেড: ভালো)</span>
+                    </div>
+
+                    <div class="lh-crop-finance">
+                        <div class="lh-finance-col">
+                            <span class="lh-finance-label">খরচ</span>
+                            <span class="lh-finance-val">৳ ১১,০০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">আয়</span>
+                            <span class="lh-finance-val">৳ ২৫,০০০</span>
+                        </div>
+                        <div class="lh-finance-col" style="text-align: right;">
+                            <span class="lh-finance-label">লাভ/ক্ষতি</span>
+                            <span class="lh-finance-val profit">+ ৳ ১৪,০০০</span>
+                        </div>
+                    </div>
+
+                    <button class="lh-accordion-btn">
+                        <span>▼ বিস্তারিত হিসাব দেখুন</span>
+                    </button>
+                    <div class="lh-accordion-content">
+                        <ul class="lh-expense-list">
+                            <li><span>বীজ ক্রয়:</span> <span>৳ ১,০০০</span></li>
+                            <li><span>সার:</span> <span>৳ ৩,০০০</span></li>
+                            <li><span>সেচ খরচ:</span> <span>৳ ২,০০০</span></li>
+                            <li><span>কীটনাশক ও স্প্রে:</span> <span>৳ ১,০০০</span></li>
+                            <li><span>দিনমজুর:</span> <span>৳ ৪,০০০</span></li>
+                            <li class="total"><span>সর্বমোট খরচ:</span> <span>৳ ১১,০০০</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="lh-crop-tags" style="margin-top: 12px;">
+                        <span class="lh-tag">আবহাওয়া অনুকূলে ছিল</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Post-Harvest Weight Update Modal -->
+    <div class="calendar-modal" id="weightModal">
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <h4>ওজন আপডেট করুন</h4>
+                <button class="close-modal" aria-label="Close modal"
+                    onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow='';">&times;</button>
+            </div>
+            <div class="calendar-body" style="padding: 20px 0 0;">
+
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left;">
+                    শুকানো, মজুতকালীন পচন বা বাছাই করার কারণে ওজন কমে গেলে তা এখানে আপডেট করতে পারেন, যেন লাভের সঠিক
+                    হিসাব হয়।
+                </p>
+
+                <div style="margin-bottom: 16px; text-align: left;">
+                    <label
+                        style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">সর্বশেষ
+                        ওজন বা হারানো ওজন</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select
+                            style="flex: 1; min-width: 0; padding: 12px 8px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; outline: none; background: #FFFBEB; color: #B45309; font-weight: 600; appearance: auto;">
+                            <option value="current">বর্তমান ওজন</option>
+                            <option value="lost">হারানো ওজন</option>
+                        </select>
+                        <input type="number" placeholder="যেমন: ৭৮০"
+                            style="flex: 1; min-width: 0; padding: 12px 8px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: #F8FAFC;">
+                        <span style="font-size: 14px; font-weight: 500; white-space: nowrap;">কেজি</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px; text-align: left;">
+                    <label
+                        style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">ওজন
+                        কমার কারণ</label>
+                    <select
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; background: #F8FAFC; color: var(--text-main); appearance: auto;">
+                        <option value="drying">শুকানো/রোদে দেওয়া</option>
+                        <option value="spoilage">মজুতকালীন পচন বা নষ্ট</option>
+                        <option value="sorting">বাছাই/গ্রেডিং</option>
+                        <option value="other">অন্যান্য</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="calendar-footer" style="padding: 0;">
+                <button class="btn-primary w-100"
+                    onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow=''; alert('ওজন আপডেট সফল হয়েছে');">ওজন
+                    সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Layout Components -->
+    <app-bottom-nav></app-bottom-nav>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+</body>
+
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>অ্যাপ সেটিংস | AgriTech</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Moto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <!-- Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/settings.js" defer></script>
+</head>
+
+<body class="settings-body">
+    <!-- Header -->
+    <header class="page-top-header"
+        style="position: sticky; top: 0; z-index: 100; background: white; padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <button class="back-btn" onclick="history.back()" aria-label="Go Back"
+                style="border: none; background: #F1F5F9; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 style="font-size: 18px; margin:0; line-height: 1.2;">অ্যাপ সেটিংস</h2>
+        </div>
+    </header>
+
+    <main class="settings-main">
+        <!-- Offline Data & Sync Status Card -->
+        <div class="sync-card" id="syncCard">
+            <!-- Connection Status Banner -->
+            <div class="conn-status-banner online" id="connBanner">অনলাইন আছেন</div>
+
+            <div class="sync-icon-container" id="syncIconBox">
+                <span class="material-icons-round sync-arrow" id="syncIcon">cloud_done</span>
+            </div>
+
+            <h3 class="sync-status-title" id="syncTitle">সকল ডেটা সিঙ্ক করা আছে</h3>
+            <p class="sync-info" id="syncTimestamp">সর্বশেষ আপডেট: আজ, সকাল ১০:১৫</p>
+
+            <button class="btn-sync" id="btnManualSync">
+                <span class="material-icons-round" style="font-size: 18px;">sync</span>
+                এখনই সিঙ্ক করুন
+            </button>
+        </div>
+
+        <!-- Preferences & Settings List -->
+        <h3 class="settings-section-title">পছন্দসমূহ (Preferences)</h3>
+        <div class="settings-list">
+            <!-- Push Notification -->
+            <div class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">notifications_active</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">নোটিফিকেশন চালু রাখুন</span>
+                        <span class="setting-desc">নতুন আপডেট ও কাজের রিমাইন্ডার</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="togglePush" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- SMS Alert -->
+            <div class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">sms</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">জরুরি নোটিশ SMS এ পান</span>
+                        <span class="setting-desc">আবহাওয়া সতর্কবার্তা ও রোগবালাই নোটিশ</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleSms">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- App Language -->
+            <div class="setting-item clickable" id="btnChangeLang">
+                <div class="setting-left">
+                    <div class="setting-icon-box primary">
+                        <span class="material-icons-round">language</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">অ্যাপের ভাষা (Language)</span>
+                        <span class="setting-desc">বাংলা অথবা English</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="value" id="currentLangDisp">বাংলা</span>
+                    <span class="material-icons-round">chevron_right</span>
+                </div>
+            </div>
+
+            <!-- Offline Auto Sync -->
+            <div class="setting-item">
+                <div class="setting-left">
+                    <div class="setting-icon-box">
+                        <span class="material-icons-round">wifi_protected_setup</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title">স্বয়ংক্রিয় সিঙ্ক (Auto Sync)</span>
+                        <span class="setting-desc">ইন্টারনেট পেলে ব্যাকগ্রাউন্ডে ডেটা সেভ হবে</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleAutoSync" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Info & Cache -->
+        <h3 class="settings-section-title">সিস্টেম</h3>
+        <div class="settings-list">
+            <div class="setting-item clickable" id="btnClearCache">
+                <div class="setting-left">
+                    <div class="setting-icon-box" style="background:#FEF2F2; color:#EF4444;">
+                        <span class="material-icons-round">delete_sweep</span>
+                    </div>
+                    <div class="setting-text">
+                        <span class="setting-title" style="color:#EF4444;">ক্যাশ স্টোরেজ রিফ্রেশ</span>
+                        <span class="setting-desc">অ্যাপ স্লো হলে এটি ব্যবহার করুন</span>
+                    </div>
+                </div>
+                <div class="setting-right">
+                    <span class="material-icons-round" style="color:#EF4444;">chevron_right</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Version Display -->
+        <div class="app-info-container">
+            <div class="app-version">AgriTech ভার্সন ১.০.৪</div>
+        </div>
+
+        <!-- Bottom Padding -->
+        <div style="height: 40px;"></div>
+    </main>
+
+    <!-- Language Selection Bottom Sheet -->
+    <div class="lang-modal" id="langModal">
+        <div class="lang-content">
+            <div class="lang-header">
+                <h4>ভাষা নির্বাচন করুন</h4>
+                <button class="close-lang-modal" id="closeLangModal">&times;</button>
+            </div>
+            <div class="lang-body">
+                <div class="lang-option active" data-lang="bn">
+                    <span class="lang-option-name">বাংলা (Bengali)</span>
+                    <span class="material-icons-round">check_circle</span>
+                </div>
+                <div class="lang-option" data-lang="en">
+                    <span class="lang-option-name">English</span>
+                    <span class="material-icons-round">check_circle</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <app-bottom-nav></app-bottom-nav>
+</body>
+
+</html>

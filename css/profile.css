@@ -1,0 +1,480 @@
+/* Profile & Settings Styles */
+
+.profile-body {
+    background: var(--bg-color);
+    padding-top: 0;
+}
+
+.profile-main {
+    padding: 20px 16px;
+}
+
+/* User Info Card */
+.user-profile-card {
+    text-align: center;
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.profile-image-container {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 16px;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #E2E8F0;
+}
+
+.edit-image-btn {
+    position: absolute;
+    bottom: 0;
+    right: -4px;
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    transition: transform 0.2s;
+}
+
+.edit-image-btn:active {
+    transform: scale(0.95);
+}
+
+.edit-image-btn .material-icons-round {
+    font-size: 16px;
+}
+
+.user-name {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.verified-badge {
+    color: #10B981;
+    font-size: 18px;
+}
+
+.user-phone {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+.user-address {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* Overview Stats */
+.overview-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon.land {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--primary-dark);
+}
+
+.stat-icon.sub {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563EB;
+}
+
+.stat-info h5 {
+    margin: 0 0 2px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Settings Menu List */
+.settings-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 16px 8px;
+}
+
+.settings-list {
+    background: white;
+    border-radius: 20px;
+    padding: 8px 0;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    text-decoration: none;
+    background: white;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.setting-item:not(:last-child) {
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.setting-item:active {
+    background: #F8FAFC;
+}
+
+.setting-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.setting-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #F8FAFC;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.setting-icon-box .material-icons-round {
+    font-size: 20px;
+}
+
+.setting-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.setting-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.setting-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.setting-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94A3B8;
+}
+
+.setting-right .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* Warning/Danger items */
+.setting-item.danger .setting-icon-box {
+    background: #FEF2F2;
+    color: #EF4444;
+}
+
+.setting-item.danger .setting-title {
+    color: #EF4444;
+}
+
+/* Logout Modal */
+.logout-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.logout-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.logout-content {
+    background: white;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.logout-modal.active .logout-content {
+    transform: scale(1);
+}
+
+.logout-icon {
+    width: 56px;
+    height: 56px;
+    background: #FEF2F2;
+    color: #EF4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.logout-icon .material-icons-round {
+    font-size: 28px;
+}
+
+.logout-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.logout-content p {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.logout-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: #F1F5F9;
+    color: #475569;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel:active {
+    background: #E2E8F0;
+}
+
+.btn-confirm-logout {
+    flex: 1;
+    padding: 12px;
+    background: #EF4444;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-confirm-logout:active {
+    transform: scale(0.95);
+}
+
+/* Bottom Sheet Modal for Forms */
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.profile-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content-bottom {
+    background: white;
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.profile-modal.active .modal-content-bottom {
+    transform: translateY(0);
+}
+
+.modal-header-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header-bottom h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.close-modal-btn {
+    background: #F1F5F9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-main);
+    transition: background 0.2s;
+}
+
+.close-modal-btn:active {
+    background: #E2E8F0;
+}
+
+.modal-body-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-group-p {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group-p label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.form-group-p input {
+    width: 100%;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group-p input:focus {
+    border-color: var(--primary);
+}
+
+.form-group-p input:disabled {
+    background: #F8FAFC;
+    color: #94A3B8;
+    cursor: not-allowed;
+}
+
+.btn-save-full {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save-full:active {
+    transform: scale(0.98);
+}

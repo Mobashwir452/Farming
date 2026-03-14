@@ -1,0 +1,458 @@
+/* Community & Helpdesk Styles */
+
+.community-body {
+    background: var(--bg-color);
+    padding-top: 0;
+}
+
+/* Tab Navigation */
+.com-tabs-container {
+    padding: 16px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 69px;
+    /* adjust based on header */
+    z-index: 90;
+}
+
+.com-tabs {
+    display: flex;
+    background: #F1F5F9;
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.com-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.com-tab.active {
+    background: white;
+    color: var(--primary-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.community-main {
+    padding: 16px;
+}
+
+.com-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.com-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tab 1: Community Feed */
+.create-post-box {
+    padding: 16px;
+}
+
+.post-input-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-input-area input {
+    flex: 1;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    outline: none;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 12px;
+}
+
+.post-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.post-action-btn .material-icons-round {
+    font-size: 18px;
+}
+
+/* Feed Cards */
+.post-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feed-card {
+    padding: 16px;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.post-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-meta h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.post-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.expert-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #EFF6FF;
+    color: #3B82F6;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.post-content p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    color: var(--text-main);
+}
+
+.post-image {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    object-fit: cover;
+    max-height: 250px;
+}
+
+.post-interactions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 12px;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.interaction-btn.active {
+    color: var(--primary);
+}
+
+.interaction-btn .material-icons-round {
+    font-size: 18px;
+}
+
+/* Tab 2: Helpdesk */
+.support-contact-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+}
+
+.support-info h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: var(--text-main);
+}
+
+.support-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Tickets List */
+.ticket-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ticket-card {
+    padding: 16px;
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.ticket-id {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.ticket-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.ticket-status.resolved {
+    background: #DCFCE7;
+    color: #16A34A;
+}
+
+.ticket-status.pending {
+    background: #FEF9C3;
+    color: #CA8A04;
+}
+
+.ticket-title {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.ticket-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 12px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 12px;
+}
+
+.ticket-date {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.view-ticket-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* FAB for Helpdesk */
+.fab-ask-expert {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    z-index: 99;
+    transition: transform 0.2s;
+}
+
+.fab-ask-expert:active {
+    transform: scale(0.95);
+}
+
+/* --- Expert Modal (Bottom Sheet) --- */
+.expert-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.expert-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.expert-content {
+    background: white;
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+.expert-modal.active .expert-content {
+    transform: translateY(0);
+}
+
+.expert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.expert-header h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.expert-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.expert-body label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.expert-body textarea {
+    width: 100%;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    resize: none;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.expert-body textarea:focus {
+    border-color: var(--primary);
+}
+
+.upload-box {
+    border: 2px dashed #CBD5E1;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: #F8FAFC;
+    transition: all 0.2s;
+}
+
+.upload-box:hover {
+    border-color: var(--primary-light);
+    background: #F0FDF4;
+    color: var(--primary);
+}
+
+.upload-box .material-icons-round {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.close-expert-modal {
+    background: #F1F5F9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-main);
+    transition: background 0.2s;
+}
+
+.close-expert-modal:active {
+    background: #E2E8F0;
+}

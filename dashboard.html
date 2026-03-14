@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgriTech - Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <!-- Web Components & Modules -->
+    <script type="module" src="js/components.js" defer></script>
+    <script type="module" src="js/dashboard.js" defer></script>
+    <script src="js/timeline.js" defer></script>
+</head>
+
+<body class="dashboard-body">
+
+    <!-- Global Layout Components -->
+    <app-dash-header></app-dash-header>
+    <app-sidebar></app-sidebar>
+    <app-bottom-nav></app-bottom-nav>
+
+    <!-- Calendar Bottom Sheet Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <h4>নতুন তারিখ নির্বাচন করুন</h4>
+                <button class="close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-month">মার্চ ২০২৬</div>
+                <div class="calendar-weekdays">
+                    <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+            <div class="calendar-footer">
+                <button class="btn-primary w-100" id="confirmReschedule">নির্ধারণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="dashboard-container">
+        <!-- Weather / Tips Banner -->
+        <section class="tips-banner">
+            <div class="banner-icon">💡</div>
+            <div class="banner-text">
+                <strong>আজকের টিপস:</strong> আগামী দুই দিন বৃষ্টির সম্ভাবনা আছে, সেচ দেওয়া থেকে বিরত থাকুন।
+            </div>
+        </section>
+
+        <!-- Daily Greeting & Task Card -->
+        <section class="task-card">
+            <div class="greeting">
+                <h2>শুভ সকাল, রহিম! 👋</h2>
+                <p>আপনার আজকের প্রধান কাজ</p>
+            </div>
+            <div class="task-content">
+                <div class="task-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 4 13V4h9a7 7 0 0 1 7 7v9h-9Z"></path>
+                        <path d="M4 20L11 13"></path>
+                    </svg>
+                </div>
+                <div class="task-details">
+                    <h3>বোরো ধানে ইউরিয়া প্রয়োগ</h3>
+                    <p>জমি: উত্তরের বিল (০.৪ একর)</p>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn-task success">সম্পন্ন করেছি</button>
+                <button class="btn-task outline">পরে করবো</button>
+            </div>
+        </section>
+
+        <h3 class="section-title">কুইক অ্যাকশন</h3>
+
+        <!-- Quick Action Grid -->
+        <section class="quick-grid">
+            <a href="#" class="q-card">
+                <div class="q-icon crops">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 4 13V4h9a7 7 0 0 1 7 7v9h-9Z"></path>
+                        <path d="M4 20L11 13"></path>
+                    </svg>
+                </div>
+                <span>আমার খামার</span>
+                <small>২ টি খামার</small>
+            </a>
+            <a href="#" class="q-card">
+                <div class="q-icon ledger">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                    </svg>
+                </div>
+                <span>আয়-ব্যয়</span>
+                <small>৳ লাভ-ক্ষতি</small>
+            </a>
+            <a href="crop_doctor.html" class="q-card">
+                <div class="q-icon subsidy">
+                    <!-- Modified to Crop Doctor / AI Scanner -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z">
+                        </path>
+                        <circle cx="12" cy="13" r="3"></circle>
+                    </svg>
+                </div>
+                <span>কৃষি স্ক্যানার</span>
+                <small>রোগ নির্ণয়</small>
+            </a>
+            <a href="#" class="q-card">
+                <div class="q-icon support">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                        <path
+                            d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z">
+                        </path>
+                    </svg>
+                </div>
+                <span>বিশেষজ্ঞ সাপোর্ট</span>
+                <small>ভিডিও কল</small>
+            </a>
+        </section>
+
+        <div class="section-header">
+            <h3 class="section-title">কাজের টাইমলাইন</h3>
+            <a href="tasks.html" class="view-all">সব দেখুন</a>
+        </div>
+        <!-- Vertical Task Timeline (From Variant 1) -->
+        <section class="timeline-container">
+            <div class="timeline-item completed">
+                <div class="tl-node">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tl-content">
+                    <p class="tl-time">আজ, সকাল ১০:০০</p>
+                    <p class="tl-title">উত্তরের বিলে ইউরিয়া প্রয়োগ</p>
+                </div>
+            </div>
+            <div class="timeline-item pending">
+                <div class="tl-node">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="tl-content">
+                    <p class="tl-time">আগামীকাল, সকাল ০৮:০০</p>
+                    <p class="tl-title">মাঠে সেচ প্রদান</p>
+                    <div class="task-item-actions">
+                        <button class="btn-tl-action done">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 6L9 17l-5-5"></path>
+                            </svg>
+                            সম্পন্ন
+                        </button>
+                        <button class="btn-tl-action reschedule">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            সময় পরিবর্তন
+                        </button>
+                        <button class="btn-tl-action cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            বাতিল
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-item alert">
+                <div class="tl-node">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="tl-content">
+                    <p class="tl-time">বুধবার, সকাল ০৯:০০</p>
+                    <p class="tl-title">কীটনাশক স্প্রে</p>
+                    <div class="task-item-actions">
+                        <button class="btn-tl-action done">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 6L9 17l-5-5"></path>
+                            </svg>
+                            সম্পন্ন
+                        </button>
+                        <button class="btn-tl-action reschedule">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            সময় পরিবর্তন
+                        </button>
+                        <button class="btn-tl-action cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            বাতিল
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-header">
+            <h3 class="section-title">সাম্প্রতিক লেনদেন</h3>
+            <a href="transactions.html" class="view-all">সব দেখুন</a>
+        </div>
+        <!-- Recent Transactions (From Variant 2) -->
+        <section class="transactions-container">
+            <div class="transaction-item">
+                <div class="tr-icon expense">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tr-info">
+                    <h4>ইউরিয়া সার ক্রয়</h4>
+                    <p>আজ দুপুর ১২:৩০</p>
+                </div>
+                <div class="tr-amount negative">- ৳ ৮৫০</div>
+            </div>
+            <div class="transaction-item">
+                <div class="tr-icon income">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tr-info">
+                    <h4>টমেটো বিক্রয়</h4>
+                    <p>গতকাল বিকেল ০৪:১৫</p>
+                </div>
+                <div class="tr-amount positive">+ ৳ ৩,২০০</div>
+            </div>
+        </section>
+
+        <!-- Bottom padding to avoid nav overlap -->
+        <div class="scroll-spacer"></div>
+    </main>
+
+</body>
+
+</html>
