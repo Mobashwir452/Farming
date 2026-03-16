@@ -27,7 +27,7 @@ async function loadComponents() {
 
 function initSidebarBehavior() {
     // Determine active page
-    const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
     const navItems = document.querySelectorAll('.nav-item');
     
     navItems.forEach(item => {
