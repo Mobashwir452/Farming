@@ -1,0 +1,17 @@
+{
+  "name": "agritech-backend",
+  "version": "1.0.0",
+  "description": "Backend API for AgriTech SaaS Admin Panel",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "itty-router": "^4.0.28",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

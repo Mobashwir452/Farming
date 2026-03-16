@@ -1,0 +1,12 @@
+name = "agritech-backend"
+main = "worker.js"
+compatibility_date = "2023-12-01"
+
+# Environment Variables
+[vars]
+# API_SECRET = "super_secret_jwt_key_here" # We will set this securely using `wrangler secret put`
+
+[[d1_databases]]
+binding = "DB"
+database_name = "agritech-db"
+database_id = "your-database-id-here" # Replace this once `wrangler d1 create` is run locally
