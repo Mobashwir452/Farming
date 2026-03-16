@@ -3,7 +3,10 @@
  * This script runs on every page load to ensure the user is authenticated.
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8787/api'; // Change to production worker URL when deployed
+const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+const API_BASE_URL = isLocal 
+    ? 'http://127.0.0.1:8787/api' // Local Cloudflare Worker
+    : 'https://agritech-backend.mobashwir9.workers.dev/api'; // Live Cloudflare Worker
 
 // Function to check if user is authenticated
 function requireAuth() {

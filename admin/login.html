@@ -122,8 +122,13 @@
             btn.disabled = true;
 
             try {
-                // IMPORTANT: Replace with the actual deployed worker URL if not testing locally
-                const response = await fetch('http://127.0.0.1:8787/api/admin/login', {
+                // Dynamically route to local worker if testing on localhost, else point to live APIs
+                const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+                const API_URL = isLocal 
+                    ? 'http://127.0.0.1:8787/api/admin/login' 
+                    : 'https://agritech-backend.mobashwir9.workers.dev/api/admin/login';
+
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
