@@ -8,6 +8,5 @@ CREATE TABLE IF NOT EXISTS role_permissions (
 );
 
 -- Assign all permissions to Super Admin (Role ID 1)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT 1, id FROM permissions
-ON CONFLICT DO NOTHING;
+INSERT OR IGNORE INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions;

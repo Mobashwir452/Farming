@@ -8,15 +8,16 @@ const API_BASE_URL = 'http://127.0.0.1:8787/api'; // Change to production worker
 // Function to check if user is authenticated
 function requireAuth() {
     const token = localStorage.getItem('agritech_admin_token');
+    const isLoginPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('/login');
     
     // If no token and not on login page, redirect to login
-    if (!token && !window.location.pathname.endsWith('login.html')) {
+    if (!token && !isLoginPage) {
         window.location.href = 'login.html';
         return false;
     }
     
     // If token exists and on login page, redirect to dashboard
-    if (token && window.location.pathname.endsWith('login.html')) {
+    if (token && isLoginPage) {
         window.location.href = 'index.html';
         return false;
     }
