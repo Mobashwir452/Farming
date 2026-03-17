@@ -2,12 +2,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebas
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCXlZEkRpqzph1bog0QGobDeGF6qER3kjI",
-  authDomain: "smartkhamar-9b521.firebaseapp.com",
-  projectId: "smartkhamar-9b521",
-  storageBucket: "smartkhamar-9b521.firebasestorage.app",
-  messagingSenderId: "1057648659117",
-  appId: "1:1057648659117:web:9219e249e8db29a3629424"
+    apiKey: "AIzaSyCXlZEkRpqzph1bog0QGobDeGF6qER3kjI",
+    authDomain: "smartkhamar-9b521.firebaseapp.com",
+    projectId: "smartkhamar-9b521",
+    storageBucket: "smartkhamar-9b521.firebasestorage.app",
+    messagingSenderId: "1057648659117",
+    appId: "1:1057648659117:web:9219e249e8db29a3629424"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -57,18 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnNextPhone = document.getElementById('btnNextPhone');
     const phoneNumberInput = document.getElementById('phoneNumber');
 
-    // Turnstile Callback (Unlocks the Next button)
-    window.onTurnstileSuccess = function(token) {
-        if (btnNextPhone) {
-            btnNextPhone.disabled = false;
-            btnNextPhone.style.opacity = '1';
-            btnNextPhone.style.cursor = 'pointer';
-            // Save token if needed for backend verification later
-            window.turnstileToken = token;
-        }
-    };
-
-    // Fallback for Localhost Testing if Turnstile dummy key doesn't fire callback automatically
+    // Input Validation (Unlocks the Next button)
     if (phoneNumberInput) {
         phoneNumberInput.addEventListener('input', (e) => {
             const val = e.target.value.trim();
@@ -79,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnNextPhone.style.cursor = 'pointer';
                 }
             } else {
-                 if (btnNextPhone) {
+                if (btnNextPhone) {
                     btnNextPhone.disabled = true;
                     btnNextPhone.style.opacity = '0.6';
                     btnNextPhone.style.cursor = 'not-allowed';
-                 }
+                }
             }
         });
     }
@@ -91,34 +80,51 @@ document.addEventListener('DOMContentLoaded', () => {
     // Global variable to hold confirmation result
     window.confirmationResult = null;
 
-    // Initialize Recaptcha (Invisible)
+    // Initialize Recaptcha
     const initRecaptcha = () => {
         if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'btnNextPhone', {
-                'size': 'invisible',
+            // Create a dedicated container for the visible Recaptcha so it doesn't break the button
+            let recaptchaDiv = document.getElementById('recaptcha-container');
+            if (!recaptchaDiv) {
+                recaptchaDiv = document.createElement('div');
+                recaptchaDiv.id = 'recaptcha-container';
+                recaptchaDiv.style.marginTop = '15px';
+                recaptchaDiv.style.marginBottom = '15px';
+                btnNextPhone.parentNode.insertBefore(recaptchaDiv, btnNextPhone);
+            }
+
+            // Must use a visible widget with test numbers to prevent 400 errors on localhost
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'normal',
                 'callback': (response) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
-                    onSignInSubmit();
+                    // reCAPTCHA solved automatically.
+                    console.log("Recaptcha resolved");
                 }
             });
+            window.recaptchaVerifier.render();
         }
     };
 
     const onSignInSubmit = async () => {
         let phone = phoneNumberInput.value.trim();
         // If user copied +880 or starts with 880, clean it up to ensure strict 11 digits
-        if(phone.startsWith('+88')) phone = phone.slice(3);
-        if(phone.startsWith('88')) phone = phone.slice(2);
-        
+        if (phone.startsWith('+88')) phone = phone.slice(3);
+        if (phone.startsWith('88')) phone = phone.slice(2);
+
         const fullPhone = '+88' + phone;
 
         btnNextPhone.disabled = true;
         btnNextPhone.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> প্রসেসিং...';
 
         try {
+            // Check if verifier is built
+            if (!window.recaptchaVerifier) {
+                initRecaptcha();
+            }
+
             const result = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
             window.confirmationResult = result;
-            
+
             // Go to OTP Step
             const disp = document.getElementById('otpPhoneDisp');
             if (disp) disp.innerText = `+৮৮০ ${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`;
@@ -126,29 +132,85 @@ document.addEventListener('DOMContentLoaded', () => {
             startOtpTimer();
         } catch (error) {
             console.error(error);
-            showToastMsg('ওটিপি পাঠাতে সমস্যা হয়েছে। সঠিক নম্বর দিয়েছেন কিনা চেক করুন।', 'error');
+            showToastMsg('ওটিপি পাঠাতে সমস্যা হয়েছে। Firebase Domain Auth চেক করুন।', 'error');
             btnNextPhone.disabled = false;
             btnNextPhone.innerHTML = 'এগিয়ে যান <span class="material-icons-round">arrow_forward</span>';
-            // Reset reCAPTCHA
-            if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(function(widgetId) {
-                grecaptcha.reset(widgetId);
-            });
+            // Note: the 400 error usually means 127.0.0.1 is not added to Firebase Authorized Domains
+
+            // Reset Recaptcha so they can try again if they fix the domain
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.render().then(function (widgetId) {
+                    grecaptcha.reset(widgetId);
+                }).catch(e => console.log(e));
+            }
         }
     };
 
+    // Phone lookup store
+    let currentLoginPhone = '';
+
     if (btnNextPhone && phoneNumberInput) {
-        btnNextPhone.addEventListener('click', () => {
+        btnNextPhone.addEventListener('click', async (e) => {
             const phone = phoneNumberInput.value.trim();
 
             if (phone.length !== 11 || !phone.startsWith('01')) {
                 showToastMsg('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 01xxxxxxxxx)', 'error');
+                e.preventDefault();
+                e.stopImmediatePropagation();
                 return;
             }
 
-            initRecaptcha();
+            btnNextPhone.disabled = true;
+            btnNextPhone.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> চেক করা হচ্ছে...';
             
-            // Programmatically trigger Recaptcha and flow
-            onSignInSubmit();
+            // Clean phone for DB
+            let cleanPhone = phone;
+            if (cleanPhone.startsWith('+88')) cleanPhone = cleanPhone.slice(3);
+            if (cleanPhone.startsWith('88')) cleanPhone = cleanPhone.slice(2);
+            const fullPhone = '+88' + cleanPhone;
+
+            try {
+                // Pre-flight check: Does the user exist and have a PIN?
+                const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
+                const res = await fetch(`${apiUrl}/api/auth/check-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: fullPhone })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentLoginPhone = fullPhone; // Save for the PIN step
+                    
+                    if (data.exists && data.hasPin) {
+                        // Returning User -> Go straight to PIN screen
+                        btnNextPhone.disabled = false;
+                        btnNextPhone.innerHTML = 'এগিয়ে যান <span class="material-icons-round">arrow_forward</span>';
+                        navigateTo(stepLogin);
+                        return; // Stop here, do not trigger OTP SMS
+                    }
+                }
+                
+                // If not exist, no pin, or error -> Fallback to standard OTP flow
+                if (window.recaptchaVerifier) {
+                    onSignInSubmit();
+                } else {
+                    initRecaptcha();
+                    btnNextPhone.disabled = false;
+                    btnNextPhone.innerText = "Recaptcha পূরণ করে আবার ক্লিক করুন";
+                }
+
+            } catch (err) {
+                console.error("Check Error", err);
+                // On error, let them try OTP anyway
+                if (window.recaptchaVerifier) {
+                    onSignInSubmit();
+                } else {
+                    initRecaptcha();
+                    btnNextPhone.disabled = false;
+                    btnNextPhone.innerText = "Recaptcha পূরণ করে আবার ক্লিক করুন";
+                }
+            }
         });
     }
 
@@ -157,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginPin = document.getElementById('loginPin');
 
     if (btnLogin && loginPin) {
-        btnLogin.addEventListener('click', () => {
+        btnLogin.addEventListener('click', async () => {
             const pin = loginPin.value.trim();
             if (pin.length < 4) {
                 showToastMsg('অন্তত ৪ ডিজিটের পিন দিন।', 'error');
@@ -167,9 +229,35 @@ document.addEventListener('DOMContentLoaded', () => {
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> লগইন হচ্ছে...';
 
-            setTimeout(() => {
+            try {
+                const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
+                const response = await fetch(`${apiUrl}/api/auth/login-pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentLoginPhone, pin: pin })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Login failed');
+                }
+
+                const data = await response.json();
+
+                // Save JWT and user data
+                localStorage.setItem('farmer_jwt', data.token);
+                localStorage.setItem('farmer_profile', JSON.stringify(data.user));
+
+                showToastMsg('সফলভাবে লগইন হয়েছে!', 'success');
                 window.location.href = 'dashboard.html';
-            }, 1000);
+
+            } catch (error) {
+                console.error("PIN Login Error:", error);
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'লগইন করুন <span class="material-icons-round">login</span>';
+                showToastMsg('পিন নম্বর ভুল হয়েছে। আবার চেষ্টা করুন।', 'error');
+                loginPin.value = ''; // clear it
+            }
         });
     }
 
@@ -226,14 +314,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await window.confirmationResult.confirm(otp);
                 const user = result.user;
                 console.log("Verified User:", user);
-                
+
                 // Get Firebase ID Token
                 const idToken = await user.getIdToken();
-                // We also pass the Turnstile token in case the backend wants to strictly verify it
-                const tToken = window.turnstileToken || '';
 
-                // API Config (use relative path if deployed on same domain, else full Cloudflare URL)
-                const apiUrl = 'http://localhost:8787'; // Change to live Worker URL in prod
+                // When running via Live Server (e.g. port 5500) OR Production, 
+                // explicitly point to the Live Wrangler Production URL 
+                // so the user does not need to run `npx wrangler dev` locally.
+                const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
 
                 // Call Cloudflare Worker to log the user into D1 and mint our custom JWT
                 const response = await fetch(`${apiUrl}/api/auth/verify-firebase`, {
@@ -241,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         idToken: idToken,
-                        turnstileToken: tToken,
                         name: document.getElementById('signupName') ? document.getElementById('signupName').value : '',
                         pin: '' // Can be updated later in the profile stage
                     })
@@ -253,21 +340,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
-                
+
                 // Keep the Worker's Custom JWT token structured for API usage
                 localStorage.setItem('farmer_jwt', data.token);
                 localStorage.setItem('farmer_profile', JSON.stringify(data.user));
 
                 btnVerifyOtp.disabled = false;
                 btnVerifyOtp.innerText = 'সফল হয়েছে!';
-                
+
                 showToastMsg('সফলভাবে ভেরিফাই ও লগইন হয়েছে!', 'success');
-                
-                // Direct to SignUp details step if they are a brand new user, otherwise go to dashboard
-                if (data.isNewUser) {
-                     navigateTo(stepSignup); 
+
+                // Direct to SignUp details step if they are a brand new user or have an incomplete profile
+                if (data.isNewUser || data.needsProfileCompletion) {
+                    navigateTo(stepSignup);
                 } else {
-                     window.location.href = 'dashboard.html';
+                    window.location.href = 'dashboard.html';
                 }
 
             } catch (error) {
@@ -286,8 +373,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupPin = document.getElementById('signupPin');
 
     if (btnSignup && signupName && signupPin) {
-        btnSignup.addEventListener('click', () => {
-            if (!signupName.value.trim() || signupPin.value.trim().length < 4) {
+        btnSignup.addEventListener('click', async () => {
+            const name = signupName.value.trim();
+            const pin = signupPin.value.trim();
+
+            if (!name || pin.length < 4) {
                 showToastMsg('সঠিক নাম ও অন্তত ৪ ডিজিটের পিন দিন।', 'error');
                 return;
             }
@@ -295,9 +385,41 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSignup.disabled = true;
             btnSignup.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> অ্যাকাউন্ট তৈরি হচ্ছে...';
 
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1000);
+            try {
+                const token = localStorage.getItem('farmer_jwt');
+                const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
+
+                const response = await fetch(`${apiUrl}/api/auth/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, pin })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update profile');
+                }
+
+                const data = await response.json();
+
+                // Update local profile with the new name
+                localStorage.setItem('farmer_profile', JSON.stringify(data.user));
+
+                showToastMsg('প্রোফাইল সফলভাবে তৈরি হয়েছে!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error("Profile Error:", error);
+                btnSignup.disabled = false;
+                btnSignup.innerHTML = 'সম্পন্ন করুন <span class="material-icons-round">check_circle</span>';
+                showToastMsg('প্রোফাইল সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+            }
         });
     }
 
@@ -327,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnResendOtp) {
         btnResendOtp.addEventListener('click', () => {
-            if (window.recaptchaVerifier) window.recaptchaVerifier.render().then(function(widgetId) {
+            if (window.recaptchaVerifier) window.recaptchaVerifier.render().then(function (widgetId) {
                 grecaptcha.reset(widgetId);
             });
             onSignInSubmit();

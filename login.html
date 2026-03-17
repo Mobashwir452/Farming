@@ -15,8 +15,8 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/auth.css">
     <!-- JS Libraries & APIs -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js" type="module"></script>
     
     <!-- Custom JS -->
     <script type="module" src="js/components.js" defer></script>
@@ -50,13 +50,12 @@
                 </div>
             </div>
 
-            <!-- Cloudflare Turnstile Widget (First Line of Defense) -->
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAACsJLfjUnjMHbSMMBKLDffdmhTo" data-callback="onTurnstileSuccess" data-action="login" style="margin-bottom: 16px;"></div>
-
-            <button class="btn-auth" id="btnNextPhone">
+            <!-- Extra Verification Removed User Request -->
+            <button class="btn-auth" id="btnNextPhone" style="margin-top:20px;">
                 এগিয়ে যান
                 <span class="material-icons-round">arrow_forward</span>
             </button>
+            <div id="recaptcha-container"></div>
         </div>
 
         <!-- Step 2: Login (PIN) -->
