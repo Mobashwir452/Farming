@@ -17,6 +17,8 @@
     <!-- JS -->
     <script type="module" src="js/components.js" defer></script>
     <script type="module" src="js/auth.js" defer></script>
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body class="auth-body">
@@ -45,6 +47,9 @@
                         pattern="[0-9]*" inputmode="numeric">
                 </div>
             </div>
+
+            <!-- Cloudflare Turnstile Widget (First Line of Defense) -->
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACsJLfjUnjMHbSMMBKLDffdmhTo" data-callback="onTurnstileSuccess" data-action="login" style="margin-bottom: 16px;"></div>
 
             <button class="btn-auth" id="btnNextPhone">
                 এগিয়ে যান
@@ -86,12 +91,13 @@
                 <span class="material-icons-round">arrow_back</span> নাম্বার সংশোধন করুন
             </button>
             <h2 class="step-title">ওটিপি (OTP) যাচাই করুন</h2>
-            <p class="step-desc">আপনাকে একটি ৪ সংখ্যার ওটিপি পাঠানো হয়েছে <br><strong id="otpPhoneDisp"
+            <p class="step-desc">আপনাকে একটি ৬ সংখ্যার ওটিপি পাঠানো হয়েছে <br><strong id="otpPhoneDisp"
                     style="color:var(--text-main);"></strong> নম্বরে।</p>
 
             <div class="otp-container" id="otpContainer">
-                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric"
-                    autocomplete="one-time-code">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" autocomplete="one-time-code">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+                <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
                 <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
                 <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
                 <input type="tel" class="otp-box otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">

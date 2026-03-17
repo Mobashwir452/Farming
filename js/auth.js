@@ -1,3 +1,19 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXlZEkRpqzph1bog0QGobDeGF6qER3kjI",
+  authDomain: "smartkhamar-9b521.firebaseapp.com",
+  projectId: "smartkhamar-9b521",
+  storageBucket: "smartkhamar-9b521.firebasestorage.app",
+  messagingSenderId: "1057648659117",
+  appId: "1:1057648659117:web:9219e249e8db29a3629424"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.useDeviceLanguage();
+
 document.addEventListener('DOMContentLoaded', () => {
     // Basic Custom Toast if standard component not active
     const showToastMsg = (msg, type = 'info') => {
@@ -41,9 +57,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnNextPhone = document.getElementById('btnNextPhone');
     const phoneNumberInput = document.getElementById('phoneNumber');
 
-    // Mock user database
-    // "01700000000" can be a user. Any other starts with "01" is signup
-    const existingUsers = ['01711111111', '01822222222', '01933333333'];
+    // Turnstile Callback (Unlocks the Next button)
+    window.onTurnstileSuccess = function(token) {
+        if (btnNextPhone) {
+            btnNextPhone.disabled = false;
+            btnNextPhone.style.opacity = '1';
+            btnNextPhone.style.cursor = 'pointer';
+            // Save token if needed for backend verification later
+            window.turnstileToken = token;
+        }
+    };
+
+    // Fallback for Localhost Testing if Turnstile dummy key doesn't fire callback automatically
+    if (phoneNumberInput) {
+        phoneNumberInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (val.length === 11 && val.startsWith('01')) {
+                if (btnNextPhone) {
+                    btnNextPhone.disabled = false;
+                    btnNextPhone.style.opacity = '1';
+                    btnNextPhone.style.cursor = 'pointer';
+                }
+            } else {
+                 if (btnNextPhone) {
+                    btnNextPhone.disabled = true;
+                    btnNextPhone.style.opacity = '0.6';
+                    btnNextPhone.style.cursor = 'not-allowed';
+                 }
+            }
+        });
+    }
+
+    // Global variable to hold confirmation result
+    window.confirmationResult = null;
+
+    // Initialize Recaptcha (Invisible)
+    const initRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'btnNextPhone', {
+                'size': 'invisible',
+                'callback': (response) => {
+                    // reCAPTCHA solved, allow signInWithPhoneNumber.
+                    onSignInSubmit();
+                }
+            });
+        }
+    };
+
+    const onSignInSubmit = async () => {
+        let phone = phoneNumberInput.value.trim();
+        // If user copied +880 or starts with 880, clean it up to ensure strict 11 digits
+        if(phone.startsWith('+88')) phone = phone.slice(3);
+        if(phone.startsWith('88')) phone = phone.slice(2);
+        
+        const fullPhone = '+88' + phone;
+
+        btnNextPhone.disabled = true;
+        btnNextPhone.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> প্রসেসিং...';
+
+        try {
+            const result = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+            window.confirmationResult = result;
+            
+            // Go to OTP Step
+            const disp = document.getElementById('otpPhoneDisp');
+            if (disp) disp.innerText = `+৮৮০ ${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`;
+            navigateTo(stepOtp);
+            startOtpTimer();
+        } catch (error) {
+            console.error(error);
+            showToastMsg('ওটিপি পাঠাতে সমস্যা হয়েছে। সঠিক নম্বর দিয়েছেন কিনা চেক করুন।', 'error');
+            btnNextPhone.disabled = false;
+            btnNextPhone.innerHTML = 'এগিয়ে যান <span class="material-icons-round">arrow_forward</span>';
+            // Reset reCAPTCHA
+            if(window.recaptchaVerifier) window.recaptchaVerifier.render().then(function(widgetId) {
+                grecaptcha.reset(widgetId);
+            });
+        }
+    };
 
     if (btnNextPhone && phoneNumberInput) {
         btnNextPhone.addEventListener('click', () => {
@@ -54,19 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Check if existing user
-            if (existingUsers.includes(phone)) {
-                // Existing User -> Step 2 (Login)
-                const disp = document.getElementById('loginPhoneDisp');
-                if (disp) disp.innerText = `+৮৮০ ${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`;
-                navigateTo(stepLogin);
-            } else {
-                // New User -> Step 3 (OTP)
-                const disp = document.getElementById('otpPhoneDisp');
-                if (disp) disp.innerText = `+৮৮০ ${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`;
-                navigateTo(stepOtp);
-                startOtpTimer();
-            }
+            initRecaptcha();
+            
+            // Programmatically trigger Recaptcha and flow
+            onSignInSubmit();
         });
     }
 
@@ -124,27 +206,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // OTP Verify
     const btnVerifyOtp = document.getElementById('btnVerifyOtp');
     if (btnVerifyOtp) {
-        btnVerifyOtp.addEventListener('click', () => {
+        btnVerifyOtp.addEventListener('click', async () => {
             let otp = '';
             otpBoxes.forEach(box => otp += box.value);
 
-            if (otp.length < 4) {
+            if (otp.length < 6) { // Firebase requires 6 digits
                 otpBoxes.forEach(box => box.classList.add('error'));
                 setTimeout(() => {
                     otpBoxes.forEach(box => box.classList.remove('error'));
                 }, 500);
-                showToastMsg('সঠিক ৪ ডিজিটের ওটিপি দিন।', 'error');
+                showToastMsg('সঠিক ৬-ডিজিটের ওটিপি দিন।', 'error');
                 return;
             }
 
             btnVerifyOtp.disabled = true;
             btnVerifyOtp.innerText = 'যাচাই করা হচ্ছে...';
 
-            setTimeout(() => {
+            try {
+                const result = await window.confirmationResult.confirm(otp);
+                const user = result.user;
+                console.log("Verified User:", user);
+                // In a real app, send user.uid to Cloudflare to check if profile exists
+                btnVerifyOtp.disabled = false;
+                btnVerifyOtp.innerText = 'সফল হয়েছে!';
+                
+                showToastMsg('সফলভাবে ভেরিফাই হয়েছে!', 'success');
+                // Temporarily redirecting to signup/dashboard
+                navigateTo(stepSignup); 
+            } catch (error) {
+                console.error("OTP Error:", error);
                 btnVerifyOtp.disabled = false;
                 btnVerifyOtp.innerText = 'যাচাই করুন';
-                navigateTo(stepSignup);
-            }, 1000);
+                showToastMsg('ওটিপি ভুল হয়েছে, আবার চেষ্টা করুন।', 'error');
+                otpBoxes.forEach(box => box.classList.add('error'));
+            }
         });
     }
 
@@ -195,8 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnResendOtp) {
         btnResendOtp.addEventListener('click', () => {
-            showToastMsg('নতুন ওটিপি পাঠানো হয়েছে।', 'success');
-            startOtpTimer();
+            if (window.recaptchaVerifier) window.recaptchaVerifier.render().then(function(widgetId) {
+                grecaptcha.reset(widgetId);
+            });
+            onSignInSubmit();
+            showToastMsg('নতুন ওটিপি রিকোয়েস্ট পাঠানো হচ্ছে...', 'info');
         });
     }
 
