@@ -226,13 +226,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await window.confirmationResult.confirm(otp);
                 const user = result.user;
                 console.log("Verified User:", user);
-                // In a real app, send user.uid to Cloudflare to check if profile exists
+                
+                // Get Firebase ID Token
+                const idToken = await user.getIdToken();
+                // We also pass the Turnstile token in case the backend wants to strictly verify it
+                const tToken = window.turnstileToken || '';
+
+                // API Config (use relative path if deployed on same domain, else full Cloudflare URL)
+                const apiUrl = 'http://localhost:8787'; // Change to live Worker URL in prod
+
+                // Call Cloudflare Worker to log the user into D1 and mint our custom JWT
+                const response = await fetch(`${apiUrl}/api/auth/verify-firebase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idToken: idToken,
+                        turnstileToken: tToken,
+                        name: document.getElementById('signupName') ? document.getElementById('signupName').value : '',
+                        pin: '' // Can be updated later in the profile stage
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Backend verification failed.');
+                }
+
+                const data = await response.json();
+                
+                // Keep the Worker's Custom JWT token structured for API usage
+                localStorage.setItem('farmer_jwt', data.token);
+                localStorage.setItem('farmer_profile', JSON.stringify(data.user));
+
                 btnVerifyOtp.disabled = false;
                 btnVerifyOtp.innerText = 'সফল হয়েছে!';
                 
-                showToastMsg('সফলভাবে ভেরিফাই হয়েছে!', 'success');
-                // Temporarily redirecting to signup/dashboard
-                navigateTo(stepSignup); 
+                showToastMsg('সফলভাবে ভেরিফাই ও লগইন হয়েছে!', 'success');
+                
+                // Direct to SignUp details step if they are a brand new user, otherwise go to dashboard
+                if (data.isNewUser) {
+                     navigateTo(stepSignup); 
+                } else {
+                     window.location.href = 'dashboard.html';
+                }
+
             } catch (error) {
                 console.error("OTP Error:", error);
                 btnVerifyOtp.disabled = false;
