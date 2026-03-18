@@ -4,6 +4,7 @@ import { withAuth } from './utils.js';
 // Import Route Handlers
 import { adminLogin, adminDashboard } from './routes/admin.js';
 import { verifyFirebase, updateProfile, checkUser, loginPin } from './routes/auth.js';
+import { aiRouter } from './routes/ai_engine/index.js';
 
 const router = Router();
 
@@ -19,6 +20,9 @@ router.post('/api/auth/verify-firebase', verifyFirebase);
 router.post('/api/auth/check-user', checkUser);
 router.post('/api/auth/login-pin', loginPin);
 router.put('/api/auth/profile', withAuth(['farmer']), updateProfile);
+
+// 4. AI Engine Sub-Router (Admin Only - auth handled in sub-router)
+router.all('/api/admin/ai/*', aiRouter.handle);
 
 // --- Catch-All 404 ---
 router.all('*', () => error(404, 'API Route Not Found'));

@@ -255,15 +255,40 @@
                 </div>
 
                 <div class="form-section">
-                    <h3 class="form-title">API Credentials</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 class="form-title" style="margin: 0;">API Credentials (Round Robin)</h3>
+                        <button class="btn-outline-primary" style="padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 4px;" onclick="addApiKeyRow()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            নতুন কী যুক্ত করুন
+                        </button>
+                    </div>
+                    
                     <div class="form-group">
-                        <label>Google Gemini API Key</label>
-                        <input type="password" class="form-control" value="AIzaSyB******************************">
-                        <div style="text-align: right; margin-top: 8px;">
-                            <a href="#" style="font-size: 12px; color: var(--primary); text-decoration: none;">Change Key</a>
+                        <label>Google Gemini API Keys (Maximum 10)</label>
+                        <div id="api-keys-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                            <!-- Active Key Row -->
+                            <div class="api-key-row" style="display: flex; gap: 12px; align-items: center; background: #F8FAFC; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                <input type="password" class="form-control" value="AIzaSyB******************************" style="flex: 1; background: white;" readonly>
+                                <span class="ai-badge success" style="white-space: nowrap;">Active</span>
+                                <button class="btn-icon" style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;" title="রিমুভ করুন" onclick="this.closest('.api-key-row').remove()">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                            <!-- Exhausted Key Row Example -->
+                            <div class="api-key-row" style="display: flex; gap: 12px; align-items: center; background: #FEF2F2; padding: 12px; border: 1px solid #FECACA; border-radius: 8px;">
+                                <input type="password" class="form-control" value="AIzaSyC******************************" style="flex: 1; background: white;" readonly>
+                                <span class="ai-badge danger" style="white-space: nowrap;">Exhausted</span>
+                                <button class="btn-icon" style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;" title="রিমুভ করুন" onclick="this.closest('.api-key-row').remove()">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">
+                            একাধিক কী দিলে সিস্টেম স্বয়ংক্রিয়ভাবে Round Robin পদ্ধতিতে সেগুলো ব্যবহার করবে। লিমিট শেষ হলে অটোমেটিক স্কিপ করবে (স্ট্যাটাস: 🔴 Exhausted স্বয়ংক্রিয়ভাবে রিসেট হবে)।
                         </div>
                     </div>
-                    <div class="form-group">
+                    
+                    <div class="form-group" style="margin-top: 24px;">
                         <label>Cloudflare Vectorize DB ID</label>
                         <input type="text" class="form-control" value="db_agritech_rag_v1">
                     </div>
@@ -439,6 +464,29 @@ STRICT RULES:
             
             event.target.classList.add('active');
             document.getElementById(tabId).classList.add('active');
+        }
+
+        function addApiKeyRow() {
+            const container = document.getElementById('api-keys-container');
+            const rowCount = container.querySelectorAll('.api-key-row').length;
+            
+            if (rowCount >= 10) {
+                alert('সর্বোচ্চ ১০টি API Key যুক্ত করা যাবে।');
+                return;
+            }
+
+            const newRow = document.createElement('div');
+            newRow.className = 'api-key-row';
+            newRow.style.cssText = 'display: flex; gap: 12px; align-items: center; background: #F8FAFC; padding: 12px; border: 1px dashed var(--primary); border-radius: 8px; animation: fadeIn 0.3s ease;';
+            
+            newRow.innerHTML = `
+                <input type="text" class="form-control" placeholder="নতুন API Key প্রবেশ করান" style="flex: 1; background: white;">
+                <span class="ai-badge info" style="white-space: nowrap;">New</span>
+                <button class="btn-icon" style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;" title="বাতিল করুন" onclick="this.closest('.api-key-row').remove()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            `;
+            container.appendChild(newRow);
         }
     </script>
 </body>

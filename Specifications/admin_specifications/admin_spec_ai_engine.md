@@ -30,8 +30,9 @@
 
 ### ২.৪ ইঞ্জিন কনফিগারেশন (Engine Configuration)
 এখান থেকে অ্যাডমিন AI-কে ইনস্ট্রাকশন দিতে পারবেন।
-- **API Keys Management:** 
-  - Google Gemini API Key ইনপুট এবং সেভ করার অপশন (Masked ফিল্ড, যেমন: `AIzaSyB***…`)।
+- **API Keys Management (Round Robin):** 
+  - সর্বোচ্চ ১০টি Google Gemini API Key ইনপুট এবং সেভ করার অপশন। ডাটাবেজে এটি JSON আকারে থাকবে এবং সিস্টেম স্বয়ংক্রিয়ভাবে Round Robin পদ্ধতিতে একেকটি Key ব্যবহার করে API লোড ব্যালান্স করবে।
+  - কোনো Key-এর লিমিট শেষ হয়ে গেলে (429 Error) সিস্টেম তাকে অটোমেটিক "Exhausted" মার্ক করে পরের Key-তে চলে যাবে।
   - Cloudflare Vectorize ID এবং API Token সেটআপ।
 - **System Prompt (মাস্টার ইনস্ট্রাকশন):**
   - একটি টেক্সটএরিয়া (Textarea) যেখানে সিস্টেম প্রম্পট লেখা থাকবে। যেমন: "You are an expert agricultural assistant based in Bangladesh. Reply strictly in Bengali..."
