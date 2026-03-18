@@ -1,11 +1,11 @@
 import { Router } from 'itty-router';
-import { withAuth } from '../utils.js';
+import { withAuth } from '../../utils.js';
 
 import { getAiStats } from './ai_overview.js';
 import { getPredictionRules, savePredictionRules } from './ai_prediction.js';
 import { getDoctorRules, saveDoctorRules } from './ai_doctor.js';
 import { getAiConfig, saveAiConfig } from './ai_config.js';
-import { uploadKnowledge } from './ai_rag.js';
+import { uploadKnowledge, getKnowledgeDocuments } from './ai_rag.js';
 import { getAiLogs } from './ai_logs.js';
 
 export const aiRouter = Router({ base: '/api/admin/ai' });
@@ -29,7 +29,8 @@ aiRouter.get('/config', getAiConfig);
 aiRouter.post('/config', saveAiConfig);
 
 // Tab 5: RAG
-aiRouter.post('/upload', uploadKnowledge);
+aiRouter.post('/rag/upload', uploadKnowledge);
+aiRouter.get('/rag/documents', getKnowledgeDocuments);
 
 // Tab 6: Logs
 aiRouter.get('/logs', getAiLogs);

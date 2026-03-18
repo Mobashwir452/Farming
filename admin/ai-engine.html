@@ -53,39 +53,36 @@
                             Gemini API (ফ্রি টায়ার)
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                         </div>
-                        <div class="mc-value">১২,৩৪০ <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ ১৫,০০০ (আজ)</span></div>
-                        <div class="progress-container"><div class="progress-fill" style="width: 82%;"></div></div>
-                        <div class="mc-subinfo"><span>৮২% রিকোয়েস্ট কোটা পূরণ</span></div>
+                        <div class="mc-value"><span id="stats-active-keys">০</span> <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ ১০ (অ্যাক্টিভ)</span></div>
+                        <div class="progress-container"><div id="stats-keys-progress" class="progress-fill" style="width: 0%;"></div></div>
+                        <div class="mc-subinfo"><span id="stats-keys-subtext">সর্বোচ্চ ১০টি Key বসানো যাবে</span></div>
                     </div>
 
                     <div class="metric-card">
-                        <div class="mc-title">Cloudflare Vectorize</div>
-                        <div class="mc-value">১.২ <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">GB</span></div>
-                        <div class="progress-container"><div class="progress-fill warning" style="width: 24%;"></div></div>
-                        <div class="mc-subinfo"><span>৫ GB মাসিক ফ্রি ডাটায়</span></div>
+                        <div class="mc-title">মোট টোকেন ব্যবহার</div>
+                        <div class="mc-value" id="stats-tokens-used">০</div>
+                        <div class="progress-container"><div class="progress-fill warning" style="width: 0%;"></div></div>
+                        <div class="mc-subinfo"><span>সর্বমোট হিসাব (Tokens)</span></div>
                     </div>
 
                     <div class="metric-card">
-                        <div class="mc-title">এআই সাকসেস রেট</div>
-                        <div class="mc-value">৯৭.৮%</div>
-                        <div class="mc-subinfo success"><span>+ ২.১% গত সপ্তাহের তুলনায়</span></div>
+                        <div class="mc-title">মোট রিকোয়েস্ট (Queries)</div>
+                        <div class="mc-value" id="stats-total-queries">০</div>
+                        <div class="mc-subinfo success"><span>+০% গত সপ্তাহের তুলনায়</span></div>
                     </div>
 
                     <div class="metric-card">
-                        <div class="mc-title">আজকের ক্রপ ডাক্তার স্ক্যান</div>
-                        <div class="mc-value">৩,৪২০</div>
-                        <div class="mc-subinfo warning"><span>১২০টি ফেইল করেছে</span></div>
+                        <div class="mc-title">ক্রপ ডাক্তার স্ক্যান</div>
+                        <div class="mc-value" id="stats-doctor-queries">০</div>
+                        <div class="mc-subinfo warning"><span id="stats-doctor-subtext">০টি ফেইল করেছে</span></div>
                     </div>
                 </div>
 
                 <!-- Trending Topics (Placeholder) -->
                 <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
                     <h3 class="form-title">জনপ্রিয় অনুসন্ধান (Trending)</h3>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">ব্লাস্ট রোগ সমাধান (৪৫০+)</span>
-                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">বোরো ধানের সার (৩২০+)</span>
-                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">টমেটোর পাতা কোঁকড়ানো (২১০+)</span>
-                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">আলুর লেট ব্লাইট (১৮০+)</span>
+                    <div id="stats-trending" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">লোডিং...</span>
                     </div>
                 </div>
             </div>
@@ -98,23 +95,21 @@
                             <h3 class="form-title">স্মার্ট প্ল্যান লজিক ও বেসলাইন</h3>
                             <div class="form-group">
                                 <label>ফসল নির্বাচন করুন</label>
-                                <select class="form-control">
-                                    <option>বোরো ধান (ব্রি-২৮)</option>
-                                    <option>আলো (ডায়মন্ড)</option>
-                                    <option>ভুট্টা</option>
+                                <select id="pred-crop-select" class="form-control">
+                                    <option>নতুন ফসল নির্বাচন করুন...</option>
                                 </select>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                                 <div class="form-group">
                                     <label>গড় ফলন (প্রতি একর)</label>
-                                    <input type="text" class="form-control" value="৫০-৬০ মণ">
+                                    <input id="pred-avg-yield" type="text" class="form-control" placeholder="যেমন: ৫০-৬০ মণ">
                                 </div>
                                 <div class="form-group">
                                     <label>গড় খরচ (প্রতি একর)</label>
-                                    <input type="text" class="form-control" value="৳ ১৮,০০০">
+                                    <input id="pred-avg-cost" type="text" class="form-control" placeholder="যেমন: ৳ ১৮,০০০">
                                 </div>
                             </div>
-                            <button class="btn-primary" style="padding: 10px 16px;">বেসলাইন আপডেট করুন</button>
+                            <button id="btn-save-pred" class="btn-primary" style="padding: 10px 16px;">বেসলাইন আপডেট করুন</button>
                         </div>
 
                         <div class="form-section">
@@ -139,19 +134,10 @@
                     </div>
 
                     <div>
-                         <div class="form-section" style="height: 100%;">
+                        <div class="form-section" style="height: 100%;">
                             <h3 class="form-title">সর্বশেষ জেনারেটেড টাইমলাইন</h3>
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">আব্দুর রহিম (01712***890)</div>
-                                    <div style="font-size: 14px; font-weight: 600;">বোরো ধান (২.০ একর)</div>
-                                    <div style="font-size: 12px; color: var(--primary); margin-top: 8px; cursor: pointer;">লগ দেখুন</div>
-                                </div>
-                                <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">শফিকুল (01844***456)</div>
-                                    <div style="font-size: 14px; font-weight: 600;">আলু (১.২ একর)</div>
-                                    <div style="font-size: 12px; color: var(--primary); margin-top: 8px; cursor: pointer;">লগ দেখুন</div>
-                                </div>
+                            <div id="pred-timeline" style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="color: var(--text-muted); padding: 10px;">এখনও কোনো প্রেডিকশন জেনারেট হয়নি।</div>
                             </div>
                         </div>
                     </div>
@@ -166,10 +152,10 @@
                             <h3 class="form-title">রোগ ও সমাধান কনফিগারেশন</h3>
                             <div class="form-group">
                                 <label>স্ক্যান রুলস ও মেডিসিন রেকমেন্ডেশন</label>
-                                <textarea class="form-control" rows="4">Rule 1: If disease is "Rice Blast", always recommend "নাটিভো ৭৫" or "টেবুকোনাজল" for High Confidence matches.&#13;&#10;Rule 2: Emphasize organic solutions first before chemical options.</textarea>
+                                <textarea id="doctor-rules-input" class="form-control" rows="4" placeholder="এখানে ক্রপ ডাক্তারের রুলসগুলো লিখুন..."></textarea>
                                 <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি AI ইঞ্জিনকে স্ক্যানের রেজাল্টের সাথে যুক্ত করা হবে।</p>
                             </div>
-                            <button class="btn-primary" style="padding: 10px 16px;">সেভ করুন</button>
+                            <button id="btn-save-doctor-rules" class="btn-primary" style="padding: 10px 16px;">সেভ করুন</button>
                         </div>
                     </div>
                     <div>
@@ -177,21 +163,8 @@
                             <h3 class="form-title" style="color: var(--danger);">স্ক্যানিং ফেইলর লগস (Low Confidence)</h3>
                             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">যে ছবিগুলো এআই সঠিকভাবে চিনতে পারেনি, সেগুলোর ম্যানুয়াল রিভিউ প্রয়োজন।</p>
                             
-                            <div style="display: flex; gap: 8px; align-items: center; padding: 8px; background: white; border-radius: 8px; margin-bottom: 8px;">
-                                <img src="https://images.unsplash.com/photo-1595844784411-eb6ac3014aef?w=40&h=40&fit=crop" style="width: 40px; height: 40px; border-radius: 4px;">
-                                <div style="flex: 1;">
-                                    <div style="font-size: 13px; font-weight: 600;">Confidence: 34%</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">01712***890 • 1 hr ago</div>
-                                </div>
-                                <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">রিভিউ</button>
-                            </div>
-                             <div style="display: flex; gap: 8px; align-items: center; padding: 8px; background: white; border-radius: 8px;">
-                                <div style="width: 40px; height: 40px; background: #E2E8F0; border-radius: 4px;"></div>
-                                <div style="flex: 1;">
-                                    <div style="font-size: 13px; font-weight: 600;">Too Blurry</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">01844***456 • 3 hrs ago</div>
-                                </div>
-                                <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px;">রিভিউ</button>
+                            <div id="doctor-failure-list">
+                                <div style="padding: 10px; color: var(--text-muted);">ফেইল হওয়া কোনো স্ক্যান পাওয়া যায়নি।</div>
                             </div>
                         </div>
                     </div>
@@ -210,21 +183,8 @@
                                     <th>সময়</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td><img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?w=40&h=40&fit=crop" class="log-thumbnail"></td>
-                                    <td>করিম মিয়া</td>
-                                    <td>ধানের ব্লাস্ট (Rice Blast)</td>
-                                    <td><span class="ai-badge success">৯২%</span></td>
-                                    <td>১০ মিনিট আগে</td>
-                                </tr>
-                                <tr>
-                                    <td><div style="width:40px; height:40px; background:#e2e8f0; border-radius:6px;"></div></td>
-                                    <td>আশরাফুল</td>
-                                    <td>আলুর লেট ব্লাইট</td>
-                                    <td><span class="ai-badge warning">৭৮%</span></td>
-                                    <td>৩৫ মিনিট আগে</td>
-                                </tr>
+                            <tbody id="doctor-success-tbody">
+                                <tr><td colspan="5" style="text-align:center; padding: 20px;">নতুন কোনো স্ক্যান রেকর্ড নেই।</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -246,9 +206,9 @@
                             <div style="font-size: 12px; color: #DC2626;">বর্তমান স্ট্যাটাস: চালু আছে (Enabled)</div>
                         </div>
                         <label style="position: relative; display: inline-block; width: 48px; height: 28px;">
-                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                            <input type="checkbox" id="config-emergency" style="opacity: 0; width: 0; height: 0;">
                             <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); border-radius: 28px; transition: .4s;">
-                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 24px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s;"></span>
+                                <span style="position: absolute; content: ''; height: 20px; width: 20px; left: 24px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s;" class="toggle-circle"></span>
                             </span>
                         </label>
                     </div>
@@ -297,21 +257,16 @@
                 <div class="form-section">
                     <h3 class="form-title">সিস্টেম প্রম্পট (Master Instruction)</h3>
                     <div class="form-group">
-                        <textarea class="form-control" rows="6">You are a highly experienced agricultural expert based in Bangladesh.
-Your task is to answer farmers' questions clearly and simply using the provided context (RAG). 
-STRICT RULES:
-1. Always reply in Bengali (বাংলা).
-2. Do not hallucinate or invent crop medicines.
-3. If unsure, tell them to call the helpline 16162.</textarea>
+                        <textarea id="config-system-prompt" class="form-control" rows="6"></textarea>
                         <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি প্রতিটি রিকোয়েস্টের শুরুতে AI কে পাঠানো হয়।</div>
                     </div>
                     
                     <div class="form-group">
                         <label>AI উত্তর দিতে ব্যর্থ হলে (Fallback Message)</label>
-                        <input type="text" class="form-control" value="দুঃখিত, আমি আপনার প্রশ্নটি বুঝতে পারিনি অথবা আমার কাছে এর সঠিক তথ্য নেই। অনুগ্রহ করে 16162 হেল্পলাইনে কল করুন।">
+                        <input id="config-fallback" type="text" class="form-control" value="">
                     </div>
                     
-                    <button class="btn-primary">পরিবর্তন সেভ করুন</button>
+                    <button id="btn-save-config" class="btn-primary">পরিবর্তন সেভ করুন</button>
                 </div>
             </div>
 
@@ -345,28 +300,8 @@ STRICT RULES:
                     <!-- Indexed List -->
                     <div class="form-section">
                         <h3 class="form-title">বর্তমানে যুক্ত ডকুমেন্টস</h3>
-                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
-                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <div>
-                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">বাংলাদেশের কৃষি ম্যানুয়াল ২০২৪.pdf</div>
-                                    <div style="font-size: 12px; color: var(--text-muted);">২.৪ MB • সিংক হয়েছে: ২ দিন আগে</div>
-                                </div>
-                                <span class="ai-badge success">Active</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <div>
-                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">ধানের রোগ ও প্রতিকার.txt</div>
-                                    <div style="font-size: 12px; color: var(--text-muted);">৪৫ KB • সিংক হয়েছে: ৫ দিন আগে</div>
-                                </div>
-                                <span class="ai-badge success">Active</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">Govt Weather Guidelines link</div>
-                                    <div style="font-size: 12px; color: var(--warning);">Syncing... (80%)</div>
-                                </div>
-                                <span class="ai-badge warning">Processing</span>
-                            </li>
+                        <ul id="rag-documents-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                            <li style="text-align: center; color: var(--text-muted); padding: 24px;">এখনও কোনো নলেজ আপলোড করা হয়নি।</li>
                         </ul>
                     </div>
                 </div>
@@ -398,7 +333,7 @@ STRICT RULES:
                                     <th>Tokens</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="logs-tbody">
                                 <tr>
                                     <td style="white-space: nowrap;">আজ, ১০:৪৫ AM</td>
                                     <td>01712***890</td>
@@ -465,29 +400,7 @@ STRICT RULES:
             event.target.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
-
-        function addApiKeyRow() {
-            const container = document.getElementById('api-keys-container');
-            const rowCount = container.querySelectorAll('.api-key-row').length;
-            
-            if (rowCount >= 10) {
-                alert('সর্বোচ্চ ১০টি API Key যুক্ত করা যাবে।');
-                return;
-            }
-
-            const newRow = document.createElement('div');
-            newRow.className = 'api-key-row';
-            newRow.style.cssText = 'display: flex; gap: 12px; align-items: center; background: #F8FAFC; padding: 12px; border: 1px dashed var(--primary); border-radius: 8px; animation: fadeIn 0.3s ease;';
-            
-            newRow.innerHTML = `
-                <input type="text" class="form-control" placeholder="নতুন API Key প্রবেশ করান" style="flex: 1; background: white;">
-                <span class="ai-badge info" style="white-space: nowrap;">New</span>
-                <button class="btn-icon" style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;" title="বাতিল করুন" onclick="this.closest('.api-key-row').remove()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            `;
-            container.appendChild(newRow);
-        }
     </script>
+    <script type="module" src="js/ai-engine.js"></script>
 </body>
 </html>
