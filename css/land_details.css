@@ -6,7 +6,7 @@
 }
 
 .land-details-container {
-    padding: 0 0 110px 0; /* Space for bottom nav */
+    padding: 0 0 200px 0; /* Space for bottom nav */
 }
 
 /* Page Header Override (with Back Button) */
@@ -71,6 +71,7 @@
 /* Sections Container */
 .ld-sections {
     padding: 16px;
+    padding-bottom: 140px; /* Space for FAB and bottom nav */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -339,4 +340,78 @@
     font-weight: 700;
     color: var(--text-main);
     text-align: center;
+}
+
+/* Custom Tabs for Land Details */
+.ld-tabs-container {
+    display: flex;
+    gap: 8px;
+    background: #E2E8F0;
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.ld-tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ld-tab-btn.active {
+    background: white;
+    color: var(--primary-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ld-tab-pane {
+    display: none;
+}
+
+.ld-tab-pane.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Resource Item Checkbox */
+.resource-check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+}
+
+.resource-check-item.bought {
+    opacity: 0.6;
+    background: #F1F5F9;
+}
+
+.resource-check-item.bought .res-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.res-checkbox {
+    width: 24px;
+    height: 24px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }

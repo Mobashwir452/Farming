@@ -22,7 +22,16 @@ async function loadAiConfig() {
             if (document.getElementById('config-system-prompt')) {
                 document.getElementById('config-system-prompt').value = data.config.system_prompt || '';
                 document.getElementById('config-fallback').value = data.config.fallback_message || '';
-                document.getElementById('config-emergency').checked = data.config.emergency_stop === 1;
+
+                const emCheck = document.getElementById('config-emergency');
+                if (emCheck) {
+                    emCheck.checked = data.config.emergency_stop === 1;
+                    const stText = document.getElementById('emergency-status-text');
+                    if (stText) {
+                        stText.textContent = emCheck.checked ? 'বর্তমান স্ট্যাটাস: সম্পূর্ণ বন্ধ (Emergency ON)' : 'বর্তমান স্ট্যাটাস: চালু আছে (Active)';
+                        stText.style.color = emCheck.checked ? '#DC2626' : '#16A34A';
+                    }
+                }
             }
 
             // Populate API Keys
@@ -96,12 +105,6 @@ async function saveAiConfig() {
 // Window Expose for inline onclick
 window.addApiKeyRow = function () {
     const container = document.getElementById('api-keys-container');
-    const rowCount = container.querySelectorAll('.api-key-row').length;
-
-    if (rowCount >= 10) {
-        alert('সর্বোচ্চ ১০টি API Key যুক্ত করা যাবে।');
-        return;
-    }
 
     if (container.innerHTML.includes('কোনো API Key পাওয়া যায়নি')) {
         container.innerHTML = '';
@@ -318,6 +321,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('btn-save-config');
     if (saveBtn) {
         saveBtn.addEventListener('click', saveAiConfig);
+    }
+
+    // Bind Emergency Status text change on toggle
+    const emSwitch = document.getElementById('config-emergency');
+    if (emSwitch) {
+        emSwitch.addEventListener('change', (e) => {
+            const stText = document.getElementById('emergency-status-text');
+            if (stText) {
+                stText.textContent = e.target.checked ? 'বর্তমান স্ট্যাটাস: বন্ধ করা হচ্ছে (Emergency ON)' : 'বর্তমান স্ট্যাটাস: চালু হবে (Active)';
+                stText.style.color = e.target.checked ? '#DC2626' : '#16A34A';
+            }
+        });
     }
 
     // Bind Prediction Rule save

@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
+export const API_URL = 'https://agritech-backend.mobashwir9.workers.dev';
+
 const firebaseConfig = {
     apiKey: "AIzaSyCXlZEkRpqzph1bog0QGobDeGF6qER3kjI",
     authDomain: "smartkhamar-9b521.firebaseapp.com",
@@ -162,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnNextPhone.disabled = true;
             btnNextPhone.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> চেক করা হচ্ছে...';
-            
+
             // Clean phone for DB
             let cleanPhone = phone;
             if (cleanPhone.startsWith('+88')) cleanPhone = cleanPhone.slice(3);
@@ -181,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     const data = await res.json();
                     currentLoginPhone = fullPhone; // Save for the PIN step
-                    
+
                     if (data.exists && data.hasPin) {
                         // Returning User -> Go straight to PIN screen
                         btnNextPhone.disabled = false;
@@ -190,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return; // Stop here, do not trigger OTP SMS
                     }
                 }
-                
+
                 // If not exist, no pin, or error -> Fallback to standard OTP flow
                 if (window.recaptchaVerifier) {
                     onSignInSubmit();

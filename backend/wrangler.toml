@@ -10,3 +10,14 @@ compatibility_date = "2023-12-01"
 binding = "DB"
 database_name = "agritech-db"
 database_id = "0c3a0645-a41f-499c-8e90-9ea5fa566894"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "agritech_knowledge_db"
+
+[[r2_buckets]]
+binding = "IMAGE_BUCKET"
+bucket_name = "agritech-images"
+
+[triggers]
+crons = ["0 2 * * *"] # Run daily at 2:00 AM UTC

@@ -267,19 +267,34 @@
     z-index: 1;
 }
 
+.gl-content {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    padding: 14px 16px;
+    border-radius: 12px;
+    width: 100%;
+}
+
 .gl-content h4 {
     font-size: 15px;
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 4px;
-    margin-top: 5px;
+    margin-bottom: 6px;
 }
 
 .gl-content p {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.6;
 }
+
+/* Dynamic Category Colors */
+.gl-step.cat-prep .gl-dot { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.gl-step.cat-sow .gl-dot { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+.gl-step.cat-feed .gl-dot { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+.gl-step.cat-protect .gl-dot { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.gl-step.cat-harvest .gl-dot { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.gl-step.cat-default .gl-dot { background: #F1F5F9; color: var(--text-main); border: 1px solid #cbd5e1; }
 
 /* Sticky Bottom Actions */
 .sticky-bottom-actions {

@@ -1,0 +1,183 @@
+/* ai_timeline_tasks.css */
+
+.preview-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.bg-green { background: #10B981; }
+.bg-primary { background: var(--primary); }
+
+.section-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Table */
+.resource-table-container {
+    overflow-x: auto;
+}
+
+.resource-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.resource-table th, .resource-table td {
+    padding: 12px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.resource-table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-top: 0;
+}
+
+.resource-table tfoot td {
+    border-bottom: none;
+    padding-top: 16px;
+    padding-bottom: 4px;
+}
+
+/* Timeline Calendar List */
+.timeline-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tl-task-card {
+    display: flex;
+    gap: 16px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.tl-date-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.tl-month {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--danger);
+    text-transform: uppercase;
+    margin-bottom: -2px;
+}
+
+.tl-day {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.tl-info h4 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.tl-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.tl-offset-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #E0E7FF;
+    color: #4F46E5;
+    margin-top: 8px;
+}
+
+/* Sticky Bottom Copy (from ai prediction) */
+.sticky-bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-cancel, .btn-accept {
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-accept {
+    flex: 2;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    color: white;
+}

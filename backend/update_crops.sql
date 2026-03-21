@@ -1,0 +1,28 @@
+ALTER TABLE crops_master_data ADD COLUMN planting_months TEXT;
+ALTER TABLE crops_master_data ADD COLUMN disease_resistance_score INTEGER;
+
+UPDATE crops_master_data SET planting_months = 'November, December, January', disease_resistance_score = 6 WHERE id = 1;
+UPDATE crops_master_data SET planting_months = 'November, December, January', disease_resistance_score = 5 WHERE id = 2;
+UPDATE crops_master_data SET planting_months = 'June, July', disease_resistance_score = 7 WHERE id = 3;
+UPDATE crops_master_data SET planting_months = 'June, July', disease_resistance_score = 8 WHERE id = 4;
+UPDATE crops_master_data SET planting_months = 'March, April', disease_resistance_score = 8 WHERE id = 5;
+UPDATE crops_master_data SET planting_months = 'November, December, January', disease_resistance_score = 7 WHERE id = 6;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 7;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 8;
+UPDATE crops_master_data SET planting_months = 'September, October', disease_resistance_score = 8 WHERE id = 9;
+UPDATE crops_master_data SET planting_months = 'September, October', disease_resistance_score = 9 WHERE id = 10;
+UPDATE crops_master_data SET planting_months = 'September, October', disease_resistance_score = 8 WHERE id = 11;
+UPDATE crops_master_data SET planting_months = 'September, October', disease_resistance_score = 8 WHERE id = 12;
+UPDATE crops_master_data SET planting_months = 'July, August', disease_resistance_score = 9 WHERE id = 13;
+UPDATE crops_master_data SET planting_months = 'March, April', disease_resistance_score = 8 WHERE id = 14;
+UPDATE crops_master_data SET planting_months = 'March, April', disease_resistance_score = 8 WHERE id = 15;
+UPDATE crops_master_data SET planting_months = 'November', disease_resistance_score = 8 WHERE id = 16;
+UPDATE crops_master_data SET planting_months = 'November', disease_resistance_score = 8 WHERE id = 17;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 18;
+UPDATE crops_master_data SET planting_months = 'February, March, August, September', disease_resistance_score = 9 WHERE id = 19;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 20;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 21;
+UPDATE crops_master_data SET planting_months = 'November, December', disease_resistance_score = 9 WHERE id = 22;
+UPDATE crops_master_data SET planting_months = 'October, November, February, March', disease_resistance_score = 8 WHERE id = 23;
+UPDATE crops_master_data SET planting_months = 'October, November', disease_resistance_score = 8 WHERE id = 24;
+UPDATE crops_master_data SET planting_months = 'January, February', disease_resistance_score = 8 WHERE id = 25;

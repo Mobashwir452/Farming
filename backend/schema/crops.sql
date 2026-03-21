@@ -1,0 +1,21 @@
+-- backend/schema/crops.sql
+-- Table to store crops associated with specific user farms
+
+CREATE TABLE IF NOT EXISTS crops (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    farm_id INTEGER NOT NULL,            -- References farms(id)
+    crop_name TEXT NOT NULL,             -- e.g., "বোরো ধান (ব্রি-২৮)", "শীতকালীন টমেটো"
+    planted_date DATETIME,               -- When the crop was planted
+    status TEXT DEFAULT 'Healthy',       -- System/AI governed status ('Healthy', 'Warning', 'Harvested', 'Disease Risk')
+    current_plant_count INTEGER,         -- Approximate tracking of current plants
+    expected_harvest_date DATETIME,      -- Projected harvest time
+    resources_state_json TEXT,           -- User tracking check-offs and exact resource lists from AI
+    tasks_state_json TEXT,               -- Real-time tracking of AI calendar step completions
+    expected_revenue_bdt REAL,           -- Computed expectation of final sale
+    expected_cost_bdt REAL,              -- Computed expectation of total cost
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (farm_id) REFERENCES farms(id)
+);
+
+-- Index for faster lookups by farm_id
+CREATE INDEX IF NOT EXISTS idx_crops_farm_id ON crops(farm_id);
