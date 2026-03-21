@@ -101,6 +101,12 @@ Do NOT wait for user input on this. Provide the optimal financial estimate for "
 1. The exact fertilizers, pesticides, seeds, quantities, and their costs listed in your <financial_resources> block MUST 100% IDENTICALLY MATCH the actions and amounts you describe in your <timeline> block. You must NOT introduce any fertilizer or pesticide in the timeline that is missing from the resource list, and the quantities must match identically. Both blocks must be generated strictly representing exactly 1 Shotangsho (১ শতাংশ).
 2. For Pesticides/Fungicides, the <amount> and <estimated_cost_bdt> must reflect the TOTAL requirement across the ENTIRE crop lifespan (Amount per dose × Number of total doses needed for 1 shotangsho).
 
+[CRITICAL TIMELINE & TASKS RULES - MUST FOLLOW STRICTLY]:
+1. TWO SEPARATE OUTPUTS: You MUST provide a short <timeline> (5-7 grouped steps for a high-level guideline) AND a separate <daily_tasks> array (a highly granular, fully unrolled daily to-do list for the farmer). 
+2. EXACT CALCULATION: NEVER use vague phrases like "ফুল আসার পর" or "রোগ দেখা দিলে" in the <day_offset>. You MUST calculate the exact biological day these events naturally occur for this specific variety and output a strict numerical <day_offset> (e.g., if flowering is at day 45, output <day_offset>45</day_offset>).
+3. PRE-PLANTING NEGATIVE OFFSETS: All land preparation, bed making, basal dose application, and seed treatments MUST have a NEGATIVE <day_offset> (e.g., -7, -3). The actual planting/sowing day MUST be EXACTLY <day_offset>0</day_offset>.
+4. UNROLL RECURRING TASKS: Inside <daily_tasks>, DO NOT group repeated actions. If a pesticide needs to be sprayed every 15 days, you MUST generate completely separate <task> tags for Day 15, Day 30, Day 45, etc., until harvest. 
+
 Output your response STRICTLY using ONLY the following XML tags translated to Bengali. Do not write any markdown code blocks, do not write any intro/outro text, just output the raw XML tags. Do NOT use JSON structures.`;
 
         promptText += `
@@ -123,7 +129,6 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
     <amount>0.5 kg</amount>
     <estimated_cost_bdt>150</estimated_cost_bdt>
   </resource>
-  <!-- List EVERY SINGLE fertilizer needed as a SEPARATE resource -->
   <resource>
     <category>fertilizer</category>
     <name>ইউরিয়া সার</name>
@@ -131,81 +136,53 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
     <estimated_cost_bdt>25</estimated_cost_bdt>
   </resource>
   <resource>
-    <category>fertilizer</category>
-    <name>টিএসপি সার</name>
-    <amount>500 গ্রাম</amount>
-    <estimated_cost_bdt>20</estimated_cost_bdt>
-  </resource>
-  <!-- List EVERY SINGLE pesticide needed as a SEPARATE resource -->
-  <resource>
-    <category>pesticide</category>
-    <name>কীটনাশক (উদা: ইমিডাক্লোপ্রিড)</name>
-    <amount>5 ml</amount>
-    <estimated_cost_bdt>40</estimated_cost_bdt>
-  </resource>
-  <!-- List ALL labor and processing costs. Do NOT group them into one resource! Breakdown into AT LEAST the following 3, or more if needed -->
-  <resource>
     <category>labor_and_other</category>
     <name>জমি তৈরি ও চাষের খরচ</name>
     <amount>--</amount>
     <estimated_cost_bdt>100</estimated_cost_bdt>
   </resource>
-  <resource>
-    <category>labor_and_other</category>
-    <name>শ্রমিক খরচ (রোপণ, নিড়ানি ও হার্ভেস্ট)</name>
-    <amount>--</amount>
-    <estimated_cost_bdt>400</estimated_cost_bdt>
-  </resource>
-  <resource>
-    <category>labor_and_other</category>
-    <name>সেচ ও আনুষঙ্গিক খরচ</name>
-    <amount>--</amount>
-    <estimated_cost_bdt>150</estimated_cost_bdt>
-  </resource>
 </financial_resources>
 
 <timeline>
   <step>
+    <day_offset>-7</day_offset>
+    <title>১. জমি ও মাদা প্রস্তুতকরণ</title>
+    <desc>কয়টি চাষ/মই দিতে হবে এবং মূল জমিতে কী কী প্রান্তিক/বেসাল সার দিতে হবে তার বিস্তারিত।</desc>
+  </step>
+  <step>
     <day_offset>0</day_offset>
-    <title>১. বীজ বা চারার পরিমাণ ও শোধন</title>
-    <desc>১ শতাংশ জমির জন্য কতটুকু বীজ/চারা লাগবে। সরাসরি বীজ এবং চারা রোপণ- উভয় পদ্ধতির নিয়ম। বীজ শোধনের জন্য কোন ঔষধ পরিমিত পানিতে কতক্ষণ ভেজাতে হবে।</desc>
+    <title>২. বপন বা রোপণ</title>
+    <desc>রোপণের সঠিক পদ্ধতি ও দূরত্ব।</desc>
   </step>
   <step>
-    <day_offset>5</day_offset>
-    <title>২. জমি প্রস্তুতকরণ</title>
-    <desc>কয়টি চাষ/মই দিতে হবে। বেড/মাদার মাপ (ফিট হিসেবে) এবং বীজ বা চারার দূরত্ব (ফিট হিসেবে)।</desc>
-  </step>
-  <step>
-    <day_offset>10</day_offset>
-    <title>৩. প্রাথমিক সার প্রয়োগ</title>
-    <desc>১ শতাংশ বা ১টি মাদার জন্য কি কি সার কতটুকু দিতে হবে, মাটি ওলটপালট করে সারের গ্যাস বের করতে কতদিন ফেলে রাখতে হবে।</desc>
-  </step>
-  <step>
-    <day_offset>15</day_offset>
-    <title>৪. বপন বা রোপণ</title>
-    <desc>সঠিক সময় এবং রোপণের সঠিক গভীরতা।</desc>
-  </step>
-  <step>
-    <day_offset>30</day_offset>
-    <title>৫. সেচ ও আন্তঃপরিচর্যা</title>
-    <desc>প্রথম সেচ ও নিয়মিত সেচের রুটিন, মালচিং, আগাছা দমন, মাচা বা খুঁটি দেওয়া।</desc>
-  </step>
-  <step>
-    <day_offset>45</day_offset>
-    <title>৬. উপরি সার ও ঔষধ প্রয়োগ</title>
-    <desc>কতদিন পর কোন সার (রিং বা ছিটিয়ে) দিতে হবে এবং কী প্রতিরোধক স্প্রে করতে হবে।</desc>
-  </step>
-  <step>
-    <day_offset>60</day_offset>
-    <title>৭. রোগ ও পোকা-মাকড় দমন</title>
-    <desc>এই জাতের প্রধান ২-৩টি রোগ, মাঠের লক্ষণ এবং দমন করার জন্য ঔষধের গ্রুপের নাম ও প্রয়োগমাত্রা।</desc>
-  </step>
-  <step>
-    <day_offset>90</day_offset>
-    <title>৮. ফসল সংগ্রহ</title>
-    <desc>কতদিন পর ফসল পেকেছে বোঝার উপায় এবং বাজারদর অনুযায়ী কোন অবস্থায় হার্ভেস্ট করতে হবে তা বিস্তারিত লিখুন।</desc>
+    <day_offset>20</day_offset>
+    <title>৩. বৃদ্ধি পর্যায় (Growth Stage)</title>
+    <desc>প্রথম উপরি সার এবং নিয়মিত সেচ ও বালাইনাশকের ওভারভিউ।</desc>
   </step>
 </timeline>
+
+<daily_tasks>
+  <task>
+    <day_offset>-7</day_offset>
+    <title>জমি প্রস্তুত ও প্রথম সার</title>
+    <desc>জমিতে চাষ দিয়ে টিএসপি ও পটাশ সার প্রয়োগ করুন।</desc>
+  </task>
+  <task>
+    <day_offset>0</day_offset>
+    <title>বীজ/চারা রোপণ</title>
+    <desc>সঠিক দূরত্ব বজায় রেখে রোপণ করুন এবং হালকা সেচ দিন।</desc>
+  </task>
+  <task>
+    <day_offset>15</day_offset>
+    <title>১ম প্রতিরোধক স্প্রে</title>
+    <desc>পোকামাকড় দমনে ১ম স্প্রে করুন।</desc>
+  </task>
+  <task>
+    <day_offset>30</day_offset>
+    <title>২য় প্রতিরোধক স্প্রে</title>
+    <desc>পোকামাকড় দমনে ২য় স্প্রে করুন।</desc>
+  </task>
+</daily_tasks>
 `;
 
         await env.DB.prepare("UPDATE ai_api_keys SET status = 'active', reset_date = NULL WHERE status = 'exhausted' AND reset_date <= datetime('now', '-24 hours')").run();
@@ -318,16 +295,35 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
                 const descMatch = block.match(/<desc>([\s\S]*?)<\/desc>/i);
                 return {
                     step_number: idx + 1,
-                    day_offset: dayMatch ? parseInt(dayMatch[1].replace(/[^\d]/g, '')) || 0 : 0,
+                    day_offset: dayMatch ? parseInt(dayMatch[1].replace(/[^\d-]/g, '')) || 0 : 0,
                     title: titleMatch ? titleMatch[1].replace(/<[^>]*>?/gm, '').trim() : '',
                     description: descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : ''
                 };
             });
         }
 
+        let daily_tasks = [];
+        const tasksBlock = aiRawText.match(/<daily_tasks>([\s\S]*?)(?:<\/daily_tasks>|$)/i);
+        if (tasksBlock) {
+            const taskMatches = [...tasksBlock[1].matchAll(/<task>([\s\S]*?)<\/task>/gi)];
+            daily_tasks = taskMatches.map((m) => {
+                const block = m[1];
+                const dayMatch = block.match(/<day_offset>([\s\S]*?)<\/day_offset>/i);
+                const titleMatch = block.match(/<title>([\s\S]*?)<\/title>/i);
+                const descMatch = block.match(/<desc>([\s\S]*?)<\/desc>/i);
+                return {
+                    day_offset: dayMatch ? parseInt(dayMatch[1].replace(/[^\d-]/g, '')) || 0 : 0,
+                    title: titleMatch ? titleMatch[1].replace(/<[^>]*>?/gm, '').trim() : '',
+                    description: descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : ''
+                };
+            });
+        }
+
+        const cacheData = { guideline: timeline, tasks: daily_tasks };
+
         // Set expiry dynamically (6 months for AI generated)
         await env.DB.prepare("INSERT OR REPLACE INTO ai_timeline_cache (crop_name, variety_name, base_yield_kg, base_cost_taka, base_revenue_taka, timeline_json, risks_json, resources_json, crop_market_price_bdt, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+6 months'))")
-            .bind(cropName, varietyName, base_yield_kg, base_cost_taka, base_revenue_taka, JSON.stringify(timeline), JSON.stringify(risks), JSON.stringify(financial_resources), crop_market_price_bdt)
+            .bind(cropName, varietyName, base_yield_kg, base_cost_taka, base_revenue_taka, JSON.stringify(cacheData), JSON.stringify(risks), JSON.stringify(financial_resources), crop_market_price_bdt)
             .run();
 
         return json({ success: true, message: 'AI Generated and Cached' });

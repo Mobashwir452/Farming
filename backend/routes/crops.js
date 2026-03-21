@@ -35,7 +35,7 @@ export const saveCropTimeline = async (request, env) => {
 
         // Setup initial task tracking schedule
         const startDate = new Date(body.planting_date || Date.now());
-        const tasksState = (body.timeline || []).map(t => {
+        const tasksState = (body.daily_tasks || []).map(t => {
             const taskDate = new Date(startDate);
             taskDate.setDate(startDate.getDate() + (t.day_offset || 0));
             return {

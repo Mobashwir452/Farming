@@ -252,6 +252,7 @@ window.acceptAITimeline = function () {
             crop_name: finalCropSaveName,
             status: 'Healthy',
             timeline: window.fullAIData.timeline,
+            daily_tasks: window.fullAIData.daily_tasks,
             resources: window.fullAIData.resources,
             finance: window.fullAIData.finance,
             yield: window.fullAIData.yield,

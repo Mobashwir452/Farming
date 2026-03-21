@@ -234,81 +234,113 @@
                     <input type="hidden" id="cache_crop_string" value="">
                     <input type="hidden" id="cache_variety_name" value="">
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <!-- Static Top Section -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color);">
                         <div>
-                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">বেস
-                                ফলন (কেজি)</label>
-                            <input type="number" id="cache_yield" required placeholder="যেমন: 2400"
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">বেস ফলন (কেজি/শতাংশ)</label>
+                            <input type="number" id="cache_yield" required placeholder="যেমন: 24"
                                 style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
                         </div>
                         <div>
-                            <label
-                                style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">সম্ভাব্য
-                                খরচ (টাকা)</label>
-                            <input type="number" id="cache_cost" required placeholder="যেমন: 15000"
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">সম্ভাব্য খরচ (টাকা/শতাংশ)</label>
+                            <input type="number" id="cache_cost" required placeholder="যেমন: 400"
                                 style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
                         </div>
                         <div>
-                            <label
-                                style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">সম্ভাব্য
-                                আয় (টাকা)</label>
-                            <input type="number" id="cache_revenue" required placeholder="যেমন: 35000"
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">সম্ভাব্য আয় (টাকা/শতাংশ)</label>
+                            <input type="number" id="cache_revenue" required placeholder="যেমন: 1200"
                                 style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
                         </div>
                     </div>
 
-                    <div
-                        style="margin-bottom: 24px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <label
-                                style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">টাইমলাইন
-                                ধাপসমূহ</label>
-                            <button type="button" class="btn-primary"
-                                style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px;"
-                                onclick="addTimelineStep()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                                নতুন ধাপ
-                            </button>
+                    <!-- Nav Tabs -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto;">
+                        <button type="button" class="cache-tab-btn active" onclick="switchCacheTab('guidelines', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--primary); border-bottom: 2px solid var(--primary); cursor: pointer; white-space: nowrap;">নির্দেশিকা</button>
+                        <button type="button" class="cache-tab-btn" onclick="switchCacheTab('risks', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">ঝুঁকি ও সতর্কতা</button>
+                        <button type="button" class="cache-tab-btn" onclick="switchCacheTab('resources', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">খরচ বিবরণী</button>
+                        <button type="button" class="cache-tab-btn" onclick="switchCacheTab('tasks', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">দৈনিক কাজ</button>
+                    </div>
+
+                    <!-- Tab Content Areas -->
+                    <div class="cache-tabs-wrapper">
+                        <!-- GUIDELINE TAB -->
+                        <div id="cache-tab-guidelines" class="cache-tab-pane" style="display: block;">
+                            <div style="margin-bottom: 24px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <label style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">টাইমলাইন ধাপসমূহ</label>
+                                    <button type="button" class="btn-primary" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px;" onclick="addTimelineStep()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        নতুন ধাপ
+                                    </button>
+                                </div>
+                                <div id="timelineContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
                         </div>
-                        <div id="timelineContainer" style="display: flex; flex-direction: column; gap: 12px;">
-                            <!-- Rendered dynamically -->
+
+                        <!-- RISKS TAB -->
+                        <div id="cache-tab-risks" class="cache-tab-pane" style="display: none;">
+                            <div style="margin-bottom: 24px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 12px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <label style="font-size: 14px; font-weight: 700; color: #BE185D; margin: 0;">ঝুঁকি ও সতর্কতা (Risks)</label>
+                                    <button type="button" class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px; color: #BE185D; border-color: #BE185D; display: flex; align-items: center; gap: 4px;" onclick="addRiskRow()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        নতুন ঝুঁকি
+                                    </button>
+                                </div>
+                                <div id="risksContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- RESOURCES TAB -->
+                        <div id="cache-tab-resources" class="cache-tab-pane" style="display: none;">
+                            <div style="margin-bottom: 24px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="font-size: 14px; font-weight: 700; color: #166534; margin: 0;">রিসোর্স ও খরচ বিবরণী</label>
+                                        <p style="font-size: 11px; color: #15803D; margin: 4px 0 0 0;">বীজ, সার ও সেচ (১ শতাংশ জমির জন্য)</p>
+                                    </div>
+                                    <button type="button" class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px; color: #166534; border-color: #166534; display: flex; align-items: center; gap: 4px;" onclick="addResourceRow()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        নতুন খরচ
+                                    </button>
+                                </div>
+                                <div id="resourcesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- TASKS TAB -->
+                        <div id="cache-tab-tasks" class="cache-tab-pane" style="display: none;">
+                            <div style="margin-bottom: 24px; background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 12px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="font-size: 14px; font-weight: 700; color: #3730A3; margin: 0;">দৈনিক কাজ (To-do List)</label>
+                                        <p style="font-size: 11px; color: #4338CA; margin: 4px 0 0 0;">ডে-অফসেট অনুযায়ী കൃষকের চেকলিস্ট</p>
+                                    </div>
+                                    <button type="button" class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: #4F46E5; border-color: #4F46E5; display: flex; align-items: center; gap: 4px;" onclick="addDailyTaskRow()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        নতুন কাজ
+                                    </button>
+                                </div>
+                                <div id="tasksContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div
-                        style="margin-bottom: 24px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 12px; padding: 16px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <label style="font-size: 14px; font-weight: 700; color: #BE185D; margin: 0;">ঝুঁকি ও সতর্কতা
-                                (Risks)</label>
-                            <button type="button" class="btn-outline-primary"
-                                style="padding: 6px 12px; font-size: 12px; color: #BE185D; border-color: #BE185D; display: flex; align-items: center; gap: 4px;"
-                                onclick="addRiskRow()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                                নতুন ঝুঁকি
-                            </button>
-                        </div>
-                        <div id="risksContainer" style="display: flex; flex-direction: column; gap: 12px;">
-                            <!-- Rendered dynamically -->
-                        </div>
-                    </div>
-
-                    <div
-                        style="display: flex; gap: 16px; align-items: center; border-top: 1px solid var(--border-color); padding-top: 24px;">
-                        <button type="submit" class="btn-primary" style="padding: 12px 24px; font-weight: 600;"
-                            id="cacheSaveBtn">সেভ আপডেট</button>
-                        <button type="button" class="btn-outline-primary"
-                            style="color: var(--danger); border-color: var(--danger); padding: 12px 24px; font-weight: 600; display: none;"
-                            id="cacheDeleteBtn" onclick="deleteCache()">ক্যাশ ডিলিট করুন</button>
+                    <div style="display: flex; gap: 16px; align-items: center; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                        <button type="submit" class="btn-primary" style="padding: 12px 24px; font-weight: 600;" id="cacheSaveBtn">সেভ আপডেট</button>
+                        <button type="button" class="btn-outline-primary" style="color: var(--danger); border-color: var(--danger); padding: 12px 24px; font-weight: 600; display: none;" id="cacheDeleteBtn" onclick="deleteCache()">ক্যাশ ডিলিট করুন</button>
                     </div>
                 </form>
             </div>

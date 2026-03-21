@@ -315,6 +315,22 @@ async function submitBulkCrop(e) {
 let currentCacheCropId = null;
 let currentTimelineData = [];
 let currentRisksData = [];
+let currentResourcesData = [];
+let currentTasksData = [];
+
+window.switchCacheTab = function(tabId, btn) {
+    document.querySelectorAll('.cache-tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.color = 'var(--text-muted)';
+        b.style.borderBottomColor = 'transparent';
+    });
+    btn.classList.add('active');
+    btn.style.color = 'var(--primary)';
+    btn.style.borderBottomColor = 'var(--primary)';
+
+    document.querySelectorAll('.cache-tab-pane').forEach(p => p.style.display = 'none');
+    document.getElementById('cache-tab-' + tabId).style.display = 'block';
+}
 
 async function openCacheModal(id, hasCache) {
     const crop = globalCrops.find(c => c.id === id);
@@ -344,8 +360,12 @@ async function openCacheModal(id, hasCache) {
         document.getElementById('cacheForm').reset();
         currentTimelineData = [];
         currentRisksData = [];
+        currentResourcesData = [];
+        currentTasksData = [];
         renderTimelineEditor();
         renderRisksEditor();
+        renderResourcesEditor();
+        renderTasksEditor();
 
         document.getElementById('cacheDeleteBtn').style.display = 'none';
         document.getElementById('cacheSaveBtn').innerHTML = 'নতুন সেভ করুন';
@@ -358,11 +378,17 @@ function closeCacheModal() {
     currentCacheCropId = null;
     currentTimelineData = [];
     currentRisksData = [];
+    currentResourcesData = [];
+    currentTasksData = [];
 }
 
 function showManualCacheForm() {
     document.getElementById('cacheMissingSection').style.display = 'none';
     document.getElementById('cacheDataSection').style.display = 'block';
+    
+    // Switch to first tab safely
+    const firstTabBtn = document.querySelector('.cache-tab-btn');
+    if (firstTabBtn) switchCacheTab('guidelines', firstTabBtn);
 }
 
 async function fetchCacheData() {
@@ -381,11 +407,24 @@ async function fetchCacheData() {
             document.getElementById('cache_cost').value = data.cache.base_cost_taka || '';
             document.getElementById('cache_revenue').value = data.cache.base_revenue_taka || '';
 
-            try { currentTimelineData = JSON.parse(data.cache.timeline_json || '[]'); } catch (e) { currentTimelineData = []; }
+            try { 
+                const tlJson = JSON.parse(data.cache.timeline_json || '{"guideline":[], "tasks":[]}');
+                if (Array.isArray(tlJson)) {
+                     currentTimelineData = tlJson;
+                     currentTasksData = [];
+                } else {
+                     currentTimelineData = tlJson.guideline || [];
+                     currentTasksData = tlJson.tasks || [];
+                }
+            } catch (e) { currentTimelineData = []; currentTasksData = []; }
+            
             try { currentRisksData = JSON.parse(data.cache.risks_json || '[]'); } catch (e) { currentRisksData = []; }
+            try { currentResourcesData = JSON.parse(data.cache.resources_json || '[]'); } catch (e) { currentResourcesData = []; }
 
             renderTimelineEditor();
             renderRisksEditor();
+            renderResourcesEditor();
+            renderTasksEditor();
 
             document.getElementById('cacheModalSubtitle').textContent = `তৈরি: ${data.cache.created_at}`;
         }
@@ -394,6 +433,7 @@ async function fetchCacheData() {
     }
 }
 
+// === GUIDELINE EDITOR ===
 window.renderTimelineEditor = function () {
     const container = document.getElementById('timelineContainer');
     if (currentTimelineData.length === 0) {
@@ -448,7 +488,6 @@ window.addTimelineStep = function () {
 
 window.removeTimelineStep = function (index) {
     currentTimelineData.splice(index, 1);
-    // Re-index steps
     currentTimelineData.forEach((step, idx) => step.step_number = idx + 1);
     renderTimelineEditor();
 }
@@ -459,6 +498,7 @@ window.updateTimelineField = function (index, field, value) {
     }
 }
 
+// === RISKS EDITOR ===
 window.renderRisksEditor = function () {
     const container = document.getElementById('risksContainer');
     if (currentRisksData.length === 0) {
@@ -468,9 +508,10 @@ window.renderRisksEditor = function () {
 
     container.innerHTML = currentRisksData.map((risk, idx) => `
         <div style="background: white; border: 1px solid #FECDD3; padding: 12px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
-            <select onchange="updateRiskField(${idx}, 'type', this.value)" style="padding: 8px; border: 1px solid #FECDD3; border-radius: 6px; font-size: 13px; background: #FFF1F2; color: #BE185D; font-weight: 600; outline: none;">
+            <select onchange="updateRiskField(${idx}, 'type', this.value)" style="padding: 8px; border: 1px solid #FECDD3; border-radius: 6px; font-size: 13px; background: #FFF1F2; color: #BE185D; font-weight: 600; outline: none; flex-shrink: 0;">
                 <option value="warning" ${risk.type === 'warning' ? 'selected' : ''}>Warning</option>
-                <option value="caution" ${risk.type === 'caution' ? 'selected' : ''}>Caution</option>
+                <option value="info" ${risk.type === 'info' ? 'selected' : ''}>Info</option>
+                <option value="lifespan" ${risk.type === 'lifespan' ? 'selected' : ''}>Lifespan</option>
             </select>
             <input type="text" value="${escapeHtml(risk.message || '')}" oninput="updateRiskField(${idx}, 'message', this.value)" placeholder="ঝুঁকির বিবরণ লিখুন..." style="flex-grow: 1; padding: 8px; border: 1px solid #FECDD3; border-radius: 6px; font-size: 13px;">
             <button type="button" onclick="removeRiskRow(${idx})" style="background: none; border: none; color: #BE185D; cursor: pointer; padding: 4px; flex-shrink: 0;" title="ডিলিট করুন">
@@ -496,6 +537,94 @@ window.updateRiskField = function (index, field, value) {
     }
 }
 
+// === RESOURCES EDITOR ===
+window.renderResourcesEditor = function () {
+    const container = document.getElementById('resourcesContainer');
+    if (currentResourcesData.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 12px; color: #15803D; font-size: 13px; opacity: 0.7;">কোনো খরচের বিবরণী যোগ করা হয়নি।</div>';
+        return;
+    }
+
+    container.innerHTML = currentResourcesData.map((res, idx) => `
+        <div style="background: white; border: 1px solid #BBF7D0; padding: 12px; border-radius: 8px; display: grid; grid-template-columns: 100px 1fr 80px 80px 30px; gap: 8px; align-items: center;">
+            <select onchange="updateResourceField(${idx}, 'category', this.value)" style="padding: 8px; border: 1px solid #BBF7D0; border-radius: 6px; font-size: 12px; background: #F0FDF4; color: #166534; font-weight: 600; outline: none; width: 100%;">
+                <option value="seed_or_sapling" ${res.category === 'seed_or_sapling' ? 'selected' : ''}>বীজ/চারা</option>
+                <option value="fertilizer" ${res.category === 'fertilizer' ? 'selected' : ''}>সার</option>
+                <option value="pesticide" ${res.category === 'pesticide' ? 'selected' : ''}>কীটনাশক</option>
+                <option value="irrigation" ${res.category === 'irrigation' ? 'selected' : ''}>সেচ</option>
+                <option value="labor_and_other" ${res.category === 'labor_and_other' ? 'selected' : ''}>লেবার/অন্যান্য</option>
+            </select>
+            <input type="text" value="${escapeHtml(res.name || '')}" oninput="updateResourceField(${idx}, 'name', this.value)" placeholder="নাম (যেমন: ইউরিয়া)" style="width: 100%; padding: 8px; border: 1px solid #BBF7D0; border-radius: 6px; font-size: 13px;">
+            <input type="text" value="${escapeHtml(res.amount || '')}" oninput="updateResourceField(${idx}, 'amount', this.value)" placeholder="পরিমাণ" style="width: 100%; padding: 8px; border: 1px solid #BBF7D0; border-radius: 6px; font-size: 13px;">
+            <input type="number" value="${res.estimated_cost_bdt || 0}" oninput="updateResourceField(${idx}, 'estimated_cost_bdt', this.value)" placeholder="খরচ" style="width: 100%; padding: 8px; border: 1px solid #BBF7D0; border-radius: 6px; font-size: 13px;">
+            <button type="button" onclick="removeResourceRow(${idx})" style="background: none; border: none; color: #166534; cursor: pointer; padding: 4px; display:flex; justify-content:center;" title="ডিলিট করুন">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+window.addResourceRow = function () {
+    currentResourcesData.push({ category: 'fertilizer', name: '', amount: '', estimated_cost_bdt: 0 });
+    renderResourcesEditor();
+}
+
+window.removeResourceRow = function (index) {
+    currentResourcesData.splice(index, 1);
+    renderResourcesEditor();
+}
+
+window.updateResourceField = function (index, field, value) {
+    if (currentResourcesData[index]) {
+        currentResourcesData[index][field] = field === 'estimated_cost_bdt' ? parseFloat(value) || 0 : value;
+    }
+}
+
+// === TASKS EDITOR ===
+window.renderTasksEditor = function () {
+    const container = document.getElementById('tasksContainer');
+    if (currentTasksData.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 12px; color: #4338CA; font-size: 13px; opacity: 0.7;">কোনো দৈনিক কাজ যোগ করা হয়নি।</div>';
+        return;
+    }
+
+    // Sort tasks strictly based on day offset before rendering
+    currentTasksData.sort((a, b) => parseInt(a.day_offset || 0) - parseInt(b.day_offset || 0));
+
+    container.innerHTML = currentTasksData.map((task, idx) => `
+        <div style="background: white; border: 1px solid #C7D2FE; padding: 12px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: flex-start; flex-shrink: 0; width: 60px;">
+                <label style="font-size: 10px; color: #4338CA; font-weight: 600;">অফসেট</label>
+                <input type="number" value="${task.day_offset || 0}" oninput="updateTaskField(${idx}, 'day_offset', this.value); if(this.value.endsWith('.')){}else{renderTasksEditor()}" style="width: 100%; text-align: center; padding: 6px; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 13px; font-weight: 700; color: #3730A3;">
+            </div>
+            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" value="${escapeHtml(task.title || '')}" oninput="updateTaskField(${idx}, 'title', this.value)" placeholder="কাজের নাম (যেমন: ১ম স্প্রে)" style="width: 100%; padding: 8px; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 13px; font-weight: 600;">
+                <textarea oninput="updateTaskField(${idx}, 'description', this.value)" placeholder="কী করতে হবে তার বিবরণ..." rows="2" style="width: 100%; padding: 8px; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical;">${escapeHtml(task.description || '')}</textarea>
+            </div>
+            <button type="button" onclick="removeDailyTaskRow(${idx})" style="background: none; border: none; color: #4338CA; cursor: pointer; padding: 4px; flex-shrink: 0;" title="ডিলিট করুন">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+window.addDailyTaskRow = function () {
+    currentTasksData.push({ day_offset: 0, title: '', description: '' });
+    renderTasksEditor();
+}
+
+window.removeDailyTaskRow = function (index) {
+    currentTasksData.splice(index, 1);
+    renderTasksEditor();
+}
+
+window.updateTaskField = function (index, field, value) {
+    if (currentTasksData[index]) {
+        currentTasksData[index][field] = field === 'day_offset' ? parseInt(value) || 0 : value;
+    }
+}
+
+// === SUBMIT EVENT ===
 async function submitCache(e) {
     e.preventDefault();
     const token = localStorage.getItem('agritech_admin_token');
@@ -506,16 +635,26 @@ async function submitCache(e) {
 
     // Clean up empty steps/risks just in case
     const cleanTimeline = currentTimelineData.filter(s => s.title.trim() || s.description.trim());
+    const cleanTasks = currentTasksData.filter(t => t.title.trim() || t.description.trim());
     const cleanRisks = currentRisksData.filter(r => r.message.trim());
+    const cleanResources = currentResourcesData.filter(r => r.name.trim());
+
+    // Pack Guideline and Tasks naturally back into timeline_json as { guideline: [...], tasks: [...] } 
+    // to keep it strictly aligned with standard outputs expected by AI logic.
+    const packedTimelineData = {
+        guideline: cleanTimeline,
+        tasks: cleanTasks
+    };
 
     const payload = {
         crop_name: crop.crop_name,
         variety_name: crop.variety_name,
-        base_yield_kg: parseFloat(document.getElementById('cache_yield').value),
-        base_cost_taka: parseFloat(document.getElementById('cache_cost').value),
-        base_revenue_taka: parseFloat(document.getElementById('cache_revenue').value),
-        timeline_json: JSON.stringify(cleanTimeline),
-        risks_json: JSON.stringify(cleanRisks)
+        base_yield_kg: parseFloat(document.getElementById('cache_yield').value) || 0,
+        base_cost_taka: parseFloat(document.getElementById('cache_cost').value) || 0,
+        base_revenue_taka: parseFloat(document.getElementById('cache_revenue').value) || 0,
+        timeline_json: JSON.stringify(packedTimelineData),
+        risks_json: JSON.stringify(cleanRisks),
+        resources_json: JSON.stringify(cleanResources)
     };
 
     submitBtn.disabled = true;
