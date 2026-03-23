@@ -2,7 +2,7 @@ import { error, json } from 'itty-router';
 
 export const createFarm = async (request, env) => {
     try {
-        const { name, area_shotangsho, location } = await request.json();
+        const { name, area_shotangsho, location, lat, lng } = await request.json();
 
         if (!name || !area_shotangsho) {
             return error(400, 'Valid name and area_shotangsho are required.');
@@ -11,10 +11,10 @@ export const createFarm = async (request, env) => {
         const farmerId = request.user.id;
 
         const insertQuery = `
-            INSERT INTO farms (farmer_id, name, area_shotangsho, location) 
-            VALUES (?, ?, ?, ?) RETURNING id;
+            INSERT INTO farms (farmer_id, name, area_shotangsho, location, lat, lng) 
+            VALUES (?, ?, ?, ?, ?, ?) RETURNING id;
         `;
-        const result = await env.DB.prepare(insertQuery).bind(farmerId, name, parseFloat(area_shotangsho), location || null).first();
+        const result = await env.DB.prepare(insertQuery).bind(farmerId, name, parseFloat(area_shotangsho), location || null, lat || null, lng || null).first();
 
         return json({
             success: true,
@@ -67,10 +67,14 @@ export const getFarmDetails = async (request, env) => {
         const cropsQuery = `SELECT * FROM crops WHERE farm_id = ? ORDER BY created_at DESC`;
         const { results: crops } = await env.DB.prepare(cropsQuery).bind(farmId).all();
 
+        const txQuery = `SELECT * FROM transactions WHERE farm_id = ? AND farmer_id = ? ORDER BY transaction_date DESC`;
+        const { results: transactions } = await env.DB.prepare(txQuery).bind(farmId, farmerId).all();
+
         return json({
             success: true,
             farm,
-            crops
+            crops,
+            transactions
         });
     } catch (err) {
         return error(500, 'Server Error: ' + err.message);

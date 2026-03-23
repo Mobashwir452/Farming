@@ -1,15 +1,25 @@
-export const runCropVerification = async (env) => {
+export const runCropVerification = async (env, cropId = null) => {
+    let stats = { processedCount: 0, successCount: 0, failedCount: 0, messages: [] };
     try {
         console.log("CRON: Starting Auto-Verification Job...");
 
-        // Find unverified crops that haven't been processed by AI yet (data_source IS NULL)
-        const unverified = await env.DB.prepare("SELECT id, crop_name, variety_name FROM crops_master_data WHERE verified_status = 0 AND data_source IS NULL LIMIT 5").all();
+        let query = "SELECT id, crop_name, variety_name FROM crops_master_data WHERE verified_status = 0 AND (data_source IS NULL OR data_source != 'AI Verified') LIMIT 5";
+        let params = [];
+        
+        if (cropId) {
+            query = "SELECT id, crop_name, variety_name FROM crops_master_data WHERE id = ?";
+            params = [cropId];
+        }
+
+        const unverified = await env.DB.prepare(query).bind(...params).all();
 
         if (!unverified.results || unverified.results.length === 0) {
             console.log("CRON: No unverified crops found. Done.");
-            return;
+            stats.messages.push("No unverified crops found. Done.");
+            return stats;
         }
 
+        stats.processedCount = unverified.results.length;
         console.log(`CRON: Found ${unverified.results.length} unverified crops to process.`);
 
         await env.DB.prepare("UPDATE ai_api_keys SET status = 'active', reset_date = NULL WHERE status = 'exhausted' AND reset_date <= datetime('now', '-24 hours')").run();
@@ -17,7 +27,8 @@ export const runCropVerification = async (env) => {
 
         if (!keyObj) {
             console.error("CRON: No active AI keys available.");
-            return;
+            stats.messages.push("No active AI keys available.");
+            return stats;
         }
 
         for (const crop of unverified.results) {
@@ -33,6 +44,9 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
 <disease_resistance_score>Write exactly digits 1 to 10</disease_resistance_score>
 <planting_months>Comma separated English months, e.g. November, December</planting_months>
 <crop_category>Write exactly ONE of these options in Bengali: সবজি, ফল, দানা, ডাল, তেল, ফুল, অর্থকরী, মসলা</crop_category>
+<suitable_regions>Short text in Bengali, e.g. দেশের সব অঞ্চল (হাওর বাদে)</suitable_regions>
+<soil_type>Short text in Bengali, e.g. দোআঁশ ও বেলে দোআঁশ মাটি</soil_type>
+<special_features>Short text in Bengali, e.g. আগাম জাত, খরা সহনশীল</special_features>
 
 <base_cost_taka>Write exactly digits only, e.g. 15000</base_cost_taka>
 <base_revenue_taka>Write exactly digits only, e.g. 30000</base_revenue_taka>
@@ -111,6 +125,10 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
             const planM = extractStr('planting_months');
             let catMatch = extractStr('crop_category');
             
+            const suitableRegions = extractStr('suitable_regions');
+            const soilType = extractStr('soil_type');
+            const specialFeatures = extractStr('special_features');
+            
             let financial_resources = [];
             let base_cost_taka = 0;
             const resourcesBlock = aiText.match(/<financial_resources>([\s\S]*?)(?:<\/financial_resources>|$)/i);
@@ -167,20 +185,27 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
                 // Populate data_source to mark as AI Processed, but leave verified_status = 0 for human review
                 await env.DB.prepare(`
                     UPDATE crops_master_data 
-                    SET avg_duration_days = ?, base_yield_per_shotangsho_kg = ?, disease_resistance = ?, disease_resistance_score = ?, planting_months = ?, crop_category = ?, data_source = 'AI Verified'
+                    SET avg_duration_days = ?, base_yield_per_shotangsho_kg = ?, disease_resistance = ?, disease_resistance_score = ?, planting_months = ?, crop_category = ?, suitable_regions = ?, soil_type = ?, special_features = ?, data_source = 'AI Verified'
                     WHERE id = ? AND verified_status = 0
-                `).bind(days, yieldShotangsho, resText, resScore, planM, catMatch, crop.id).run().catch(e => console.error(e));
+                `).bind(days, yieldShotangsho, resText, resScore, planM, catMatch, suitableRegions, soilType, specialFeatures, crop.id).run().catch(e => console.error(e));
                 
                 await env.DB.prepare("INSERT OR REPLACE INTO ai_timeline_cache (crop_name, variety_name, base_yield_kg, base_cost_taka, base_revenue_taka, timeline_json, risks_json, resources_json, crop_market_price_bdt, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+6 months'))")
                     .bind(crop.crop_name, crop.variety_name, yieldShotangsho, base_cost_taka, base_revenue_taka, JSON.stringify(timeline), JSON.stringify(risks), JSON.stringify(financial_resources), crop_market_price_bdt)
                     .run().catch(e => console.error(e));
 
                 console.log(`CRON: Successfully populated data for ${crop.crop_name}, awaiting Admin Review.`);
+                stats.successCount++;
+                stats.messages.push(`পরিপূর্ণ ভেরিফাইড: ${crop.crop_name}`);
             } else {
                 console.log(`CRON: Verification failed for ${crop.crop_name} due to missing tags.`);
+                stats.failedCount++;
+                stats.messages.push(`অসম্পূর্ণ/ব্যর্থ: ${crop.crop_name}`);
             }
         }
+        return stats;
     } catch (err) {
         console.error("CRON Global Error:", err.message);
+        stats.messages.push(`সার্ভার এরর: ${err.message}`);
+        return stats;
     }
 };

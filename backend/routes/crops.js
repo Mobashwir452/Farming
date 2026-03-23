@@ -136,6 +136,10 @@ export const updateCropState = async (request, env) => {
             updates.push('resources_state_json = ?');
             params.push(body.resources_state_json);
         }
+        if (body.notes_json !== undefined) {
+            updates.push('notes_json = ?');
+            params.push(body.notes_json);
+        }
         
         if (updates.length > 0) {
             params.push(cropId);
@@ -149,3 +153,81 @@ export const updateCropState = async (request, env) => {
     }
 };
 
+export const deleteCrop = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const farmerId = request.user.id;
+        
+        const check = await env.DB.prepare("SELECT c.id, c.image_r2_key FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
+        if (!check) return Response.json({ success: false, error: 'Unauthorized or crop not found' }, { status: 403 });
+
+        if (check.image_r2_key && env.IMAGE_BUCKET) {
+            try { await env.IMAGE_BUCKET.delete(check.image_r2_key); } catch(e) { console.error("R2 cleanup fail:", e); }
+        }
+        
+        await env.DB.prepare("DELETE FROM crops WHERE id = ?").bind(cropId).run();
+        
+        return Response.json({ success: true, message: 'Crop deleted completely' });
+    } catch(e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
+export const completeCrop = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const farmerId = request.user.id;
+        
+        const check = await env.DB.prepare("SELECT c.id FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
+        if (!check) return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+
+        await env.DB.prepare("UPDATE crops SET status = 'Harvested' WHERE id = ?").bind(cropId).run();
+        
+        return Response.json({ success: true, message: 'Crop marked as complete' });
+    } catch(e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
+export const updateCropStatusManually = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const farmerId = request.user.id;
+        const body = await request.json();
+        
+        if(!body.status) return Response.json({ success: false, error: "Empty status" }, { status: 400 });
+
+        const check = await env.DB.prepare("SELECT c.id FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
+        if (!check) return Response.json({ success: false }, { status: 403 });
+
+        await env.DB.prepare("UPDATE crops SET status = ? WHERE id = ?").bind(body.status, cropId).run();
+        
+        return Response.json({ success: true, message: 'Status updated' });
+    } catch(e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
+export const addCropNote = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const farmerId = request.user.id;
+        const { note } = await request.json();
+        
+        if(!note) return Response.json({ success: false, error: "Empty note" }, { status: 400 });
+
+        const check = await env.DB.prepare("SELECT c.id, c.notes_json FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
+        if (!check) return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+
+        let existingNotes = [];
+        try { existingNotes = JSON.parse(check.notes_json || '[]'); } catch(e){}
+        
+        existingNotes.push({ date: new Date().toISOString(), text: note });
+
+        await env.DB.prepare("UPDATE crops SET notes_json = ? WHERE id = ?").bind(JSON.stringify(existingNotes), cropId).run();
+        
+        return Response.json({ success: true, message: 'Note added successfully' });
+    } catch(e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};

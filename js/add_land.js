@@ -1,4 +1,6 @@
 // js/add_land.js
+window.currentLat = null;
+window.currentLng = null;
 
 // Mapping Functions (Existing)
 window.startMapping = function () {
@@ -64,13 +66,21 @@ window.saveManualLand = async function (event) {
     }
 
     try {
+        const payload = { 
+            name: name, 
+            area_shotangsho: area, 
+            location: locationValue,
+            lat: window.currentLat,
+            lng: window.currentLng
+        };
+
         const response = await fetch(`${BASE_URL}/api/farms`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ name: name, area_shotangsho: area, location: locationValue })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -105,6 +115,8 @@ window.fetchGPSLocation = function () {
     navigator.geolocation.getCurrentPosition(async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        window.currentLat = lat;
+        window.currentLng = lon;
         
         try {
             // Reverse Geocoding using OpenStreetMap Nominatim API (Free, no key required)
@@ -160,7 +172,7 @@ window.searchLocation = async function (query) {
                 suggestionsBox.innerHTML = data.map(item => {
                     const shortName = item.display_name.split(',').slice(0, 3).join(',');
                     return `
-                    <li style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; gap: 10px;" onclick="selectLocation('${shortName.replace(/'/g, "\\'")}')">
+                    <li style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; gap: 10px;" onclick="selectLocation('${shortName.replace(/'/g, "\\'")}', '${item.lat}', '${item.lon}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         <span style="font-size: 14px; color: #334155; line-height: 1.4;">${shortName}</span>
                     </li>
@@ -175,8 +187,12 @@ window.searchLocation = async function (query) {
     }, 500);
 };
 
-window.selectLocation = function(name) {
+window.selectLocation = function(name, lat, lng) {
     document.getElementById('manualLocation').value = name;
+    if (lat && lng) {
+        window.currentLat = parseFloat(lat);
+        window.currentLng = parseFloat(lng);
+    }
     document.getElementById('locationSuggestions').style.display = 'none';
     const statusText = document.getElementById('locationStatus');
     statusText.style.display = 'block';

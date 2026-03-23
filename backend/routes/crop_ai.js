@@ -4,6 +4,20 @@ const MONTH_MAP = {
     9: 'September', 10: 'October', 11: 'November', 12: 'December'
 };
 
+const cleanVarietyName = (cropName, varietyName) => {
+    let cleanVariety = (varietyName || '').trim();
+    const cName = (cropName || '').trim();
+    if (cName && cleanVariety.startsWith(cName)) {
+        let tmp = cleanVariety.substring(cName.length).trim();
+        if (tmp.startsWith('(') && tmp.endsWith(')')) {
+            cleanVariety = tmp.substring(1, tmp.length - 1).trim();
+        } else if (tmp) {
+            cleanVariety = tmp;
+        }
+    }
+    return cleanVariety;
+};
+
 export const suggestCrop = async (request, env) => {
     try {
         const url = new URL(request.url);
@@ -418,7 +432,8 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
 
         // 6. CACHING AND NEW MASTER TRACKING!
         const cropNameToSave = isNewVarietySearch ? cropString.trim() : targetCropName;
-        const varietyNameToSave = isNewVarietySearch ? finalVarietyName : targetVarietyName;
+        let rawVarietyNameToSave = isNewVarietySearch ? finalVarietyName : targetVarietyName;
+        const varietyNameToSave = cleanVarietyName(cropNameToSave, rawVarietyNameToSave);
 
         // If AI found a completely new variety, store it into Master Table as Unverified!
         if (isNewVarietySearch && varietyNameToSave !== targetVarietyName) {

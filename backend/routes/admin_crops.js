@@ -1,5 +1,19 @@
 import { error, json } from 'itty-router';
 
+const formatVarietyName = (cropName, varietyName) => {
+    let cleanVariety = (varietyName || '').trim();
+    const cName = (cropName || '').trim();
+    if (cName && cleanVariety.startsWith(cName)) {
+        let tmp = cleanVariety.substring(cName.length).trim();
+        if (tmp.startsWith('(') && tmp.endsWith(')')) {
+            cleanVariety = tmp.substring(1, tmp.length - 1).trim();
+        } else if (tmp) {
+            cleanVariety = tmp;
+        }
+    }
+    return cleanVariety;
+};
+
 export const getMasterCrops = async (request, env) => {
     try {
         const query = `
@@ -36,8 +50,10 @@ export const addMasterCrop = async (request, env) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
+        const cleanedVariety = formatVarietyName(data.crop_name, data.variety_name);
+
         await env.DB.prepare(insertQuery).bind(
-            data.crop_category, data.crop_name, data.variety_name,
+            data.crop_category, data.crop_name, cleanedVariety,
             data.suitable_regions, data.soil_type, data.base_yield_per_shotangsho_kg,
             data.avg_duration_days, data.disease_resistance, data.special_features,
             data.data_source
@@ -62,8 +78,10 @@ export const editMasterCrop = async (request, env) => {
             WHERE id = ?
         `;
 
+        const cleanedVariety = formatVarietyName(data.crop_name, data.variety_name);
+
         await env.DB.prepare(updateQuery).bind(
-            data.crop_category, data.crop_name, data.variety_name,
+            data.crop_category, data.crop_name, cleanedVariety,
             data.suitable_regions, data.soil_type, data.base_yield_per_shotangsho_kg,
             data.avg_duration_days, data.disease_resistance, data.special_features,
             data.data_source, id
@@ -95,6 +113,7 @@ export const addBulkMasterCrops = async (request, env) => {
         }
 
         const statements = crops.map(c => {
+            const cleanedVariety = formatVarietyName(c.crop_name, c.variety_name);
             return env.DB.prepare(`
                 INSERT INTO crops_master_data (
                     crop_category, crop_name, variety_name, suitable_regions, 
@@ -102,7 +121,7 @@ export const addBulkMasterCrops = async (request, env) => {
                     disease_resistance, special_features, data_source
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).bind(
-                c.crop_category, c.crop_name, c.variety_name,
+                c.crop_category, c.crop_name, cleanedVariety,
                 c.suitable_regions, c.soil_type, c.base_yield_per_shotangsho_kg,
                 c.avg_duration_days, c.disease_resistance, c.special_features,
                 c.data_source

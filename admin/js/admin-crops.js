@@ -12,6 +12,11 @@ window.switchTab = function (tabName) {
     document.getElementById('tabPending').style.color = tabName === 'pending' ? 'var(--primary)' : 'var(--text-muted)';
     document.getElementById('tabPending').style.borderBottomColor = tabName === 'pending' ? 'var(--primary)' : 'transparent';
 
+    const verifyBtn = document.getElementById('aiVerifyActionContainer');
+    if (verifyBtn) {
+        verifyBtn.style.display = tabName === 'pending' ? 'block' : 'none';
+    }
+
     handleSearch();
 }
 
@@ -86,6 +91,17 @@ function renderCropsTable(crops) {
     }
 
     tbody.innerHTML = crops.map(crop => {
+        let cleanVariety = (crop.variety_name || '').trim();
+        const cName = (crop.crop_name || '').trim();
+        if (cName && cleanVariety.startsWith(cName)) {
+            let tmp = cleanVariety.substring(cName.length).trim();
+            if (tmp.startsWith('(') && tmp.endsWith(')')) {
+                cleanVariety = tmp.substring(1, tmp.length - 1).trim();
+            } else if (tmp) {
+                cleanVariety = tmp;
+            }
+        }
+
         let actionButtons = '';
         if (currentTab === 'verified') {
             actionButtons = `
@@ -94,6 +110,7 @@ function renderCropsTable(crops) {
             `;
         } else {
             actionButtons = `
+                <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px; border-color: #2563EB; background: #2563EB;" onclick="triggerAIVerification(${crop.id})">Verify</button>
                 <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px; border-color: #10B981; background: #10B981;" onclick="updatePendingStatus(${crop.id}, 1)">Approve</button>
                 <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);" onclick="updatePendingStatus(${crop.id}, -1)">Reject</button>
             `;
@@ -104,7 +121,7 @@ function renderCropsTable(crops) {
                 <td style="color: var(--text-muted);">#${crop.id}</td>
                 <td><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--primary);">${escapeHtml(crop.crop_category || 'N/A')}</span></td>
                 <td style="font-weight: 500;">${escapeHtml(crop.crop_name)}</td>
-                <td>${escapeHtml(crop.variety_name || '')}</td>
+                <td>${escapeHtml(cleanVariety || '')}</td>
                 <td><span style="font-size: 11px; background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">${escapeHtml(crop.planting_months || 'N/A')}</span></td>
                 <td><span style="font-size: 11px; background: #fce7f3; color: #be185d; padding: 2px 6px; border-radius: 4px;">${crop.disease_resistance_score || 'N/A'}/10</span></td>
                 <td style="font-weight: 600;">${crop.base_yield_per_shotangsho_kg || 0}</td>
@@ -146,6 +163,69 @@ window.updatePendingStatus = async function (id, statusVal) {
         }
     } catch (error) {
         alert('Server connection failed.');
+    }
+}
+
+window.triggerAIVerification = async function (cropId = null) {
+    if (!cropId) {
+        const pendingCount = globalCrops.filter(c => c.verified_status === 0).length;
+        if (pendingCount === 0) {
+            alert("কোনো পেন্ডিং ফসল নেই ভেরিফাই করার জন্য!");
+            return;
+        }
+        if (!confirm('আপনি কি পেন্ডিং ফসলগুলোর জন্য ম্যানুয়ালি এআই ভেরিফিকেশন শুরু করতে চান? এটি কিছু সময় নিতে পারে।')) return;
+    } else {
+        if (!confirm('আপনি কি শুধুমাত্র নির্দিষ্ট এই ফসলটির জন্য এআই ভেরিফিকেশন শুরু করতে চান?')) return;
+    }
+
+    const token = localStorage.getItem('agritech_admin_token');
+    
+    const btn = document.getElementById('btnAiVerifyGlobal');
+    const spinner = document.getElementById('aiVerifySpinner');
+    const icon = document.getElementById('aiVerifyIcon');
+    const text = document.getElementById('aiVerifyText');
+
+    if (btn) btn.disabled = true;
+    if (spinner) spinner.style.display = 'block';
+    if (icon) icon.style.display = 'none';
+    if (text) text.textContent = 'ভেরিফাই হচ্ছে...';
+
+    const payload = cropId ? { cropId } : {};
+
+    try {
+        const response = await fetch(`${window.ADMIN_CONFIG?.API_BASE_URL || 'https://agritech-backend.mobashwir9.workers.dev'}/api/admin/trigger-ai-verification`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            let msg = 'ভেরিফিকেশন সিকোয়েন্স সম্পন্ন হয়েছে!\n';
+            if (data.details) {
+                msg += `মোট প্রোসেস করা হয়েছে: ${data.details.processedCount || 0} টি\n`;
+                msg += `সফল হয়েছে: ${data.details.successCount || 0} টি\n`;
+                msg += `ব্যর্থ হয়েছে: ${data.details.failedCount || 0} টি\n`;
+                if (data.details.messages && data.details.messages.length > 0) {
+                   console.log("Verification Logs:", data.details.messages);
+                }
+            }
+            alert(msg);
+            fetchCrops();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Server connection failed.');
+        console.error(error);
+    } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        icon.style.display = 'block';
+        text.textContent = 'ম্যানুয়ালি এআই ভেরিফাই করুন';
     }
 }
 

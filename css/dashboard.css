@@ -346,7 +346,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 24px 0 16px;
+    margin: 8px 0 16px;
     padding-left: 4px;
 }
 
@@ -849,7 +849,7 @@
     background: white;
     z-index: 1001;
     transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-    box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
 }
@@ -916,9 +916,20 @@
     border-bottom: none;
 }
 
-.w-day { font-weight: 600; width: 60px; font-size: 15px; }
-.w-icon { font-size: 24px; }
-.w-temp { font-weight: 700; font-size: 15px; }
+.w-day {
+    font-weight: 600;
+    width: 60px;
+    font-size: 15px;
+}
+
+.w-icon {
+    font-size: 24px;
+}
+
+.w-temp {
+    font-weight: 700;
+    font-size: 15px;
+}
 
 /* Desktop override simply constraints max-width for Dashboard since it's an app view */
 @media (min-width: 900px) {

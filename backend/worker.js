@@ -5,12 +5,17 @@ import { withAuth } from './utils.js';
 import { adminLogin, adminDashboard } from './routes/admin.js';
 import { getMasterCrops, addMasterCrop, editMasterCrop, deleteMasterCrop, addBulkMasterCrops, updateCropStatus } from './routes/admin_crops.js';
 import { getAdminCache, saveAdminCache, deleteAdminCache, generateAdminCacheAI } from './routes/admin_cache.js';
+import { getAdminSettings, saveAdminSettings } from './routes/admin_settings.js';
 import { verifyFirebase, updateProfile, checkUser, loginPin } from './routes/auth.js';
 import { createFarm, getFarms, getFarmDetails, updateFarm, deleteFarm } from './routes/farms.js';
-import { saveCropTimeline, searchCrops, updateCropState } from './routes/crops.js';
+import { saveCropTimeline, searchCrops, updateCropState, deleteCrop, completeCrop, updateCropStatusManually, addCropNote } from './routes/crops.js';
 import { predictCrop, suggestCrop } from './routes/crop_ai.js';
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
+import { getTransactions, addTransaction, deleteTransaction } from './routes/transactions.js';
+import { generateCropReport } from './services/pdfReportGenerator.js';
+import { checkOverdueTasks } from './services/taskChecker.js';
+import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
 
 const router = Router();
 
@@ -26,6 +31,23 @@ router.post('/api/admin/crops', withAuth(['admin']), addMasterCrop);
 router.put('/api/admin/crops/:id', withAuth(['admin']), editMasterCrop);
 router.put('/api/admin/crops/:id/status', withAuth(['admin']), updateCropStatus);
 router.delete('/api/admin/crops/:id', withAuth(['admin']), deleteMasterCrop);
+router.get('/api/admin/settings', withAuth(['admin']), getAdminSettings);
+router.post('/api/admin/settings', withAuth(['admin']), saveAdminSettings);
+router.get('/api/admin/test/weather-sync', withAuth(['admin']), testWeatherSync);
+router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (request, env) => {
+    try {
+        let cropId = null;
+        try {
+            const body = await request.json();
+            cropId = body.cropId || null;
+        } catch(e) {} // ignore empty bodies
+        
+        const stats = await runCropVerification(env, cropId);
+        return Response.json({ success: true, message: 'AI Verification cycle executed successfully.', details: stats });
+    } catch(e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+});
 
 // 2.5 Admin Cache Routes
 router.get('/api/admin/cache', withAuth(['admin']), getAdminCache);
@@ -47,11 +69,20 @@ router.put('/api/farms/:id', withAuth(['farmer']), updateFarm);
 router.delete('/api/farms/:id', withAuth(['farmer']), deleteFarm);
 
 // 3.6 Public Crop AI & Timeline Routes
+router.get('/api/public/cache', withAuth(['farmer']), getAdminCache);
 router.get('/api/ai/suggest-crop', withAuth(['farmer']), suggestCrop);
 router.get('/api/ai/predict-crop', withAuth(['farmer']), predictCrop);
 router.get('/api/crops/search', withAuth(['farmer']), searchCrops);
 router.post('/api/crops', withAuth(['farmer']), saveCropTimeline);
 router.put('/api/crops/:id/state', withAuth(['farmer']), updateCropState);
+router.delete('/api/crops/:id', withAuth(['farmer']), deleteCrop);
+router.put('/api/crops/:id/complete', withAuth(['farmer']), completeCrop);
+router.put('/api/crops/:id/status', withAuth(['farmer']), updateCropStatusManually);
+router.post('/api/crops/:id/notes', withAuth(['farmer']), addCropNote);
+router.get('/api/crops/:id/report', withAuth(['farmer']), generateCropReport);
+router.get('/api/crops/:id/transactions', withAuth(['farmer']), getTransactions);
+router.post('/api/crops/:id/transactions', withAuth(['farmer']), addTransaction);
+router.delete('/api/crops/:id/transactions/:txId', withAuth(['farmer']), deleteTransaction);
 
 // 4. AI Engine Sub-Router (Admin Only - auth handled in sub-router)
 router.all('/api/admin/ai/*', aiRouter.handle);
@@ -89,6 +120,10 @@ export default {
     },
     async scheduled(event, env, ctx) {
         // Triggered by Cloudflare Cron Trigger (e.g. daily at midnight)
-        ctx.waitUntil(runCropVerification(env));
+        ctx.waitUntil(Promise.allSettled([
+            runCropVerification(env),
+            checkOverdueTasks(env),
+            syncWeatherData(env)
+        ]));
     }
 };

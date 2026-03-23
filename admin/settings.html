@@ -147,19 +147,28 @@
 
                     <div class="form-group">
                         <label class="form-label">বাল্ক SMS এপিআই কী (BulkSMSBD)</label>
-                        <input type="password" class="form-input" value="1234567890abcdef">
+                        <input type="password" id="bulkSmsKey" class="form-input" value="">
                     </div>
                     <div class="form-group">
                         <label class="form-label">aamarPay Store ID</label>
-                        <input type="text" class="form-input" value="agritech_store">
+                        <input type="text" id="aamarPayId" class="form-input" value="">
                     </div>
                     <div class="form-group">
                         <label class="form-label">aamarPay Signature Key</label>
-                        <input type="password" class="form-input" value="secret_signature_key">
+                        <input type="password" id="aamarPayKey" class="form-input" value="">
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--border-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; margin: 0 0 16px 0;">অন্যান্য সার্ভিসেস</h4>
+                        <div class="form-group">
+                            <label class="form-label">ওয়েদার এপিআই কী (OpenWeatherMap বা WeatherAPI) <span style="color:red">*</span></label>
+                            <input type="text" id="weatherApiKey" class="form-input" placeholder="যেমন: abcdef1234567..." value="">
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">কৃষক জমির লোকেশন থেকে ডায়নামিক আবহাওয়ার ঝুঁকি মাপতে ব্যবহৃত হবে।</p>
+                        </div>
                     </div>
 
                     <div style="margin-top: 32px; text-align: right;">
-                        <button class="btn-primary" onclick="alert('API Keys সফলভাবে সেভ হয়েছে!')">সেভ API Keys</button>
+                        <button class="btn-primary" onclick="saveAdminSettingsApi(this)">সেভ API Keys</button>
                     </div>
                 </div>
             </div>
@@ -169,7 +178,59 @@
 
     <script src="js/admin-components.js"></script>
     <script>
+        const API_URL = 'https://agritech-backend.mobashwir9.workers.dev';
+
+        async function fetchAdminSettingsApi() {
+            const token = localStorage.getItem('agritech_admin_token');
+            if(!token) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/settings`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if(data.success && data.settings) {
+                    if(data.settings.weather_api_key) document.getElementById('weatherApiKey').value = data.settings.weather_api_key;
+                    if(data.settings.bulk_sms_key) document.getElementById('bulkSmsKey').value = data.settings.bulk_sms_key;
+                    if(data.settings.aamarpay_id) document.getElementById('aamarPayId').value = data.settings.aamarpay_id;
+                    if(data.settings.aamarpay_key) document.getElementById('aamarPayKey').value = data.settings.aamarpay_key;
+                }
+            } catch(e) { console.error("Could not load API Settings", e); }
+        }
+
+        async function saveAdminSettingsApi(btn) {
+            const token = localStorage.getItem('agritech_admin_token');
+            const payload = {
+                weather_api_key: document.getElementById('weatherApiKey')?.value || '',
+                bulk_sms_key: document.getElementById('bulkSmsKey')?.value || '',
+                aamarpay_id: document.getElementById('aamarPayId')?.value || '',
+                aamarpay_key: document.getElementById('aamarPayKey')?.value || ''
+            };
+
+            const originalText = btn.textContent;
+            btn.textContent = 'হচ্ছে...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/settings`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('API Keys সফলভাবে ডাটাবেসে সেভ হয়েছে!');
+                } else {
+                    alert(data.error || 'Error processing APIs');
+                }
+            } catch(e) {
+                alert('Connection Error');
+            }
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+             fetchAdminSettingsApi();
              // Set active menu item after components load
              setTimeout(() => {
                 const navItems = document.querySelectorAll('.nav-item');
