@@ -47,9 +47,9 @@
             <!-- Tabs -->
             <div class="ai-tabs">
                 <button class="ai-tab-btn active" onclick="switchAITab('tab-overview')">ওভারভিউ</button>
-                <button class="ai-tab-btn" onclick="switchAITab('tab-crop-prediction')">স্মার্ট ক্রপ প্রেডিকশন</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-api-management')">API টোকেন ম্যানেজমেন্ট</button>
+                <button class="ai-tab-btn" onclick="switchAITab('tab-config')">প্রম্পট স্টুডিও</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-crop-doctor')">ক্রপ ডাক্তার</button>
-                <button class="ai-tab-btn" onclick="switchAITab('tab-config')">ইঞ্জিন কনফিগারেশন</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-rag')">নলেজ বেস (RAG)</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-logs')">সিস্টেম লগস</button>
             </div>
@@ -59,298 +59,325 @@
                 <div class="metrics-grid">
                     <div class="metric-card highlight">
                         <div class="mc-title">
-                            Gemini API (ফ্রি টায়ার)
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 16 16 12 12 8"></polyline>
-                                <line x1="8" y1="12" x2="16" y2="12"></line>
-                            </svg>
+                            API Key Health (কিয়ার স্ট্যাটাস)
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                         </div>
-                        <div class="mc-value"><span id="stats-active-keys">০</span> <span
-                                style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ ১০
-                                (অ্যাক্টিভ)</span></div>
+                        <div class="mc-value" style="display: flex; align-items: baseline; gap: 4px;">
+                            <span id="stats-active-keys">০</span>
+                            <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">/ <span id="stats-total-keys">০</span> (অ্যাক্টিভ)</span>
+                        </div>
                         <div class="progress-container">
                             <div id="stats-keys-progress" class="progress-fill" style="width: 0%;"></div>
                         </div>
-                        <div class="mc-subinfo"><span id="stats-keys-subtext">সর্বোচ্চ ১০টি Key বসানো যাবে</span></div>
+                        <div class="mc-subinfo"><span id="stats-keys-subtext">আনলিমিটেড ফ্রি-টায়ার কি বসানো যাবে</span></div>
                     </div>
 
                     <div class="metric-card">
-                        <div class="mc-title">মোট টোকেন ব্যবহার</div>
-                        <div class="mc-value" id="stats-tokens-used">০</div>
-                        <div class="progress-container">
-                            <div class="progress-fill warning" style="width: 0%;"></div>
-                        </div>
-                        <div class="mc-subinfo"><span>সর্বমোট হিসাব (Tokens)</span></div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="mc-title">মোট রিকোয়েস্ট (Queries)</div>
+                        <div class="mc-title">টোটাল এআই রিকোয়েস্ট (Queries)</div>
                         <div class="mc-value" id="stats-total-queries">০</div>
-                        <div class="mc-subinfo success"><span>+০% গত সপ্তাহের তুলনায়</span></div>
+                        <div class="mc-subinfo success"><span>সমস্ত মডিউল মিলিয়ে</span></div>
                     </div>
 
                     <div class="metric-card">
-                        <div class="mc-title">ক্রপ ডাক্তার স্ক্যান</div>
-                        <div class="mc-value" id="stats-doctor-queries">০</div>
-                        <div class="mc-subinfo warning"><span id="stats-doctor-subtext">০টি ফেইল করেছে</span></div>
+                        <div class="mc-title">সাফল্য বা ভেরিফিকেশন রেট</div>
+                        <div class="mc-value" id="stats-success-rate">০%</div>
+                        <div class="progress-container">
+                            <div id="stats-success-progress" class="progress-fill warning" style="width: 0%; background: #10B981;"></div>
+                        </div>
+                        <div class="mc-subinfo"><span style="color: var(--danger);">ব্যর্থতা: <span id="stats-failed-rate">০</span>% (কোটা লিমিটের কারণে)</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="mc-title">সিস্টেমের সময় ও অর্থ সাশ্রয়</div>
+                        <div class="mc-value" id="stats-hours-saved">০ ঘণ্টা</div>
+                        <div class="mc-subinfo success"><span>AI দ্বারা স্বয়ংক্রিয়ভাবে এত ঘণ্টার কাজ বাঁচানো হয়েছে</span></div>
                     </div>
                 </div>
 
-                <!-- Trending Topics (Placeholder) -->
-                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
-                    <h3 class="form-title">জনপ্রিয় অনুসন্ধান (Trending)</h3>
-                    <div id="stats-trending" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <span
-                            style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">লোডিং...</span>
+                <!-- NEW: Crop Doctor Vision Metrics Row -->
+                <div style="margin-top: 24px;">
+                    <h3 class="form-title" style="margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+                            <path d="M2 12h4l2-9 5 18 3-10h6"></path>
+                        </svg>
+                        ক্রপ ডাক্তার - ভিশন এআই পারফরম্যান্স
+                    </h3>
+                    <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="metric-card" style="border-left: 4px solid #3b82f6;">
+                            <div class="mc-title">সর্বমোট স্ক্যান প্রসেসড</div>
+                            <div class="mc-value" id="stats-vision-scans">০</div>
+                            <div class="mc-subinfo" style="color: var(--text-muted);"><span>ছবি থেকে রোগ শনাক্তকরণ</span></div>
+                        </div>
+                        <div class="metric-card" style="border-left: 4px solid #10b981;">
+                            <div class="mc-title">রোগ শনাক্তকরণের হার</div>
+                            <div class="mc-value" id="stats-vision-rate">০%</div>
+                            <div class="mc-subinfo success"><span>অজানা বা ভুল ছবি ব্যতীত</span></div>
+                        </div>
+                        <div class="metric-card" style="border-left: 4px solid #f59e0b;">
+                            <div class="mc-title">সর্বোচ্চ শনাক্তকৃত রোগ</div>
+                            <div class="mc-value" id="stats-vision-top-disease" style="font-size: 20px; text-transform: capitalize;">নেই</div>
+                            <div class="mc-subinfo warning"><span id="stats-vision-disease-list">ডেটা লোড হচ্ছে...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+                    <!-- LEFT COLUMN -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                            <h3 class="form-title">কোন ফিচারে AI কতবার ব্যবহৃত হয়েছে?</h3>
+                            <div id="stats-feature-breakdown" style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="color: var(--text-muted); font-size: 14px;">লোডিং...</div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                            <h3 class="form-title">এআই কোটা রিফ্রেশ টাইমার</h3>
+                            <ul id="stats-exhausted-keys" style="margin: 0; padding-left: 20px; font-size: 14px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                                <li>লোডিং...</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                            <h3 class="form-title">জনপ্রিয় অনুসন্ধান (Trending)</h3>
+                            <div id="stats-trending" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <span style="background: var(--bg-hover); padding: 8px 16px; border-radius: 20px; font-size: 14px;">লোডিং...</span>
+                            </div>
+                        </div>
+
+                        <div class="card" style="box-shadow: none; border: 1px solid var(--border-color);">
+                            <h3 class="form-title" style="color: var(--danger);">রিসেন্ট ফল সার্ভার লগস (Error Logs)</h3>
+                            <div style="overflow-x: auto;">
+                                <table class="log-table" style="font-size: 13px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>Crop</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stats-error-logs">
+                                        <tr><td colspan="3" style="text-align: center;">লোডিং...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB: Crop Prediction -->
-            <div id="tab-crop-prediction" class="ai-tab-pane">
-                <div class="split-layout">
-                    <div>
-                        <div class="form-section">
-                            <h3 class="form-title">স্মার্ট প্ল্যান লজিক ও বেসলাইন</h3>
-                            <div class="form-group">
-                                <label>ফসল নির্বাচন করুন</label>
-                                <select id="pred-crop-select" class="form-control">
-                                    <option>নতুন ফসল নির্বাচন করুন...</option>
-                                </select>
+            <!-- TAB: API Management -->
+            <div id="tab-api-management" class="ai-tab-pane">
+                
+                <!-- Compact System Settings Matrix -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <!-- Kill Switch -->
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--danger);">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                                <span style="font-size: 14px; font-weight: 600; color: #991B1B;">এআই ইমার্জেন্সি কিল-সুইচ</span>
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="form-group">
-                                    <label>গড় ফলন (প্রতি শতাংশ)</label>
-                                    <input id="pred-avg-yield" type="text" class="form-control"
-                                        placeholder="যেমন: ৫০-৬০ মণ">
-                                </div>
-                                <div class="form-group">
-                                    <label>গড় খরচ (প্রতি শতাংশ)</label>
-                                    <input id="pred-avg-cost" type="text" class="form-control"
-                                        placeholder="যেমন: ৳ ১৮,০০০">
-                                </div>
-                            </div>
-                            <button id="btn-save-pred" class="btn-primary" style="padding: 10px 16px;">বেসলাইন আপডেট
-                                করুন</button>
+                            <div id="emergency-status-text" style="font-size: 12px; color: #DC2626;">বর্তমান স্ট্যাটাস: চালু আছে (Active)</div>
                         </div>
-
-                        <div class="form-section">
-                            <h3 class="form-title">রিস্ক ও অ্যালার্ট সোর্স (Weather & Pests)</h3>
-                            <div class="form-group">
-                                <label>বহিরাগত API ইন্টিগ্রেশন</label>
-                                <select class="form-control" style="margin-bottom: 12px;">
-                                    <option>OpenWeatherMap API (অ্যাক্টিভ)</option>
-                                    <option>BAMD Database API</option>
-                                </select>
-                                <div
-                                    style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                    <div style="font-size: 13px;">ভারী বৃষ্টির সতর্কবার্তা চালু আছে</div>
-                                    <label
-                                        style="position: relative; display: inline-block; width: 40px; height: 24px;">
-                                        <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
-                                        <span
-                                            style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); border-radius: 24px; transition: .4s;">
-                                            <span
-                                                style="position: absolute; content: ''; height: 18px; width: 18px; left: 19px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s;"></span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                        <style>
+                            .em-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                            .em-toggle input { opacity: 0; width: 0; height: 0; }
+                            .em-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--success, #10B981); border-radius: 24px; transition: .4s; }
+                            .em-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; }
+                            .em-toggle input:checked + .em-slider { background-color: var(--danger, #EF4444); }
+                            .em-toggle input:checked + .em-slider:before { transform: translateX(20px); }
+                        </style>
+                        <label class="em-toggle">
+                            <input type="checkbox" id="config-emergency">
+                            <span class="em-slider"></span>
+                        </label>
                     </div>
 
-                    <div>
-                        <div class="form-section" style="height: 100%;">
-                            <h3 class="form-title">সর্বশেষ জেনারেটেড টাইমলাইন</h3>
-                            <div id="pred-timeline" style="display: flex; flex-direction: column; gap: 12px;">
-                                <div style="color: var(--text-muted); padding: 10px;">এখনও কোনো প্রেডিকশন জেনারেট হয়নি।
-                                </div>
-                            </div>
+                    <!-- Vector DB -->
+                    <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--primary);">
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                            Cloudflare Vectorize DB ID
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input id="config-vectorize-id" type="text" class="form-control" value="agritech_knowledge_db" readonly style="background: #f8fafc; padding: 8px 12px; font-size: 13px; flex: 1; border: 1px dashed var(--border-color);">
+                            <span style="font-size: 11px; color: var(--text-muted); padding: 4px 8px; background: #E2E8F0; border-radius: 4px;">Read-only</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="form-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <div>
+                            <h3 class="form-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                                </svg>
+                                API Control & Quota Management
+                            </h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">সিস্টেমের জেনারেটিভ এআই অ্যাক্সেস ও লিমিট এখান থেকে রিয়েল-টাইমে মনিটর করুন।</p>
+                        </div>
+                        <button class="btn-primary" style="display: flex; align-items: center; gap: 6px; padding: 10px 16px;" onclick="document.getElementById('add-api-key-modal').style.display='flex'">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                            নতুন API Key যুক্ত করুন
+                        </button>
+                    </div>
+
+                    <div style="overflow-x: auto; background: white; border: 1px solid var(--border-color); border-radius: 8px;">
+                        <table class="log-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 12px 16px; text-align: left; background: #F8FAFC; border-bottom: 1px solid var(--border-color);">API Key</th>
+                                    <th style="padding: 12px 16px; text-align: center; background: #F8FAFC; border-bottom: 1px solid var(--border-color);">স্ট্যাটাস</th>
+                                    <th style="padding: 12px 16px; text-align: right; background: #F8FAFC; border-bottom: 1px solid var(--border-color);">আজকের কল</th>
+                                    <th style="padding: 12px 16px; text-align: right; background: #F8FAFC; border-bottom: 1px solid var(--border-color);">মোট কল</th>
+                                    <th style="padding: 12px 16px; text-align: center; background: #F8FAFC; border-bottom: 1px solid var(--border-color);">অ্যাকশন / টাইমার</th>
+                                </tr>
+                            </thead>
+                            <tbody id="api-keys-tbody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">ডেটা লোড হচ্ছে...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="api-pagination-container" style="padding: 0 0 16px 0;"></div>
                 </div>
             </div>
 
             <!-- TAB: Crop Doctor -->
             <div id="tab-crop-doctor" class="ai-tab-pane">
-                <div class="split-layout">
-                    <div>
-                        <div class="form-section">
-                            <h3 class="form-title">রোগ ও সমাধান কনফিগারেশন</h3>
-                            <div class="form-group">
-                                <label>স্ক্যান রুলস ও মেডিসিন রেকমেন্ডেশন</label>
-                                <textarea id="doctor-rules-input" class="form-control" rows="4"
-                                    placeholder="এখানে ক্রপ ডাক্তারের রুলসগুলো লিখুন..."></textarea>
-                                <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি
-                                    AI ইঞ্জিনকে স্ক্যানের রেজাল্টের সাথে যুক্ত করা হবে।</p>
-                            </div>
-                            <button id="btn-save-doctor-rules" class="btn-primary" style="padding: 10px 16px;">সেভ
-                                করুন</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-section" style="background: #FEF2F2; border-color: #FECACA;">
-                            <h3 class="form-title" style="color: var(--danger);">স্ক্যানিং ফেইলর লগস (Low Confidence)
-                            </h3>
-                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">যে ছবিগুলো এআই
-                                সঠিকভাবে চিনতে পারেনি, সেগুলোর ম্যানুয়াল রিভিউ প্রয়োজন।</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <button class="btn-primary doctor-subtab-btn" onclick="switchDoctorTab('doc-settings', this)" style="padding: 8px 16px; border-radius: 6px;">Diagnostic Settings</button>
+                    <button class="btn-outline doctor-subtab-btn" onclick="switchDoctorTab('doc-sandbox', this)" style="padding: 8px 16px; border-radius: 6px;">Test Sandbox</button>
+                    <button class="btn-outline doctor-subtab-btn" onclick="switchDoctorTab('doc-logs', this)" style="padding: 8px 16px; border-radius: 6px;">Scan Logs</button>
+                </div>
+                
+                <script>
+                    function switchDoctorTab(tabId, btnElement) {
+                        document.querySelectorAll('.doctor-subtab-pane').forEach(el => el.style.display = 'none');
+                        document.querySelectorAll('.doctor-subtab-btn').forEach(el => {
+                            el.classList.remove('btn-primary');
+                            el.classList.add('btn-outline');
+                        });
+                        document.getElementById(tabId).style.display = 'block';
+                        btnElement.classList.remove('btn-outline');
+                        btnElement.classList.add('btn-primary');
 
-                            <div id="doctor-failure-list">
-                                <div style="padding: 10px; color: var(--text-muted);">ফেইল হওয়া কোনো স্ক্যান পাওয়া
-                                    যায়নি।</div>
-                            </div>
+                        const url = new URL(window.location);
+                        url.searchParams.set('doc_tab', tabId);
+                        window.history.replaceState({}, '', url);
+                    }
+                </script>
+
+                <!-- Diagnostic Settings -->
+                <div id="doc-settings" class="doctor-subtab-pane" style="display: block;">
+                    <div class="form-section">
+                        <h3 class="form-title">রোগ ও সমাধান কনফিগারেশন</h3>
+                        <div class="form-group">
+                            <label>স্ক্যান রুলস (Diagnostic Settings)</label>
+                            <textarea id="doctor-rules-input" class="form-control" rows="8"
+                                placeholder="এখানে ক্রপ ডাক্তারের রুলসগুলো লিখুন..."></textarea>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি AI ইঞ্জিনকে স্ক্যানের রেজাল্টের সাথে যুক্ত করা হবে।</p>
+                        </div>
+                        <button id="btn-save-doctor-rules" class="btn-primary" style="padding: 10px 16px;">সেভ করুন</button>
+                    </div>
+                </div>
+
+                <!-- Test Sandbox -->
+                <div id="doc-sandbox" class="doctor-subtab-pane" style="display: none;">
+                    <div class="form-section">
+                        <h3 class="form-title text-primary">স্ক্যানার স্যান্ডবক্স (Testing)</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">সরাসরি ছবি আপলোড করে টেস্ট করুন AI ঠিকমতো রোগ ধরতে পারছে কিনা।</p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px;">
+                            <input type="file" id="sandbox-image-upload" accept="image/*" style="flex: 1; padding: 6px; border: 1px dashed var(--border-color); border-radius: 6px;">
+                            <button id="btn-sandbox-scan" class="btn-primary" style="white-space: nowrap;">স্ক্যান করুন</button>
+                        </div>
+                        
+                        <div id="sandbox-result-box" style="display: none; margin-top: 15px;">
                         </div>
                     </div>
                 </div>
 
-                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-top: 24px;">
-                    <h3 class="form-title">সাম্প্রতিক সফল স্ক্যান (Live Feed)</h3>
-                    <div style="overflow-x: auto;">
-                        <table class="log-table">
-                            <thead>
-                                <tr>
-                                    <th>ছবি</th>
-                                    <th>ইউজার</th>
-                                    <th>শনাক্তকৃত রোগ</th>
-                                    <th>এআই নিশ্চয়তা</th>
-                                    <th>সময়</th>
-                                </tr>
-                            </thead>
-                            <tbody id="doctor-success-tbody">
-                                <tr>
-                                    <td colspan="5" style="text-align:center; padding: 20px;">নতুন কোনো স্ক্যান রেকর্ড
-                                        নেই।</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Scan Logs -->
+                <div id="doc-logs" class="doctor-subtab-pane" style="display: none;">
+                    <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 class="form-title" style="margin: 0;">সম্পূর্ণ স্ক্যান লগস (Scan History)</h3>
+                            <button id="refresh-logs-btn" class="btn-outline-primary" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                                রিফ্রেশ
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="log-table" style="font-size: 13px; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>লগ ID</th>
+                                        <th>ছবি</th>
+                                        <th>ইউজার / খামার</th>
+                                        <th>ফলাফল / কনফিডেন্স</th>
+                                        <th>JSON ডেটা</th>
+                                        <th>সময়</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="doctor-full-logs-tbody">
+                                    <tr><td colspan="6" style="text-align:center;">ডেটা লোড হচ্ছে...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB: Config -->
+            <!-- TAB: Prompt Studio -->
             <div id="tab-config" class="ai-tab-pane">
-                <div class="form-section">
-                    <h3 class="form-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                            <line x1="12" y1="2" x2="12" y2="12"></line>
-                        </svg>
-                        এআই ইমার্জেন্সি কিল-সুইচ
-                    </h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">এপিআই খরচ বেড়ে গেলে বা
-                        গ্লোবাল লিমিট ক্রস করলে এখান থেকে সাময়িকভাবে এআই সার্ভিস বন্ধ করতে পারবেন।</p>
+                <div class="form-section" style="padding-top: 10px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; overflow-x: auto;" id="prompt-subtabs">
+                        <!-- Dynamically populated subtabs -->
+                        <button class="btn-outline active" style="padding: 8px 16px; border-radius: 6px;">Loading...</button>
+                    </div>
 
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; background: #FEF2F2; border: 1px solid #FECACA; padding: 16px; border-radius: 8px;">
-                        <div>
-                            <div style="font-size: 14px; font-weight: 600; color: #991B1B;">সিস্টেম ওয়াইড এআই এক্সেস
-                                (AI Access)</div>
-                            <div id="emergency-status-text" style="font-size: 12px; color: #DC2626;">বর্তমান স্ট্যাটাস:
-                                চালু আছে (Enabled)</div>
-                        </div>
-                        <label style="position: relative; display: inline-block; width: 48px; height: 28px;">
-                            <input type="checkbox" id="config-emergency" style="opacity: 0; width: 0; height: 0;">
-                            <span
-                                style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); border-radius: 28px; transition: .4s;">
-                                <span
-                                    style="position: absolute; content: ''; height: 20px; width: 20px; left: 24px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s;"
-                                    class="toggle-circle"></span>
-                            </span>
+                    <input type="hidden" id="current-prompt-key">
+
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            System Role (Identity)
+                            <span style="font-size: 12px; font-weight: normal; color: var(--primary);">System Prompt</span>
                         </label>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 class="form-title" style="margin: 0;">API Credentials (Round Robin)</h3>
-                        <button class="btn-outline-primary"
-                            style="padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 4px;"
-                            onclick="addApiKeyRow()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            নতুন কী যুক্ত করুন
-                        </button>
+                        <textarea id="prompt-system-role" class="form-control" style="font-family: monospace; resize: vertical;" rows="2"></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label>Google Gemini API Keys</label>
-                        <div id="api-keys-container"
-                            style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-                            <!-- Active Key Row -->
-                            <div class="api-key-row"
-                                style="display: flex; gap: 12px; align-items: center; background: #F8FAFC; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                <input type="password" class="form-control"
-                                    value="AIzaSyB******************************" style="flex: 1; background: white;"
-                                    readonly>
-                                <span class="ai-badge success" style="white-space: nowrap;">Active</span>
-                                <button class="btn-icon"
-                                    style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;"
-                                    title="রিমুভ করুন" onclick="this.closest('.api-key-row').remove()">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 6h18"></path>
-                                        <path
-                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <!-- Exhausted Key Row Example -->
-                            <div class="api-key-row"
-                                style="display: flex; gap: 12px; align-items: center; background: #FEF2F2; padding: 12px; border: 1px solid #FECACA; border-radius: 8px;">
-                                <input type="password" class="form-control"
-                                    value="AIzaSyC******************************" style="flex: 1; background: white;"
-                                    readonly>
-                                <span class="ai-badge danger" style="white-space: nowrap;">Exhausted</span>
-                                <button class="btn-icon"
-                                    style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px;"
-                                    title="রিমুভ করুন" onclick="this.closest('.api-key-row').remove()">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 6h18"></path>
-                                        <path
-                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">
-                            একাধিক কী দিলে সিস্টেম স্বয়ংক্রিয়ভাবে Round Robin পদ্ধতিতে সেগুলো ব্যবহার করবে। লিমিট শেষ
-                            হলে অটোমেটিক স্কিপ করবে (স্ট্যাটাস: 🔴 Exhausted স্বয়ংক্রিয়ভাবে রিসেট হবে)।
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 24px;">
-                        <label>Cloudflare Vectorize DB ID</label>
-                        <input id="config-vectorize-id" type="text" class="form-control" value="agritech_knowledge_db"
-                            readonly style="background: #f1f5f9;">
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Cloudflare Dashboard
-                            দিয়ে পরিচালিত, তাই Read-only.</div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3 class="form-title">সিস্টেম প্রম্পট (Master Instruction)</h3>
-                    <div class="form-group">
-                        <textarea id="config-system-prompt" class="form-control" rows="6"></textarea>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">এই ইনস্ট্রাকশনটি
-                            প্রতিটি রিকোয়েস্টের শুরুতে AI কে পাঠানো হয়।</div>
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            Template Body (Rules & Schema)
+                            <span style="font-size: 12px; font-weight: normal; color: var(--primary);">Main Instruction Block</span>
+                        </label>
+                        <textarea id="prompt-template-body" class="form-control" style="font-family: monospace; font-size: 13px; line-height: 1.5; resize: vertical;" rows="15"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label>AI উত্তর দিতে ব্যর্থ হলে (Fallback Message)</label>
-                        <input id="config-fallback" type="text" class="form-control" value="">
+                        <input id="prompt-fallback-message" type="text" class="form-control" placeholder="যেমন: এআই সার্ভার ব্যস্ত...">
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">API ফেইল করলে ইউজারকে এই মেসেজটি দেখানো হবে।</p>
                     </div>
 
-                    <button id="btn-save-config" class="btn-primary">পরিবর্তন সেভ করুন</button>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button id="btn-save-prompt" class="btn-primary" style="padding: 10px 24px; font-weight: 500;">
+                            <span id="prompt-save-text">টেমপ্লেট আপডেট করুন</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -477,7 +504,26 @@
         </div>
     </main>
 
+    <!-- Add API Key Modal -->
+    <div id="add-api-key-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 24px; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 16px;">নতুন API Key যুক্ত করুন</h3>
+                <button onclick="document.getElementById('add-api-key-modal').style.display='none'" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>API Key(s) <span style="font-weight: normal; color: var(--text-muted);">(কমা অথবা এন্টার দিয়ে একাধিক অ্যাড করতে পারবেন)</span></label>
+                <textarea id="new-api-key-input" class="form-control" rows="4" placeholder="AIzaSy...&#10;AIzaSy..."></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button type="button" onclick="document.getElementById('add-api-key-modal').style.display='none'" style="padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; background: white; border: 1px solid var(--border-color); color: var(--text-muted); box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;">বাতিল</button>
+                <button type="button" onclick="submitNewApiKeys()" style="padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; background: var(--primary); border: 1px solid var(--primary); color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: opacity 0.2s;">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/admin-components.js"></script>
+    <script src="js/pagination.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -493,14 +539,64 @@
             }, 100);
         });
 
-        function switchAITab(tabId) {
+        function switchAITab(tabId, btnElement = null) {
             document.querySelectorAll('.ai-tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.ai-tab-pane').forEach(pane => pane.classList.remove('active'));
 
-            event.target.classList.add('active');
+            if (btnElement) {
+                btnElement.classList.add('active');
+            } else if (event && event.target) {
+                event.target.classList.add('active');
+            }
             document.getElementById(tabId).classList.add('active');
+
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabId.replace('tab-', ''));
+            window.history.replaceState({}, '', url);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Restore Main AI Tab
+            const activeTab = params.get('tab');
+            if (activeTab) {
+                const targetId = 'tab-' + activeTab;
+                const b = Array.from(document.querySelectorAll('.ai-tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(targetId));
+                if (b) switchAITab(targetId, b);
+            }
+
+            // Restore Crop Doctor Sub Tab
+            const docTab = params.get('doc_tab');
+            if (docTab) {
+                const dB = Array.from(document.querySelectorAll('.doctor-subtab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(docTab));
+                if (dB) switchDoctorTab(docTab, dB);
+            }
+        });
     </script>
+    
+    <!-- Scan Details Modal Overlay -->
+    <div class="user-panel-overlay" id="scanDetailsModalOverlay" onclick="closeScanDetailsModal()"></div>
+
+    <!-- Scan Details Modal -->
+    <div id="scanDetailsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 800px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1001; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10;">
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700;">রোগ নির্ণয়ের বিস্তারিত (Scan Details)</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">এআই ইঞ্জিনের স্ক্যান রিপোর্ট এবং চিকিৎসা পদ্ধতি</p>
+            </div>
+            <button onclick="closeScanDetailsModal()" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div style="padding: 24px;" id="scanDetailsModalContent">
+            <!-- Dynamically populated via JS -->
+        </div>
+    </div>
+
     <script type="module" src="js/ai-engine.js"></script>
 </body>
 

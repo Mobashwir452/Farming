@@ -22,6 +22,7 @@ CREATE TABLE ai_timeline_cache (
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     expires_at DATETIME,         -- Set to 6 months after creation to auto-trigger a fresh AI generation
+    base_yield_kg REAL,
     
     UNIQUE(crop_name, variety_name)
 );

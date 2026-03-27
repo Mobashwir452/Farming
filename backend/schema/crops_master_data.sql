@@ -28,6 +28,7 @@ CREATE TABLE crops_master_data (
     data_source TEXT,            -- e.g., 'BRRI Knowledge Bank'
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    verified_status INTEGER DEFAULT 1,
     
     UNIQUE(crop_name, variety_name)
 );

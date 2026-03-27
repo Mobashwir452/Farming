@@ -1,14 +1,11 @@
--- backend/schema/ai_logs.sql
--- Stores interaction history for the entire AI Prompt Engine
+DROP TABLE IF EXISTS ai_logs;
 
-CREATE TABLE IF NOT EXISTS ai_logs (
+CREATE TABLE ai_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    farmer_phone TEXT NOT NULL,
-    feature TEXT NOT NULL, -- e.g., 'crop_doctor', 'smart_prediction'
-    api_key_used TEXT, -- Stores which Round Robin key was used
-    input_prompt TEXT,
-    ai_response TEXT,
-    tokens_used INTEGER,
-    scan_confidence TEXT, -- e.g., 'High', 'Low', '92%'
+    feature_type TEXT NOT NULL,
+    crop_name TEXT,
+    variety_name TEXT,
+    status TEXT NOT NULL,
+    error_message TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,0 +1,31 @@
+# 🧠 AI ইঞ্জিন আর্কিটেকচার ([ai_engine.js](file:///i:/Farming/Farming/backend/utils/ai_engine.js))
+
+এই অ্যাপ্লিকেশনের প্রাণকেন্দ্র হলো **[backend/utils/ai_engine.js](file:///i:/Farming/Farming/backend/utils/ai_engine.js)** ফাইলটি। 
+আগে অ্যাডমিন প্যানেল, ইউজার প্যানেল এবং ক্রন জব- এর জন্য আলাদা আলাদা প্রম্পট ও লজিক লেখা ছিলো। বর্তমানে সমস্ত AI টাস্ক এই সেন্ট্রালাইজড ইঞ্জিনটি হ্যান্ডেল করে।
+
+## 🔑 AI Engine কিভাবে কাজ করে?
+
+### ১. ইউনিফাইড প্রম্পট (Unified Prompt & 1 Shotangsho Standard)
+এই ইঞ্জিনটি Google Gemini Model কে একটি নির্দিষ্ট রুলস ম্যাপ করে দেয়।
+*   **1 Shotangsho Logic:** প্রম্পটে পরিষ্কারভাবে বলা আছে যে, সমস্ত হিসাব, ফলন, এবং সারের পরিমাণ যেন নিখুঁতভাবে **১ শতাংশ (1 Shotangsho)** জমির জন্য জেনারেট করা হয়।
+*   **D1 Scale Output:** এর ফলে ফ্রন্টএন্ডে বা ব্যাকএন্ডে যখনই কোনো কৃষকের ২ একর বা ৫০ শতাংশ খামারের হিসাব দরকার হয়, তখন শুধুমাত্র `1 Shotangsho AI Data * 50` করে দিলেই নিখুঁত রেজাল্ট পাওয়া যায়। 
+
+### ২. API Rotator & Quota Manager
+Gemini API তে Rate Limit বা Quota Exhausted এরর খুব বেশি আসে। [ai_engine.js](file:///i:/Farming/Farming/backend/utils/ai_engine.js) ফাইলটি একটি ডায়নামিক রোটেশন রুল ফলো করে:
+```javascript
+// Database Tracking Example
+SELECT id, api_key FROM ai_api_keys WHERE status = 'active'
+```
+একাধিক API Key ডেটাবেসে স্টোর করা থাকে। যেকোনো একটি Key Limit ক্রস করলে ইঞ্জিন সাথে সাথে সেটির স্ট্যাটাস `exhausted` করে দেয় এবং ফেইলওভার(Failover) হিসেবে পরের Key দিয়ে রিকুয়েস্ট করে। ২৪ ঘন্টা পর Key অটোমেটিকালি আবার `active` হয়ে যায় (Cron Job এর মাধ্যমে)।
+
+### ৩. RAG (Retrieval-Augmented Generation) 
+শুধু AI এর মনগড়া উত্তরের উপর নির্ভর করা হয় না। 
+*   প্রথমে `crops_master_data` থেকে সরকারি ফলন এবং মেয়াদ (e.g., BRRI/BARI Data) খুঁজে বের করা হয়।
+*   সেই ডেটাটি `govtContext` ভ্যারিয়েবলের মাধ্যমে AI এর প্রম্পটে পাস করে বাধ্য করা হয় যেন AI সেই সরকারি তথ্যের সাথে ভিত্তি করে গাইডলাইন জেনারেট করে।
+
+### ৪. XML Tag Extraction (Bomb-proof Parsing)
+Gemini মাঝে মাঝে JSON ফর্মেট ভেঙে ফেলে। তাই AI Engine শুধুমাত্র নির্দিষ্ট ও সুরক্ষিত **XML Tags** ব্যবহার করে (যেমন: `<base_yield_kg>`, `<daily_tasks>`, `<resources>`)। 
+রেসপন্স আসার পর ইঞ্জিন অত্যন্ত শক্তিশালী Regex ব্যবহার করে ট্যাগগুলো থেকে ভ্যালু এক্সট্রাক্ট করে এবং সেগুলোকে স্ট্রাকচার্ড JSON অবজেক্টে পরিণত করে ফ্রন্টএন্ডে পাঠায়।
+
+---
+**⚠️ Future Dev Warning:** [ai_engine.js](file:///i:/Farming/Farming/backend/utils/ai_engine.js) এর প্রম্পটের ভেতরের XML ট্যাগ বা 1 Shotangsho ইনস্ট্রাকশন কখনো মুছে ফেলবেন না। এটি সম্পূর্ণ ডেটাবেসের অখণ্ডতা নষ্ট করে দিতে পারে।

@@ -1,0 +1,35 @@
+# 🖥️ ফ্রন্টএন্ড DOM স্ট্র্যাটেজি এবং আর্কিটেকচার
+
+আমাদের অ্যাপ্লিকেশনটি সম্পূর্ণ **Vanilla JavaScript (ES6+), HTML5, এবং CSS3** ব্যবহার করে তৈরি। এখানে React, Angular, বা Vue.js এর মতো ভারী কোনো ফ্রেমওয়ার্ক নেই। তাই ভবিষ্যৎ ডেভলপারদের জন্য কিছু নির্দিষ্ট আর্কিটেকচারাল রুলস মেনে চলা বাধ্যতামূলক।
+
+## 📂 ফাইল স্ট্র্যাকচার এবং লিংকিং রুলস (1:1 Mapping)
+
+প্রতিটি HTML পেজের জন্য ঠিক একটি করে ডেডিকেটেড JS ফাইল এবং (প্রয়োজনে) একটি CSS ফাইল থাকবে। কখনো এক পেজের লজিক অন্য পেজের স্ক্রিপ্টে মিক্স করবেন না।
+*   **উদাহরণ:** 
+    *   [add_land.html](file:///i:/Farming/Farming/add_land.html) -> শুধুমাত্র [js/add_land.js](file:///i:/Farming/Farming/js/add_land.js) ব্যবহার করবে।
+    *   [land_details.html](file:///i:/Farming/Farming/land_details.html) -> শুধুমাত্র [js/land_details.js](file:///i:/Farming/Farming/js/land_details.js) ব্যবহার করবে।
+
+## 🧩 UI কম্পোনেন্ট ও নেভিগেশন (Bottom Sheets & Modals)
+
+অ্যাপের মোবাইল-ফ্রেন্ডলি লুক মেইনটেইন করার জন্য আমরা বিভিন্ন **Bottom Sheet** ও **Modal** প্যাটার্ন ব্যবহার করি।
+*   **DOM Manipulation:** `document.getElementById('modalId')` এর মাধ্যমে মডালগুলোকে টার্গেট করা হয় এবং `.classList.add('show')` বা `.classList.remove('show')` এর মাধ্যমে হাইড/শো করা হয়।
+*   **Dynamic Rendering:** ডেটাবেস থেকে Fetch করা ডেটা (যেমন Array of Arrays বা Objects), `.innerHTML` বা `document.createElement()` কনস্ট্রাক্টর ব্যবহার করে Loop আকারে UI তে রেন্ডার করা হয়।
+*   *উদাহরণ स्वरुप:* [renderTasks()](file:///i:/Farming/Farming/js/land_details.js#578-707) ফাংশনটি পুরো লুপ চালিয়ে প্রতিদিনের টাস্কগুলোকে চেকবক্স সহ UI তে প্লেস করে। 
+
+## 🔄 ডেটা স্টেট ম্যানেজমেন্ট (Local Caching Variables)
+
+যেহেতু Redux বা Context API নেই, তাই আমরা ফাইল-স্কোপড গ্লোবাল ভ্যারিয়েবল ব্যবহার করছি।
+যেমন [land_details.js](file:///i:/Farming/Farming/js/land_details.js) এ:
+```javascript
+let activeCrop = null;
+let masterCache = null;
+let farm = null;
+```
+এই ভ্যারিয়েবলগুলোতে API থেকে আসা ডেটা স্টোর করা হয়। এরপর ইউজারের ট্রাঞ্জেকশন, সেভ, বা ডিলিট করার যেকোনো ইনলাইন রিয়্যাকশন প্রথমে এই ভ্যারিয়েবলগুলোতে লজিক্যালি আপডেট করা হয়, তারপর API এ পাঠানো হয়, এবং সর্বশেষ [render()](file:///i:/Farming/Farming/js/land_details.js#578-707) ফাংশন কল করে UI রিফ্রেশ করা হয়। এতে App অনেক ফাস্ট কাজ করে।
+
+## 🖨️ PDF রিপোর্টিং ও ডাউনলোড
+*   আমরা `html2pdf.js` ব্যবহার করি। 
+*   ক্লায়েন্ট সাইডেই একটি টেম্পলেট `div` এর মধ্যে ডেটা প্লেস করে, সেটিকে PDF আকারে রেন্ডার করে ইউজারকে ডাউনলোড করতে দেওয়া হয় (যেমন, `GET /api/crops/:id/report` থেকে আসা ডেটা ফিলাপ করে)।
+
+---
+**⚠️ Future UI Warning:** যেকোনো নতুন HTML এলিমেন্ট বানালে অবশ্যই তার একটি ইউনিক [id](file:///i:/Farming/Farming/js/land_details.js#952-967) অ্যাট্রিবিউট দিতে হবে, যাতে Vanilla JS দিয়ে সহজে অ্যাক্সেস করা যায়। ক্লাস (Class) নেম শুধুমাত্র CSS ও ডিজাইনের জন্য ব্যবহার করবেন, DOM কোয়ারির জন্য নয়।

@@ -46,8 +46,8 @@ export const addMasterCrop = async (request, env) => {
             INSERT INTO crops_master_data (
                 crop_category, crop_name, variety_name, suitable_regions, 
                 soil_type, base_yield_per_shotangsho_kg, avg_duration_days, 
-                disease_resistance, special_features, data_source
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                disease_resistance, special_features, data_source, verified_status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
         `;
 
         const cleanedVariety = formatVarietyName(data.crop_name, data.variety_name);
@@ -155,6 +155,46 @@ export const updateCropStatus = async (request, env) => {
         // Approve: set verified_status = 1
         await env.DB.prepare(`UPDATE crops_master_data SET verified_status = 1 WHERE id = ?`).bind(id).run();
         return json({ success: true, message: 'Crop approved successfully' });
+    } catch (err) {
+        return error(500, err.message);
+    }
+};
+
+export const syncCropFromCache = async (request, env) => {
+    try {
+        const id = request.params.id;
+        
+        const crop = await env.DB.prepare("SELECT * FROM crops_master_data WHERE id = ?").bind(id).first();
+        if (!crop) return error(404, 'ফসল পাওয়া যায়নি (Crop not found)');
+
+        const mapVariety = (crop.variety_name && crop.variety_name.trim() !== '') ? crop.variety_name : crop.crop_name;
+        const cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name = ?").bind(crop.crop_name, mapVariety).first();
+        
+        if (!cache) return error(400, 'এই ফসলের কোনো টাইমলাইন ক্যাশ নেই!');
+
+        let newDuration = crop.avg_duration_days || 0;
+        if (cache.timeline_json) {
+            try {
+                const parsed = JSON.parse(cache.timeline_json);
+                const allOffsets = [];
+                if (parsed.guideline) parsed.guideline.forEach(g => allOffsets.push(parseInt(g.day_offset) || 0));
+                if (parsed.tasks) parsed.tasks.forEach(t => allOffsets.push(parseInt(t.day_offset) || 0));
+                if (allOffsets.length > 0) {
+                    const maxOffset = Math.max(...allOffsets);
+                    if (maxOffset > 0) newDuration = maxOffset;
+                }
+            } catch(e){}
+        }
+
+        const newYield = cache.base_yield_kg || crop.base_yield_per_shotangsho_kg;
+
+        await env.DB.prepare(`
+            UPDATE crops_master_data 
+            SET base_yield_per_shotangsho_kg = ?, avg_duration_days = ?, verified_status = 1 
+            WHERE id = ?
+        `).bind(newYield, newDuration, id).run();
+
+        return json({ success: true, message: 'ক্যাশ থেকে মাস্টার টেবিলে সফলভাবে ডাটা সিঙ্ক হয়েছে এবং অ্যাপ্রুভ হয়েছে!' });
     } catch (err) {
         return error(500, err.message);
     }

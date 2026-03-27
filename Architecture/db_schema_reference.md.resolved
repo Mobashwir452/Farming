@@ -1,0 +1,56 @@
+# 🗄️ ডাটাবেস স্কিমা রেফারেন্স (Cloudflare D1 SQLite)
+
+এই অ্যাপ্লিকেশনটি **Cloudflare D1 (Serverless SQLite)** ব্যবহার করে। ভবিষ্যতের যেকোনো ডেভলপারকে অবশ্যই এই স্ট্রাকচার মেনে কাজ করতে হবে, বিশেষ করে **শতাংশ (Shotangsho)** পরিমাপের নিয়মগুলো।
+
+## 🔗 মূল টেবিলসমূহ ও তাদের সম্পর্ক (Entity-Relationship)
+
+### ১. `farms` (খামার টেবিল)
+কৃষকের খামারের মূল তথ্য এখানে থাকে।
+- [id](file:///i:/Farming/Farming/js/land_details.js#952-967): প্রাইমারি কি (Primary Key)
+- `user_phone`: কৃষকের ফোন নাম্বার (অ্যাকাউন্ট আইডেন্টিফায়ার)
+- `name`: খামারের নাম (যেমন: "আমার স্বপ্নের খামার")
+- **`area_shotangsho`**: (অত্যন্ত গুরুত্বপূর্ণ) খামারের জমির পরিমাণ **শতাংশে (Shotangsho)**। সম্পূর্ণ অ্যাপ্লিকেশনের আয়-ব্যয় এবং সারের হিসাব এই ফিল্ডের সাথে গুণ (Multiply) হয়ে প্রদর্শিত হয়।
+- `latitude` ও `longitude`: খামারের লোকেশন (আবহাওয়া ডেটা আনার জন্য)।
+- `created_at`: খামার তৈরির তারিখ।
+
+### ২. `crops` (চলমান ফসল টেবিল)
+একটি `farms` এর অধীনে একাধিক `crops` থাকতে পারে।
+- [id](file:///i:/Farming/Farming/js/land_details.js#952-967): প্রাইমারি কি
+- `farm_id`: ফরেইন কি (Foreign Key -> `farms.id`)
+- `crop_name` ও `variety_name`: ফসলের নাম এবং জাত।
+- `status`: অবস্থাসূচক (active, completed, dropped, etc.)
+- **JSON Field গুলো:**
+  - `timeline_json`: AI থেকে পাওয়া কাজের ধাপগুলো (Guidelines & Tasks)।
+  - `resources_state_json`: সার, বীজ বা সেচের তালিকা।
+  - `risks_json`: আবহাওয়া বা অন্য ঝুঁকির তালিকা।
+  - `tasks_state_json`: কোন কাজ কবে সম্পন্ন হয়েছে তার স্টেট।
+  - `notes_json`: কৃষকের নিজস্ব নোট বা ডায়েরি। (সবচেয়ে নতুন ফিচার)।
+
+### ৩. `crops_master_data` (সরকারি তথ্য ও মাস্টার ডেটাবেস)
+অ্যাডমিন প্যানেল এবং AI মিলে এই টেবিলটি ম্যানেজ করে।
+- [id](file:///i:/Farming/Farming/js/land_details.js#952-967): প্রাইমারি কি
+- `crop_name`, `variety_name`: ফসল ও জাত।
+- **`base_yield_per_shotangsho_kg`**: (অত্যন্ত গুরুত্বপূর্ণ) ঠিক **১ শতাংশ** জমির জন্য এই জাতের ফলন কত কেজি হবে। কোনোভাবেই এখানে বিঘা বা একরের হিসাব ঢোকানো যাবে না।
+- `avg_duration_days`, `disease_resistance`, `planting_months`, `crop_category`, `suitable_regions`, `soil_type`, `special_features`: জাতের বিস্তারিত তথ্য।
+- `verified_status`: Admin verify করেছে কিনা (0 বা 1)।
+
+### ৪. `ai_timeline_cache` (এআই ক্যাশ টেবিল)
+AI API Cost কমানোর জন্য এই টেবিল ব্যবহৃত হয়।
+- `crop_name` ও `variety_name`: ফসলের নাম ও জাত।
+- **`base_yield_kg`, `base_cost_taka`, `base_revenue_taka`**: এই হিসাবগুলোও ঠিক **১ শতাংশ** জমির জন্য ক্যাশে রাখা হয়।
+- `timeline_json`, `risks_json`, `resources_json`: ভবিষ্যৎ ব্যবহারকারীদের জন্য সেভ করা AI স্ট্রাকচার।
+
+### ৫. `transactions` (হিসাব-নিকাশ বা আয়-ব্যয়)
+- [id](file:///i:/Farming/Farming/js/land_details.js#952-967): প্রাইমারি কি
+- `farm_id`: কোন খামারের।
+- `crop_id`: কোন ফসলের (অথবা NULL যদি খামারের সাধারণ খরচ হয়)।
+- `type`: 'income' (আয়) অথবা 'expense' (ব্যয়)।
+- `amount`: টাকার পরিমাণ।
+- `description`: ক্যাটাগরি বা বিবরণ (যেমন "ইউরিয়া সার ক্রয়")।
+
+### ৬. `ai_api_keys` ও `admin_settings`
+- **`ai_api_keys`**: Gemini API এর বিভিন্ন কি (Keys), তাদের স্ট্যাটাস ('active' বা 'exhausted') ট্র্যাক করে যাতে Quota লিমিটেশন বাইপাস করা যায়।
+- **`admin_settings`**: আবহাওয়ার API Keys সহ অন্যান্য গ্লোবাল কনফিগারেশন।
+
+---
+**⚠️ Future API Warning:** ডেটাবেসে কোনো আপডেট করার সময় সবসময় JSON ফিল্ডগুলোকে `JSON.stringify()` এবং রিড করার সময় `JSON.parse()` করতে হবে, কারণ D1 সরাসরি Object সাপোর্ট করে না (সব Text হিসেবে থাকে)।

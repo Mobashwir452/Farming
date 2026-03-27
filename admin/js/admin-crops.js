@@ -2,6 +2,8 @@
 
 let globalCrops = [];
 let currentTab = 'verified';
+let cropsPagination = null;
+let currentFilteredCrops = [];
 
 window.switchTab = function (tabName) {
     currentTab = tabName;
@@ -72,14 +74,33 @@ function handleSearch() {
     const query = document.getElementById('searchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
 
-    const filtered = globalCrops.filter(c => {
+    currentFilteredCrops = globalCrops.filter(c => {
         const matchesQuery = c.crop_name.toLowerCase().includes(query) || (c.variety_name && c.variety_name.toLowerCase().includes(query));
         const matchesCategory = category === "" || c.crop_category === category;
         const matchesTab = currentTab === 'verified' ? (c.verified_status !== 0) : (c.verified_status === 0);
         return matchesQuery && matchesCategory && matchesTab;
     });
 
-    renderCropsTable(filtered);
+    if (!cropsPagination) {
+        cropsPagination = new AdminPagination({
+            containerId: 'crops-pagination-container',
+            itemName: 'crops',
+            limit: 15,
+            onChange: (page, limit) => renderCropsPage(page, limit)
+        });
+    }
+
+    renderCropsPage(1, 15);
+}
+
+function renderCropsPage(page, limit) {
+    const total = currentFilteredCrops.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const pageCrops = currentFilteredCrops.slice(startIndex, endIndex);
+
+    if (cropsPagination) cropsPagination.update(total, page);
+    renderCropsTable(pageCrops);
 }
 
 function renderCropsTable(crops) {
@@ -102,7 +123,6 @@ function renderCropsTable(crops) {
             }
         }
 
-        let actionButtons = '';
         if (currentTab === 'verified') {
             actionButtons = `
                 <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px;" onclick="openEditCropModal(${crop.id})">এডিট</button>
@@ -110,7 +130,12 @@ function renderCropsTable(crops) {
             `;
         } else {
             actionButtons = `
-                <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px; border-color: #2563EB; background: #2563EB;" onclick="triggerAIVerification(${crop.id})">Verify</button>
+                <button id="verify-btn-${crop.id}" class="btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px; border-color: #2563EB; background: #2563EB; display: inline-flex; align-items: center;" onclick="triggerAIVerification(${crop.id})">
+                    <svg id="verify-spinner-${crop.id}" style="display: none; animation: spinLoader 1s linear infinite; margin-right: 4px;" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                    </svg>
+                    <span id="verify-text-${crop.id}">Verify</span>
+                </button>
                 <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px; border-color: #10B981; background: #10B981;" onclick="updatePendingStatus(${crop.id}, 1)">Approve</button>
                 <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);" onclick="updatePendingStatus(${crop.id}, -1)">Reject</button>
             `;
@@ -166,6 +191,24 @@ window.updatePendingStatus = async function (id, statusVal) {
     }
 }
 
+window.syncCacheToMaster = async function (id) {
+    if (!confirm('আপনি কি নিশ্চিত যে এই ফসলের ক্যাশ ডাটা মাস্টার ডাটাবেসে সিঙ্ক করতে চান?')) return;
+    const token = localStorage.getItem('agritech_admin_token');
+    try {
+        const response = await fetch(`${window.ADMIN_CONFIG?.API_BASE_URL || 'https://agritech-backend.mobashwir9.workers.dev'}/api/admin/crops/verify-from-cache/${id}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert(data.message);
+            fetchCrops();
+        } else alert('Error: ' + data.error);
+    } catch (e) {
+        alert('Server connection failed.');
+    }
+}
+
 window.triggerAIVerification = async function (cropId = null) {
     if (!cropId) {
         const pendingCount = globalCrops.filter(c => c.verified_status === 0).length;
@@ -180,15 +223,15 @@ window.triggerAIVerification = async function (cropId = null) {
 
     const token = localStorage.getItem('agritech_admin_token');
     
-    const btn = document.getElementById('btnAiVerifyGlobal');
-    const spinner = document.getElementById('aiVerifySpinner');
-    const icon = document.getElementById('aiVerifyIcon');
-    const text = document.getElementById('aiVerifyText');
+    const btn = cropId ? document.getElementById(`verify-btn-${cropId}`) : document.getElementById('btnAiVerifyGlobal');
+    const spinner = cropId ? document.getElementById(`verify-spinner-${cropId}`) : document.getElementById('aiVerifySpinner');
+    const icon = cropId ? null : document.getElementById('aiVerifyIcon');
+    const text = cropId ? document.getElementById(`verify-text-${cropId}`) : document.getElementById('aiVerifyText');
 
     if (btn) btn.disabled = true;
     if (spinner) spinner.style.display = 'block';
     if (icon) icon.style.display = 'none';
-    if (text) text.textContent = 'ভেরিফাই হচ্ছে...';
+    if (text) text.textContent = cropId ? 'Verifying' : 'ভেরিফাই হচ্ছে...';
 
     const payload = cropId ? { cropId } : {};
 
@@ -222,10 +265,10 @@ window.triggerAIVerification = async function (cropId = null) {
         alert('Server connection failed.');
         console.error(error);
     } finally {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        icon.style.display = 'block';
-        text.textContent = 'ম্যানুয়ালি এআই ভেরিফাই করুন';
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+        if (icon) icon.style.display = 'inline-block';
+        if (text) text.textContent = cropId ? 'Verify' : 'ম্যানুয়ালি এআই ভেরিফাই করুন';
     }
 }
 

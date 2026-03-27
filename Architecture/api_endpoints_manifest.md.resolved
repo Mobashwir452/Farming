@@ -1,0 +1,40 @@
+# 🌐 API এন্ডপয়েন্ট ম্যানিফেস্ট (Cloudflare Worker REST API)
+
+আমাদের ব্যাকএন্ডটি সম্পূর্ণভাবে [backend/worker.js](file:///i:/Farming/Farming/backend/worker.js) এর মাধ্যমে `itty-router` ব্যবহার করে রাউট করা হয়েছে। এখানে কোনো Express.js বা Node.js সার্ভার নেই। এটি Edge Node এ রান করে।
+
+## 🧑‍🌾 Public/Farmer API (পাবলিক অ্যাপ)
+এই API গুলা অ্যাক্সেস করতে হলে ফায়ারবেস অথেন্টিকেশন টোকেন থেকে প্রাপ্ত Session বা Phone Number অথরাইজেশন লাগে।
+
+### খামার (Farms)
+*   **`GET /api/farms`**: ইউজার/কৃষকের সমস্ত খামারের লিস্ট নিয়ে আসে।
+*   **`POST /api/farms`**: নতুন খামার তৈরি করে (Payload: `name`, `area_shotangsho`, [lat](file:///i:/Farming/Farming/admin/js/admin-crops.js#60-70), `lng`)।
+*   **`GET /api/farms/:id`**: একটি নির্দিষ্ট খামারের বিস্তারিত তথ্য, ফসল, এবং সংযুক্ত ট্রাঞ্জেকশন(transactions) নিয়ে আসে।
+
+### ফসল ও আর্টিফিশিয়াল ইন্টেলিজেন্স (Crops & AI)
+*   **`GET /api/ai/predict-crop`**: (সবচেয়ে কমপ্লেক্স API)। ইনপুটে `farm_id`, `crop_name`, `variety_name` নেয়। প্রথমে Database RAG করে, এরপর Cache চেক করে, না পেলে `ai_engine` এর মাধ্যমে নতুন AI Data জেনারেট করে ১ শতাংশের জন্য হিসাব করে ফেরত পাঠায়।
+*   **`POST /api/crops`**: AI প্রিডিকশন বা ম্যানুয়ালি সেটআপ করা ফসলের ডেটাবেস সেভ করে।
+*   **`PUT /api/crops/:id/state`**: কাজের ধাপ (Task) টিক দিলে (Mark Done) বা রিসোর্স আপডেট করলে এই রাউট কল হয়।
+*   **`POST /api/crops/:id/notes`**: ফসলের ডায়েরিতে নতুন নোট/কমেন্ট অ্যাড করে।
+*   **`GET /api/crops/:id/report`**: ফসলের বর্তমান অবস্থার উপর ভিত্তি করে PDF রিপোর্ট জেনারেট করার জন্য পুরো JSON পেলোড পাঠায়।
+
+### আয়-ব্যয় (Transactions)
+*   **`GET /api/crops/:id/transactions`**: ফসলের আয়-ব্যয় লিস্ট।
+*   **`POST /api/crops/:id/transactions`**: নতুন হিসাব যোগ করা।
+
+---
+
+## 👨‍💻 Admin API (অ্যাডমিন প্যানেল)
+এই রাউটগুলোতে অ্যাক্সেস করতে হলে Authorization হেডারে Admin Access Token থাকা বাধ্যতামূলক।
+
+### মাস্টার ক্রপস (Master Crops Management)
+*   **`GET /api/admin/crops`**: সমস্ত মাস্টার ক্রপের লিস্ট।
+*   **`POST /api/admin/crops`**: নতুন ক্রপ ম্যানুয়ালি ডেটাবেসে ঢোকানো।
+*   **`PUT /api/admin/crops/:id`**: ক্রপের বিস্তারিত আপডেট করা।
+*   **`POST /api/admin/trigger-ai-verification`**: এই রাউটে হিট করলে [cron_verification.js](file:///i:/Farming/Farming/backend/cron_verification.js) ট্রিগার হয়। এটি Unverified ক্রপগুলোকে স্ক্যান করে AI এর মাধ্যমে `base_yield` এবং অন্যান্য তথ্য অটোমেটিকালি ফিলাপ করে।
+
+### ক্যাশ ম্যানেজমেন্ট (Cache Management)
+*   **`GET / POST /api/admin/cache/generate`**: অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি AI ক্যাশ জেনারেট করার জন্য (এটিও `ai_engine` ব্যবহার করে)।
+*   **`DELETE /api/admin/cache`**: ভুল ক্যাশ মুছে ফেলা।
+
+---
+**⚠️ Future Fetch Warning:** ফ্রন্টএন্ড থেকে API কল করার সময় অবশ্যই `try-catch` ব্লক ব্যবহার করতে হবে। রেসপন্সে `success: false` থাকলে ইউজারকে Alert বা Modal এ Error Message দেখাতে হবে।

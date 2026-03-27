@@ -171,9 +171,28 @@
                 </div>
             </div>
 
+            <!-- Scan History Section -->
+            <div class="ld-card" id="cropScansContainer" style="display: none; padding-top: 12px; margin-bottom: 16px;">
+                <div class="ld-card-header"
+                    style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 15px; display: flex; align-items: center; fill: none; margin: 0;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--primary); margin-right: 6px;">
+                            <path d="M2 12h3M19 12h3M12 2v3M12 19v3M5.636 5.636l2.122 2.122M16.243 16.243l2.122 2.122M5.636 18.364l2.122-2.122M16.243 7.757l2.122-2.122"></path>
+                            <circle cx="12" cy="12" r="5"></circle>
+                        </svg>
+                        রোগবালাই ও স্ক্যান হিস্ট্রি
+                    </h3>
+                </div>
+                <div id="scansList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
+                    <!-- Scans populated dynamically -->
+                </div>
+            </div>
+
             <!-- 4. Quick Actions -->
             <div class="ld-actions-grid">
-                <div class="ld-action-btn" id="btnDisease" onclick="window.location.href='crop_doctor.html'">
+                <div class="ld-action-btn" id="btnDisease">
                     <div class="ld-action-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

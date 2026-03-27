@@ -16,41 +16,11 @@ export const getAiConfig = async (request, env) => {
 export const saveAiConfig = async (request, env) => {
     try {
         const body = await request.json();
-        const incomingKeys = body.keys || []; // Array of strings e.g. ["key1", "key2"]
-
-        // 1. Fetch currently stored keys
-        const { results: currentDbKeys } = await env.DB.prepare("SELECT api_key FROM ai_api_keys").all();
-        const currentKeyStrings = currentDbKeys.map(k => k.api_key);
-
-        // 2. Identify which keys to delete (removed from UI)
-        const keysToDelete = currentKeyStrings.filter(k => !incomingKeys.includes(k));
-
-        // 3. Identify which keys to insert (brand new in UI)
-        const keysToInsert = incomingKeys.filter(k => !currentKeyStrings.includes(k));
-
-        const statements = [];
-
-        // Prepare DELETE statement
-        if (keysToDelete.length > 0) {
-            const placeholders = keysToDelete.map(() => '?').join(',');
-            statements.push(env.DB.prepare(`DELETE FROM ai_api_keys WHERE api_key IN (${placeholders})`).bind(...keysToDelete));
-        }
-
-        // Prepare INSERT statements
-        for (const newKey of keysToInsert) {
-            // new keys are always inserted as active
-            statements.push(env.DB.prepare(`INSERT INTO ai_api_keys (api_key, status) VALUES (?, 'active')`).bind(newKey));
-        }
-
-        // Execute cleanly in a single batch
-        // Execute array of statements
-        if (statements.length > 0) {
-            await env.DB.batch(statements);
-        }
 
         // 4. Update core config settings (id=1)
         const sysPrompt = body.system_prompt || '';
         const fallback = body.fallback_message || '';
+        // Fix for toggle mapping securely:
         const emStop = body.emergency_stop === 1 ? 1 : 0;
 
         // This query updates or inserts if id=1 doesn't exist
@@ -64,7 +34,48 @@ export const saveAiConfig = async (request, env) => {
                 updated_at=CURRENT_TIMESTAMP
         `).bind(sysPrompt, fallback, emStop).run();
 
-        return Response.json({ success: true, message: 'API Keys updated successfully!' });
+        // If emergency is triggered, update all active API keys to 'disabled'
+        if (emStop === 1) {
+            await env.DB.prepare(`UPDATE ai_api_keys SET status = 'disabled' WHERE status = 'active'`).run();
+        } else {
+            // Revert all disabled keys back to active when emergency stops
+            await env.DB.prepare(`UPDATE ai_api_keys SET status = 'active' WHERE status = 'disabled'`).run();
+        }
+
+        return Response.json({ success: true, message: 'Configuration updated successfully!' });
+    } catch (e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+export const getAiPrompts = async (request, env) => {
+    try {
+        const { results: prompts } = await env.DB.prepare("SELECT * FROM ai_prompt_templates ORDER BY id").all();
+        return Response.json({ success: true, prompts: prompts || [] });
+    } catch (e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
+export const saveAiPrompt = async (request, env) => {
+    try {
+        const body = await request.json();
+        const { prompt_key, system_role, template_body, fallback_message } = body;
+
+        if (!prompt_key || !template_body) {
+            return Response.json({ success: false, error: "Prompt Details Missing" }, { status: 400 });
+        }
+
+        await env.DB.prepare(`
+            INSERT INTO ai_prompt_templates (prompt_key, system_role, template_body, fallback_message, updated_at) 
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(prompt_key) DO UPDATE SET 
+                system_role=excluded.system_role, 
+                template_body=excluded.template_body, 
+                fallback_message=excluded.fallback_message,
+                updated_at=CURRENT_TIMESTAMP
+        `).bind(prompt_key, system_role || '', template_body, fallback_message || '').run();
+
+        return Response.json({ success: true, message: 'Prompt updated successfully!' });
     } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
     }

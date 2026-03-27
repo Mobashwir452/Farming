@@ -16,6 +16,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/crop_doctor.css">
 
     <!-- Web Components and Scripts -->
@@ -35,6 +36,12 @@
     </header>
 
     <main class="doctor-main">
+
+        <!-- Tabs Setup -->
+        <div class="cd-tabs-container" id="cd-tabs" style="display: flex;">
+            <button class="cd-tab-btn active" onclick="switchDoctorTab('scanner', this)">নতুন স্ক্যান</button>
+            <button class="cd-tab-btn" onclick="switchDoctorTab('history', this)">স্ক্যান হিস্ট্রি</button>
+        </div>
 
         <!-- STATE 1: Landing (Camera) -->
         <div id="state-landing" class="doctor-state active">
@@ -62,7 +69,7 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn-primary btn-large btn-scan" id="btn-open-camera">
+                <button class="btn-primary btn-large" id="btn-open-camera">
                     <span class="material-icons-round">photo_camera</span>
                     ক্যামেরা চালু করুন
                 </button>
@@ -83,13 +90,22 @@
                 <select id="land-select"
                     style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:white; cursor:pointer; outline:none;">
                     <option value="">জমি নির্বাচন করুন (ঐচ্ছিক)</option>
-                    <option value="1">খালের ধারের জমি (বোরো ধান)</option>
-                    <option value="2">উত্তর পাড়া প্রজেক্ট (টমেটো)</option>
                 </select>
                 <p style="font-size:12px; color:var(--text-muted); margin-top:8px; line-height:1.4;">
                     <span class="material-icons-round" style="font-size:14px; vertical-align:middle;">info</span>
                     জমি নির্বাচন করলে এই স্ক্যানের ফলাফলটি আপনার টাস্ক টাইমলাইনে সেভ হবে।
                 </p>
+            </div>
+
+            <!-- Recent Scans Section (Moved to History Tab) -->
+        </div>
+
+        <!-- TAB: History -->
+        <div id="tab-history" style="display: none; padding-top: 16px;">
+            <div id="recent-scans-container" style="display:block;">
+                <div id="recent-scans-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 24px;">
+                    <!-- Javascript auto generated cards populate here -->
+                </div>
             </div>
         </div>
 
@@ -112,16 +128,16 @@
             <div class="result-header">
                 <img id="result-image" src="" alt="Analyzed Crop" class="result-thumb">
                 <div class="result-info">
-                    <span class="badge danger">রোগ শনাক্ত হয়েছে</span>
-                    <h2 class="disease-name">ধানের ব্লাস্ট রোগ</h2>
-                    <p class="disease-en">Rice Blast (Magnaporthe oryzae)</p>
+                    <span id="result-badge" class="badge danger">রোগ শনাক্ত হয়েছে</span>
+                    <h2 id="result-disease-bn" class="disease-name">ধানের ব্লাস্ট রোগ</h2>
+                    <p id="result-disease-en" class="disease-en">Rice Blast (Magnaporthe oryzae)</p>
                 </div>
             </div>
 
             <div class="confidence-bar">
-                <div class="conf-label"><span>এআই নিশ্চয়তা</span> <span>৯২%</span></div>
+                <div class="conf-label"><span>এআই নিশ্চয়তা</span> <span id="result-confidence-text">৯২%</span></div>
                 <div class="progress-bg">
-                    <div class="progress-fill" style="width: 92%;"></div>
+                    <div id="result-confidence-fill" class="progress-fill" style="width: 92%;"></div>
                 </div>
             </div>
 
@@ -131,7 +147,7 @@
                     <h3>কীভাবে বুঝবেন?</h3>
                 </div>
                 <div class="card-body">
-                    <ul class="symptoms-list">
+                    <ul id="result-symptoms" class="symptoms-list">
                         <li>পাতায় ছোট, ডিম্বাকার বা চোখের ন্যায় দাগ দেখা যায়।</li>
                         <li>দাগের মাঝে ছাই রঙের ও কিনারা বাদামী হয়।</li>
                     </ul>
@@ -144,8 +160,7 @@
                     <h3>জৈব সমাধান</h3>
                 </div>
                 <div class="card-body">
-                    <p>জমিতে পরিমিত সেচ দিন। ইউরিয়া সারের উপরি প্রয়োগ সাময়িকভাবে বন্ধ রাখুন। ছাই ছিটালে আংশিক উপকার
-                        পাওয়া যায়।</p>
+                    <ul id="result-organic" class="symptoms-list"></ul>
                 </div>
             </div>
 
@@ -155,8 +170,17 @@
                     <h3>রাসায়নিক সমাধান</h3>
                 </div>
                 <div class="card-body">
-                    <p><strong>টেবুকোনাজল বা ট্রাইফ্লক্সিস্ট্রোবিন</strong> (যেমন: নাটিভো ৭৫) ১০ লিটার পানিতে ৪ গ্রাম
-                        মিশিয়ে ৫ শতাংশ জমিতে ভালোভাবে স্প্রে করুন।</p>
+                    <ul id="result-chemical" class="symptoms-list"></ul>
+                </div>
+            </div>
+
+            <div class="info-card" id="prevention-card" style="display:none;">
+                <div class="card-header">
+                    <span class="material-icons-round text-primary">shield</span>
+                    <h3>প্রতিরোধের উপায়</h3>
+                </div>
+                <div class="card-body">
+                    <ul id="result-prevention" class="symptoms-list"></ul>
                 </div>
             </div>
 
@@ -174,6 +198,20 @@
 
     </main>
 
+    <!-- History View Modal -->
+    <div id="historyDetailsModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3>সর্বশেষ স্ক্যান রেজাল্ট</h3>
+                <button class="admin-modal-close" onclick="closeAdminModal('historyDetailsModal')">&times;</button>
+            </div>
+            <div class="admin-modal-body" id="historyDetailsBody">
+                <!-- Javascript populated payload bounds map here -->
+            </div>
+        </div>
+    </div>
+
+    <app-bottom-nav></app-bottom-nav>
 </body>
 
 </html>

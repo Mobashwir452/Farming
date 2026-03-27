@@ -1,0 +1,59 @@
+# এআই প্রম্পট ইঞ্জিন: ওভারভিউ ড্যাশবোর্ড আর্কিটেকচার ⚙️
+
+অ্যাডমিন প্যানেলের **"এআই প্রম্পট ইঞ্জিন"** এর **"ওভারভিউ" (Overview)** ট্যাবটি কীভাবে শুরু থেকে শেষ পর্যন্ত (End-to-End) কাজ করছে, তার একটি ক্লিয়ার আর্কিটেকচার ব্লুপ্রিন্ট নিচে দেওয়া হলো। এই আর্কিটেকচারটি ৩টি মূল স্তরে (Tier) বিভক্ত।
+
+---
+
+## ১. 🗄️ ডেটাবেস আর্কিটেকচার (Cloudflare D1)
+ড্যাশবোর্ডের সমস্ত ডেটা মূলত ৩টি টেবিল থেকে আসে:
+
+*   **`ai_logs`:** এই টেবিলটি এআই ইঞ্জিনের হার্টবিট! যখনই সিস্টেম কোনো AI রিকোয়েস্ট করে (সেটা কৃষক অ্যাপ থেকে হোক বা ক্রপ ডাক্তার থেকে), ব্যাকএন্ড সাথে সাথে এখানে একটি লগ তৈরি করে। 
+    *   *গুরুত্বপূর্ণ কলাম:* `feature_type` (কোথা থেকে কল হলো), `status` (success নাকি failed), `error_message`, `crop_name`।
+*   **`ai_api_keys`:** অ্যাডমিনদের দেওয়া সমস্ত Gemini API Key এবং তাদের বর্তমান অবস্থা (অ্যাক্টিভ নাকি লিমিট শেষ) এই টেবিলে স্টোর থাকে।
+    *   *গুরুত্বপূর্ণ কলাম:* `status` ('active'/'exhausted'), `reset_date` (কবে আবার ফ্রি টায়ার চালু হবে)।
+*   **`crops`:** কৃষকদের খামারের রিয়েল-টাইম ডেটা (ট্রেন্ডিং সার্চ বের করার জন্য, যদিও আমরা পারফরম্যান্সের জন্য `ai_logs` কলামটিকেই ট্রেন্ডিংয়ের জন্য কনফিগার করেছি)।
+
+---
+
+## ২. ⚙️ ব্যাকএন্ড ডেটা কালেকশন (Cloudflare Workers)
+
+ব্যাকএন্ডে দুটি মূল কাজ হয়—লগ জেনারেট করা এবং ড্যাশবোর্ডের জন্য অ্যাগ্রিগেট (Aggregate) করা।
+
+### A. অটোমেটেড ট্র্যাকিং ([backend/utils/ai_engine.js](file:///i:/Farming/Farming/backend/utils/ai_engine.js))
+*   এটি আমাদের **সেন্ট্রাল এআই ব্রেন**। যখনই কোনো রাউট [generateCropData](file:///i:/Farming/Farming/backend/utils/ai_engine.js#7-297) বা অন্য কোনো ফাংশন কল করে, এই ব্রেন সবার আগে API কল করে। 
+*   রেজাল্ট সফল হলে এটি `status='success'` দিয়ে `ai_logs` এ ইনসার্ট করে।
+*   কোটা লিমিট (Quota Exhausted) বা কোনো এরর হলে এটি `status='failed'` এবং সেই এরর মেসেজটি লগ করে রাখে।
+
+### B. স্ট্যাটিস্টিকস API ([backend/routes/ai_engine/ai_overview.js](file:///i:/Farming/Farming/backend/routes/ai_engine/ai_overview.js))
+এটি হলো আমাদের ড্যাশবোর্ড ডেটার সাপ্লায়ার `GET /api/admin/ai/stats`। এই রাউটটি ৬ ধরনের SQL কুয়েরি একসাথে চালিয়ে ডেটা বানায়:
+1.  **API Keys Status:** `SELECT COUNT(*)` ও `SUM(active)` ব্যবহার করে কয়টি কি রানিং আছে তা বের করে।
+2.  **Success Rate:** `ai_logs` এর মোট রিকোয়েস্ট থেকে `success` রিকোয়েস্টের শতকরা হার (%) বের করে।
+3.  **Hours Saved:** প্রতিটি সফল এআই কলকে ২ ঘণ্টা ফিজিক্যাল ম্যান-আওয়ারের সমতুল্য (Assumption) ধরে হিসাব করে।
+4.  **Feature Breakdown:** `GROUP BY feature_type` ব্যবহার করে কোন মডিউল কতবার কল হয়েছে সেটি বের করে।
+5.  **Exhausted Keys:** যেগুলো লিমিট শেষ (`exhausted`), সেগুলোর `reset_date` আনে।
+6.  **Trending & Errors:** `ORDER BY DESC LIMIT 5` দিয়ে সবচেয়ে বেশি ব্যবহৃত ফসল এবং সর্বশেষ ফেইল হওয়া লগস (Error Logs) গুলো তুলে আনে।
+*   সবকিছু শেষে এটি একটি সুন্দর JSON পেলোড (Payload) ফ্রন্টএন্ডে পাঠিয়ে দেয়।
+
+---
+
+## ৩. 🖥️ ফ্রন্টএন্ড প্রেজেন্টেশন লেয়ার (Vanilla JS + HTML)
+
+ফ্রন্টএন্ড এই API থেকে পাওয়া JSON ডেটাগুলো রিয়েল-টাইম DOM ম্যানিপুলেশনের মাধ্যমে ইউজারকে দেখায়।
+
+### A. HTML কন্টেইনার ([admin/ai-engine.html](file:///i:/Farming/Farming/admin/ai-engine.html))
+এই ফাইলে কোনো স্ট্যাটিক ডেটা নেই। সব জায়গায় আমরা `id="stats-..."` দিয়ে কন্টেইনার বানিয়ে রেখেছি।
+*   উন্নয়ন রেট (Success rate) দেখানোর জন্য: `<span id="stats-success-rate">০%</span>` 
+*   পিছনে প্রোগ্রেস বারের জন্য: `<div id="stats-success-progress"></div>`
+*   গ্রাফ/লিস্ট দেখানোর জন্য: `<div id="stats-feature-breakdown"></div>`, `<tbody id="stats-error-logs"></tbody>`
+
+### B. জাভাস্ক্রিপ্ট কন্ট্রোলার ([admin/js/ai-engine.js](file:///i:/Farming/Farming/admin/js/ai-engine.js))
+পেজ লোড হওয়ার সাথে সাথে [loadAiStats()](file:///i:/Farming/Farming/admin/js/ai-engine.js#127-235) ফাংশনটি কল হয়।
+1.  **Fetch:** এটি [fetch()](file:///i:/Farming/Farming/backend/worker.js#95-121) এর মাধ্যমে ব্যাকএন্ড থেকে JSON ডেটা আনে।
+2.  **Mapping:** `data.stats.actve_keys`, `data.stats.success_rate` মানগুলোকে ধরে ধরে HTML এর নিদৃষ্ট `document.getElementById(...)` এ বসিয়ে দেয়।
+3.  **Dynamic Lists:** `feature_breakdown`, `exhausted_keys`, `trending_crops` ও `recent_errors` এগুলোর জন্য JS এর মধ্যে `forEach` লুপ চালিয়ে ডাইনামিক `<div>` বা `<tr>` (Table Row) তৈরি করে প্যারেন্ট কন্টেইনারে (`innerHTML`) ইনজেক্ট করে দেয়।
+4.  **Time Parsing:** এক্সহস্টেড কি (Exhausted Key) পুনরায় কবে অ্যাক্টিভ হবে, তা `resetTime - Date.now()` ক্যালকুলেট করে "আর X ঘণ্টা পর" ফর্ম্যাটে ইউজারকে দেখায়।
+
+---
+
+### 💡 সিস্টেমটির সুবিধা: முழு আর্কিটেকচারের শক্তি
+এই আর্কিটেকচারের সবচেয়ে বড় সুবিধা হলো এটি **স্ক্যাল্যাবিলিটি (Scalability)**। হাজার হাজার এআই রিকোয়েস্ট আসলেও ফ্রন্টএন্ড ক্র্যাশ করবে না, কারণ ফ্রন্টএন্ড শুধুমাত্র অ্যাগ্রিগেট (Summary) করা ছোট একটি JSON পেলোড রিসিভ করে। রিয়েল-টাইম ক্যালকুলেশনের গুরুদায়িত্ব Cloudflare D1 Serverless Database নিমিষেই শেষ করে দেয়!

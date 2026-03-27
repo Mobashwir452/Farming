@@ -127,6 +127,12 @@ async function fetchFarmAndCropDetails() {
                 btnHistory.onclick = () => window.location.href = `land_history.html?id=${currentFarmId}`;
             }
 
+            // Connect Crop Doctor UI with explicit scope mapping
+            const btnDisease = document.getElementById('btnDisease');
+            if (btnDisease) {
+                btnDisease.onclick = () => window.location.href = `crop_doctor.html?farm_id=${currentFarmId}`;
+            }
+
             // Calculate total farm profit utilizing actual transactions
             let totalFarmProfit = 0;
             if (resData.transactions && resData.transactions.length > 0) {
@@ -221,6 +227,9 @@ async function fetchFarmAndCropDetails() {
                 // Output Notes List
                 renderCropNotes(activeCrop.notes_json);
 
+                // Output Crop Scans specifically linked to this Land
+                fetchCropScansForLand();
+
             } else {
                 document.getElementById('render-tasks').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো ফসল রোপণ করা নেই।</p>';
                 document.getElementById('render-resources').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো রিসোর্স নেই।</p>';
@@ -261,6 +270,54 @@ function escapeHtml(text) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+async function fetchCropScansForLand() {
+    const token = localStorage.getItem('farmer_jwt');
+    if (!token || !currentFarmId) return;
+
+    try {
+        const response = await fetch(`${API_URL}/api/public/crop-scans?farm_id=${currentFarmId}&limit=10`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        const scanContainer = document.getElementById('cropScansContainer');
+        const listEl = document.getElementById('scansList');
+
+        if (data.success && data.scans && data.scans.length > 0) {
+            scanContainer.style.display = 'block';
+            listEl.innerHTML = '';
+            
+            data.scans.forEach(scan => {
+                let imgSrc = scan.image_url;
+                if (imgSrc && imgSrc.startsWith('crop-scans/')) {
+                    imgSrc = `${API_URL}/api/public/images/${imgSrc.split('/')[1]}`;
+                } else if (!imgSrc || imgSrc === 'expired_removed') {
+                    imgSrc = 'https://placehold.co/100x100?text=Expired';
+                }
+
+                const badgeColor = scan.confidence_score > 60 ? 'var(--success)' : 'var(--danger)';
+                const scanDate = new Date(scan.created_at).toLocaleDateString('bn-BD');
+                
+                const card = document.createElement('div');
+                card.style.cssText = 'min-width: 140px; width: 140px; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border-color); flex-shrink: 0;';
+                card.innerHTML = `
+                    <img src="${imgSrc}" style="width: 100%; height: 100px; object-fit: cover;">
+                    <div style="padding: 10px;">
+                        <h4 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(scan.disease_name_bn || 'ফলাফল নেই')}</h4>
+                        <div style="font-size: 11px; color: var(--text-muted); display:flex; justify-content:space-between;">
+                            <span>${escapeHtml(scanDate)}</span>
+                            <span style="color: ${badgeColor}; font-weight: 600;">${Math.round(scan.confidence_score)}%</span>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        } else {
+            scanContainer.style.display = 'none';
+        }
+    } catch(e) { console.error("Could not fetch scans", e); }
 }
 
 window.renderCropNotes = function(notesJsonString) {
