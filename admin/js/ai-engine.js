@@ -496,6 +496,54 @@ async function loadAiStats() {
     }
 }
 
+// --- Cloudflare Telemetry (Phase 8.1) ---
+async function loadCfQuota() {
+    try {
+        const response = await fetch(`${BASE_URL}/api/admin/ai/cf-quota`, {
+            method: 'GET',
+            headers: getAuthHeaders()
+        });
+        const data = await response.json();
+
+        if (data.success && data.quota) {
+            document.getElementById('cf-telemetry-status').textContent = 'Live Synced';
+            document.getElementById('cf-telemetry-status').style.color = 'var(--success)';
+            
+            const q = data.quota;
+
+            // Workers
+            document.getElementById('q-workers').textContent = `${(q.workers.used).toLocaleString('en-US')} / 100k`;
+            document.getElementById('q-bar-workers').style.width = `${Math.min(100, (q.workers.used / q.workers.limit) * 100)}%`;
+
+            // Vectorize
+            document.getElementById('q-vectorize').textContent = `${(q.vectorize.used).toLocaleString('en-US')} / 5M`;
+            document.getElementById('q-bar-vectorize').style.width = `${Math.min(100, (q.vectorize.used / q.vectorize.limit) * 100)}%`;
+
+            // AI Neurons
+            document.getElementById('q-ai').textContent = `${(q.ai.used).toLocaleString('en-US')} / 10k`;
+            document.getElementById('q-bar-ai').style.width = `${Math.min(100, (q.ai.used / q.ai.limit) * 100)}%`;
+
+            // D1 Reads/Writes
+            document.getElementById('q-d1-read').textContent = `${(q.d1_read.used).toLocaleString('en-US')} / 5M`;
+            document.getElementById('q-bar-d1-read').style.width = `${Math.min(100, (q.d1_read.used / q.d1_read.limit) * 100)}%`;
+            document.getElementById('q-d1-write').textContent = `${(q.d1_write.used).toLocaleString('en-US')} / 100k`;
+            document.getElementById('q-bar-d1-write').style.width = `${Math.min(100, (q.d1_write.used / q.d1_write.limit) * 100)}%`;
+
+            // R2 Storage
+            document.getElementById('q-r2-a').textContent = `${(q.r2_classA.used).toLocaleString('en-US')} / 1M`;
+            document.getElementById('q-r2-b').textContent = `${(q.r2_classB.used).toLocaleString('en-US')} / 10M`;
+            document.getElementById('q-r2-size').textContent = `${q.storage.used} / 10GB`;
+            document.getElementById('q-bar-r2').style.width = `${Math.min(100, (q.storage.used / q.storage.limit) * 100)}%`;
+        } else {
+            document.getElementById('cf-telemetry-status').textContent = 'Sync Failed';
+            document.getElementById('cf-telemetry-status').style.color = 'var(--danger)';
+        }
+    } catch (e) {
+        console.error('Failed to load CF quota:', e);
+        document.getElementById('cf-telemetry-status').textContent = 'Graphql API Offline';
+    }
+}
+
 // --- Tab 2: Prediction ---
 async function loadMasterCrops() {
     try {
@@ -619,6 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load data for other tabs
     loadAiStats();
+    loadCfQuota();
     loadApiKeys();
     loadDoctorRules();
     loadRagDocuments();
@@ -889,4 +938,64 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('scanDetailsModal').style.display = 'none';
         document.getElementById('scanDetailsModalContent').innerHTML = '';
     };
+
+    // --- Chatbot & Missed Queries Logs ---
+    window.loadChatLogs = async () => {
+        const tbody = document.getElementById('chat-logs-tbody');
+        if(!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">লোড হচ্ছে...</td></tr>';
+        
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/ai/logs/chat`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if(data.success && data.logs.length > 0) {
+                tbody.innerHTML = data.logs.map(log => `
+                    <tr>
+                        <td>${log.user_id ? log.user_id : 'Guest'}</td>
+                        <td>${log.master_crop_id ? `Crop #${log.master_crop_id}` : 'N/A'}</td>
+                        <td style="white-space: pre-wrap; word-break: break-word;">${log.user_query}</td>
+                        <td style="white-space: pre-wrap; word-break: break-word; color: #334155;">${log.ai_response.length > 150 ? log.ai_response.substring(0, 150) + '...' : log.ai_response}</td>
+                        <td style="white-space: nowrap; font-size: 13px;">${new Date(log.created_at).toLocaleString('bn-BD')}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">কোনো চ্যাট লগ পাওয়া যায়নি।</td></tr>';
+            }
+        } catch(e) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Network Error: ${e.message}</td></tr>`;
+        }
+    };
+
+    window.loadMissedQueries = async () => {
+        const tbody = document.getElementById('missed-queries-tbody');
+        if(!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">লোড হচ্ছে...</td></tr>';
+        
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/ai/logs/missed`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if(data.success && data.queries.length > 0) {
+                tbody.innerHTML = data.queries.map(q => `
+                    <tr>
+                        <td>${q.master_crop_id ? `Crop #${q.master_crop_id}` : 'General'}</td>
+                        <td style="white-space: pre-wrap; word-break: break-word;">${q.failed_query}</td>
+                        <td><span style="background: #FEF2F2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #FECACA;">${q.error_reason}</span></td>
+                        <td style="white-space: nowrap; font-size: 13px;">${new Date(q.created_at).toLocaleString('bn-BD')}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">কোনো ব্যর্থ প্রশ্ন পাওয়া যায়নি। (Good job!)</td></tr>';
+            }
+        } catch(e) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">Network Error: ${e.message}</td></tr>`;
+        }
+    };
+
+    // Pre-load them initially if Tab Logs exist
+    if (document.getElementById('tab-logs')) {
+        setTimeout(() => {
+            if(window.loadChatLogs) window.loadChatLogs();
+            if(window.loadMissedQueries) window.loadMissedQueries();
+        }, 1000); // delay auto-fetch to allow other primary data to load first
+    }
 });

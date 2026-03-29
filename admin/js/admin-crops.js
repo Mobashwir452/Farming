@@ -6,6 +6,15 @@ let cropsPagination = null;
 let currentFilteredCrops = [];
 
 window.switchTab = function (tabName) {
+    if (tabName === 'missed') {
+        window.location.href = 'ai-engine.html?tab=logs&sub=missed';
+        return;
+    }
+    if (tabName === 'rag') {
+        window.location.href = 'ai-engine.html?tab=logs&sub=chat';
+        return;
+    }
+
     currentTab = tabName;
 
     document.getElementById('tabVerified').style.color = tabName === 'verified' ? 'var(--primary)' : 'var(--text-muted)';
@@ -453,6 +462,10 @@ window.switchCacheTab = function(tabId, btn) {
 
     document.querySelectorAll('.cache-tab-pane').forEach(p => p.style.display = 'none');
     document.getElementById('cache-tab-' + tabId).style.display = 'block';
+
+    if (tabId === 'rag') {
+        refreshCropsRagContext();
+    }
 }
 
 async function openCacheModal(id, hasCache) {
@@ -476,6 +489,10 @@ async function openCacheModal(id, hasCache) {
         document.getElementById('cacheSaveBtn').innerHTML = 'আপডেট করুন';
 
         await fetchCacheData(cropString);
+        
+        // Force reset to first tab to prevent old data from persisting visually
+        const firstTabBtn = document.querySelector('.cache-tab-btn');
+        if (firstTabBtn) switchCacheTab('guidelines', firstTabBtn);
     } else {
         document.getElementById('cacheDataSection').style.display = 'none';
         document.getElementById('cacheMissingSection').style.display = 'block';
@@ -503,6 +520,10 @@ function closeCacheModal() {
     currentRisksData = [];
     currentResourcesData = [];
     currentTasksData = [];
+    
+    // Clear RAG memory
+    const ragContainer = document.getElementById('ragContextContainer');
+    if (ragContainer) ragContainer.innerHTML = '';
 }
 
 function showManualCacheForm() {
@@ -900,3 +921,90 @@ function escapeHtml(unsafe) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+window.refreshCropsRagContext = async function() {
+    const crop = globalCrops.find(c => c.id === currentCacheCropId);
+    if (!crop) return;
+    
+    // Combine crop_name and variety_name correctly for RAG lookup
+    const cropTitle = (crop.variety_name && crop.variety_name.trim() !== '') ? `${crop.crop_name} (${crop.variety_name})` : crop.crop_name;
+
+    const container = document.getElementById('ragContextContainer');
+    container.innerHTML = '<div style="text-align:center; padding: 20px;">লোড হচ্ছে...</div>';
+    
+    const token = localStorage.getItem('agritech_admin_token');
+    try {
+        const response = await fetch(`${window.ADMIN_CONFIG?.API_BASE_URL || 'https://agritech-backend.mobashwir9.workers.dev'}/api/admin/crops/rag-context?crop=${encodeURIComponent(cropTitle)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        if (data.success && data.context && data.context.trim() !== '') {
+            container.innerHTML = escapeHtml(data.context);
+        } else {
+            container.innerHTML = '<div style="text-align:center; padding: 30px 20px; color: #64748b; font-size: 14px;">কোনো অটোমেটেড RAG ডেটাবেস পাওয়া যায়নি। উপরের বাটন থেকে জেনারেট করুন।</div>';
+        }
+    } catch(e) {
+        container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Failed to load RAG context.</div>';
+    }
+}
+
+window.generateRagNow = async function(cropId, forceRegenerate = false) {
+    const btn = document.getElementById('btnGenerateRag');
+    if(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> RAG এন্ট্রি তৈরি হচ্ছে, অনুগ্রহ করে ১৫-২০ সেকেন্ড অপেক্ষা করুন...';
+    }
+
+    const token = localStorage.getItem('agritech_admin_token');
+    try {
+        const url = `${window.ADMIN_CONFIG?.API_BASE_URL || 'https://agritech-backend.mobashwir9.workers.dev'}/api/admin/crops/${cropId}/generate-rag${forceRegenerate ? '?force=true' : ''}`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('সফলভাবে AI RAG জেনারেট হয়েছে!');
+            // Auto reload the RAG context tab to show exactly what was generated
+            window.refreshCropsRagContext();
+        } else {
+            alert('Error Generating RAG: ' + data.error);
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic me-2"></i> এখনই AI দিয়ে RAG তৈরি করুন';
+            }
+        }
+    } catch(e) {
+        alert('Server connection failed while generating RAG.');
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic me-2"></i> এখনই AI দিয়ে RAG তৈরি করুন';
+        }
+    }
+};
+
+window.regenerateRagNow = async function() {
+    if (!currentCacheCropId) return;
+    if (confirm("আপনি কি নিশ্চিত যে আপনি পুরোনো RAG মুছে সম্পূর্ণ নতুন করে RAG তৈরি করতে চান? এই প্রক্রিয়াটি ১৫-২০ সেকেন্ড সময় নিতে পারে।")) {
+        // Change the header button to show loading
+        const tabs = document.querySelectorAll('.cache-tab-pane');
+        const ragTab = Array.from(tabs).find(t => t.id === 'cache-tab-rag');
+        let headingBtn = null;
+        if (ragTab) {
+            headingBtn = ragTab.querySelector('button');
+            if (headingBtn) {
+                headingBtn.disabled = true;
+                headingBtn.innerText = "জেনারেট হচ্ছে...";
+            }
+        }
+        
+        await generateRagNow(currentCacheCropId, true);
+        
+        if (headingBtn) {
+            headingBtn.disabled = false;
+            headingBtn.innerText = "নতুন RAG জেনারেট করুন";
+        }
+    }
+};

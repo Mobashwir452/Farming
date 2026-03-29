@@ -279,6 +279,7 @@
                         <button type="button" class="cache-tab-btn" onclick="switchCacheTab('risks', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">ঝুঁকি ও সতর্কতা</button>
                         <button type="button" class="cache-tab-btn" onclick="switchCacheTab('resources', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">খরচ বিবরণী</button>
                         <button type="button" class="cache-tab-btn" onclick="switchCacheTab('tasks', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">দৈনিক কাজ</button>
+                        <button type="button" class="cache-tab-btn" onclick="switchCacheTab('rag', this)" style="background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;">RAG Context</button>
                     </div>
 
                     <!-- Tab Content Areas -->
@@ -354,6 +355,22 @@
                                     </button>
                                 </div>
                                 <div id="tasksContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- RAG CONTEXT TAB -->
+                        <div id="cache-tab-rag" class="cache-tab-pane" style="display: none;">
+                            <div style="margin-bottom: 24px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="font-size: 14px; font-weight: 700; color: #92400E; margin: 0;">RAG Context Data</label>
+                                        <p style="font-size: 11px; color: #B45309; margin: 4px 0 0 0;">Vector Database AI Document</p>
+                                    </div>
+                                    <button type="button" class="btn-outline-primary" style="padding: 6px 12px; font-size: 12px; color: #92400E; border-color: #92400E;" onclick="regenerateRagNow()">নতুন RAG জেনারেট করুন</button>
+                                </div>
+                                <div id="ragContextContainer" style="display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #334155; white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+                                    <div style="text-align:center; padding: 20px;">কোনো RAG ডাটা পাওয়া যায়নি।</div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -1626,3 +1626,131 @@ window.saveNewResourceFromModal = function() {
         alert('রিসোর্স সেভ করতে সমস্যা হয়েছে।');
     }
 };
+
+// --- Farming AI Chatbot (RAG) Integration ---
+window.toggleChatbot = function() {
+    const w = document.getElementById('cropChatbotContainer');
+    const badge = document.getElementById('chatbotToggleBtn');
+    
+    // Create backdrop overlay lazily
+    let backdrop = document.getElementById('chatbotBackdropOverlay');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'chatbotBackdropOverlay';
+        backdrop.style.cssText = 'position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9998; opacity: 0; visibility: hidden; transition: all 0.3s ease; backdrop-filter: blur(2px);';
+        backdrop.onclick = window.toggleChatbot;
+        document.body.appendChild(backdrop);
+    }
+    
+    // Check if bottom sheet is hidden
+    if (w.style.transform === 'translateY(100%)' || w.style.transform === '') {
+        // Open
+        w.style.transform = 'translateY(0)';
+        backdrop.style.visibility = 'visible';
+        backdrop.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+        
+        if (badge) badge.style.transform = 'scale(0)';
+        
+        // Add initial greeting if empty
+        const msgs = document.getElementById('chatMessages');
+        if (msgs && msgs.children.length === 0) {
+            const cName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : 'আপনার ফসল';
+            msgs.innerHTML = `<div style="margin-bottom: 12px; text-align: left;">
+                <div style="background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
+                    আসসালামু আলাইকুম! আমি আপনার এআই কৃষি সহকারী। <strong>${cName}</strong> সম্পর্কে কোনো প্রশ্ন থাকলে আমাকে করতে পারেন।
+                </div>
+            </div>`;
+        }
+    } else {
+        // Close
+        w.style.transform = 'translateY(100%)';
+        backdrop.style.opacity = '0';
+        setTimeout(() => backdrop.style.visibility = 'hidden', 300);
+        document.body.style.overflow = '';
+        
+        if (badge) badge.style.transform = 'scale(1)';
+    }
+};
+
+window.sendChatMessage = async function() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    
+    document.getElementById('sendChatBtn').disabled = true;
+    input.disabled = true;
+    
+    const msgsContainer = document.getElementById('chatMessages');
+    
+    // Append User Message
+    msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: right;">
+        <div style="background: #10b981; color: white; padding: 10px 14px; border-radius: 12px; border-bottom-right-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5; text-align: left;">
+            ${msg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>
+    </div>`;
+    
+    input.value = '';
+    msgsContainer.scrollTop = msgsContainer.scrollHeight;
+    
+    // Loading indicator
+    const loadingId = 'loading-' + Date.now();
+    msgsContainer.innerHTML += `<div id="${loadingId}" style="margin-bottom: 12px; text-align: left;">
+        <div style="background: #f1f5f9; color: #64748b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 13px; font-style: italic;">
+            এআই আপনার উত্তর খুঁজছে...
+        </div>
+    </div>`;
+    msgsContainer.scrollTop = msgsContainer.scrollHeight;
+    
+    try {
+        const cropName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : localStorage.getItem('agritech_active_crop_name');
+        const masterCropId = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.master_crop_id : null;
+        
+        const res = await fetch('https://agritech-backend.mobashwir9.workers.dev/api/public/crop-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('farmer_jwt')}`
+            },
+            body: JSON.stringify({
+                query: msg,
+                cropName: cropName,
+                masterCropId: masterCropId
+            })
+        });
+        
+        const data = await res.json();
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        
+        if (data.success) {
+            const formattedNodes = typeof marked !== 'undefined' ? marked.parse(data.answer) : data.answer.replace(/\n/g, '<br>');
+            msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
+                <div style="background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5; overflow: hidden;">
+                    ${formattedNodes}
+                </div>
+            </div>`;
+        } else {
+            console.error(data.error);
+            msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
+                <div style="background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
+                    দুঃখিত, কোনো উত্তর পাওয়া যায়নি।
+                </div>
+            </div>`;
+        }
+    } catch (e) {
+        console.error(e);
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
+            <div style="background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
+                ইন্টারনেট সংযোগ সমস্যা। 
+            </div>
+        </div>`;
+    }
+    
+    document.getElementById('sendChatBtn').disabled = false;
+    input.disabled = false;
+    input.focus();
+    msgsContainer.scrollTop = msgsContainer.scrollHeight;
+};

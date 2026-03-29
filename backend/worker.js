@@ -3,7 +3,7 @@ import { withAuth } from './utils.js';
 
 // Import Route Handlers
 import { adminLogin, adminDashboard } from './routes/admin.js';
-import { getMasterCrops, addMasterCrop, editMasterCrop, deleteMasterCrop, addBulkMasterCrops, updateCropStatus, syncCropFromCache } from './routes/admin_crops.js';
+import { getMasterCrops, addMasterCrop, editMasterCrop, deleteMasterCrop, addBulkMasterCrops, updateCropStatus, syncCropFromCache, getCropRagContext, generateMissingRag } from './routes/admin_crops.js';
 import { getAdminCache, saveAdminCache, deleteAdminCache, generateAdminCacheAI } from './routes/admin_cache.js';
 import { getAdminSettings, saveAdminSettings } from './routes/admin_settings.js';
 import { verifyFirebase, updateProfile, checkUser, loginPin } from './routes/auth.js';
@@ -14,6 +14,7 @@ import { analyzePublicCropImage, getPublicScanLogs } from './routes/public_crop_
 import { getScanLogs, updateDiagnosticRules, getDiagnosticRules } from './routes/admin_crop_doctor.js';
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
+import { handleCropChat } from './routes/ai_chat.js';
 import { getTransactions, addTransaction, deleteTransaction } from './routes/transactions.js';
 import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
@@ -35,10 +36,12 @@ router.put('/api/admin/crops/:id', withAuth(['admin']), editMasterCrop);
 router.put('/api/admin/crops/verify-from-cache/:id', withAuth(['admin']), syncCropFromCache);
 router.put('/api/admin/crops/:id/status', withAuth(['admin']), updateCropStatus);
 router.delete('/api/admin/crops/:id', withAuth(['admin']), deleteMasterCrop);
+router.get('/api/admin/crops/rag-context', withAuth(['admin']), getCropRagContext);
+router.post('/api/admin/crops/:id/generate-rag', withAuth(['admin']), generateMissingRag);
 router.get('/api/admin/settings', withAuth(['admin']), getAdminSettings);
 router.post('/api/admin/settings', withAuth(['admin']), saveAdminSettings);
 router.get('/api/admin/test/weather-sync', withAuth(['admin']), testWeatherSync);
-router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (request, env) => {
+router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (request, env, ctx) => {
     try {
         let cropId = null;
         try {
@@ -46,7 +49,7 @@ router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (re
             cropId = body.cropId || null;
         } catch(e) {} // ignore empty bodies
         
-        const stats = await runCropVerification(env, cropId);
+        const stats = await runCropVerification(env, cropId, ctx);
         return Response.json({ success: true, message: 'AI Verification cycle executed successfully.', details: stats });
     } catch(e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
@@ -80,6 +83,7 @@ router.delete('/api/farms/:id', withAuth(['farmer']), deleteFarm);
 // 3.6 Public Crop AI & Timeline Routes
 router.post('/api/public/crop-scan', withAuth(['farmer', 'admin']), analyzePublicCropImage);
 router.get('/api/public/crop-scans', withAuth(['farmer']), getPublicScanLogs);
+router.post('/api/public/crop-chat', withAuth(['farmer', 'admin']), handleCropChat);
 
 // 3.7 Public Image Server (R2 Bucket)
 router.get('/api/public/images/:key', async (request, env) => {

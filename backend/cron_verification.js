@@ -1,4 +1,6 @@
-export const runCropVerification = async (env, cropId = null) => {
+import { generateCropEncyclopedia } from './utils/ai_engine.js';
+
+export const runCropVerification = async (env, cropId = null, ctx = null) => {
     let stats = { processedCount: 0, successCount: 0, failedCount: 0, messages: [] };
     try {
         console.log("CRON: Starting Auto-Verification Job...");
@@ -145,6 +147,9 @@ export const runCropVerification = async (env, cropId = null) => {
                     SET avg_duration_days = ?, base_yield_per_shotangsho_kg = ?, disease_resistance = ?, disease_resistance_score = ?, planting_months = ?, crop_category = ?, suitable_regions = ?, soil_type = ?, special_features = ?, data_source = 'AI Verified'
                     WHERE id = ? AND verified_status = 0
                 `).bind(days, yieldShotangsho, resText, resScore, planM, catMatch, suitableRegions, soilType, specialFeatures, crop.id).run().catch(e => console.error(e));
+
+                // Generate Background RAG Encyclopedia (Awaiting strictly so fetch connections are not severed by Cloudflare limit hooks)
+                await generateCropEncyclopedia(env, crop.crop_name, crop.variety_name).catch(e => console.error(e));
 
                 // Protect existing manual edits inside Cache - DO NOT TOUCH CACHE AT ALL during Verify.
                 // The cache should only be updated via the Cache Modal manually.

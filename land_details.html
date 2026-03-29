@@ -28,6 +28,9 @@
 
     <!-- html2pdf for Bengali format -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Marked.js for AI Chatbot Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 </head>
 
 <body class="land-details-body">
@@ -893,6 +896,50 @@
                             লোড হচ্ছে...</div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Floating Chat Widget -->
+        <button id="chatbotToggleBtn" onclick="toggleChatbot()"
+            style="position: fixed; bottom: 84px; left: 20px; background: #0284C7; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); cursor: pointer; z-index: 99; transition: transform 0.2s;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </button>
+
+        <div id="cropChatbotContainer" style="position: fixed; bottom: 0; left: 0; right: 0; height: 85vh; background: white; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); z-index: 9999; flex-direction: column; overflow: hidden; border-top: 1px solid var(--border-color); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex;">
+            <div style="background: #0284C7; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a2 2 0 0 1 2 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="M5 12H3"></path>
+                        <path d="M21 12h-2"></path>
+                        <path d="M20 5l-2 2"></path>
+                        <path d="M6 19l-2 2"></path>
+                        <path d="M20 19l-2-2"></path>
+                        <path d="M6 5l-2-2"></path>
+                        <rect x="7" y="7" width="10" height="10" rx="2" ry="2"></rect>
+                    </svg>
+                    কৃষি এআই অ্যাসিস্ট্যান্ট
+                </h4>
+                <button onclick="toggleChatbot()" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px; line-height: 1;">&times;</button>
+            </div>
+            
+            <div id="chatMessages" style="flex: 1; padding: 16px; overflow-y: auto; background: #F8FAFC; display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+                <div style="background: white; border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; border-bottom-left-radius: 2px; max-width: 85%; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                    হ্যালো! আমি আপনার স্মার্ট কৃষি অ্যাসিস্ট্যান্ট। এই ফসল সম্পর্কে আপনার কোনো প্রশ্ন থাকলে আমাকে করতে পারেন।
+                </div>
+            </div>
+            
+            <div style="padding: 12px; border-top: 1px solid var(--border-color); background: white; display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="chatInput" placeholder="আপনার প্রশ্ন লিখুন..." style="flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 24px; outline: none; font-size: 14px; background: #F8FAFC;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button id="sendChatBtn" onclick="sendChatMessage()" style="background: #0284C7; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
             </div>
         </div>
 

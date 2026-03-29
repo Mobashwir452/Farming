@@ -397,3 +397,112 @@ Do not include Markdown blocks. Output only the pure XML.
 
     return scanResultObj;
 };
+
+// --- RAG Automated Encyclopedia Pipeline (Phase 8.2 & 8.5) ---
+export const generateCropEncyclopedia = async (env, cropName, varietyName, forceRegenerate = false) => {
+    try {
+        const cropTitle = (varietyName && varietyName.trim() !== '') ? `${cropName} (${varietyName})` : cropName;
+
+        // Check for Existing RAG
+        const existingRAG = await env.DB.prepare("SELECT id FROM ai_rag_documents WHERE crop_name = ?").bind(cropTitle).first();
+        
+        if (existingRAG) {
+            if (forceRegenerate) {
+                console.log(`Force regenerating RAG for ${cropTitle}. Deleting old vector ID: ${existingRAG.id}...`);
+                // Delete from Vectorize
+                try { await env.VECTORIZE.deleteByIds([existingRAG.id]); } catch(e) { console.error("Vectorize Delete Error:", e); }
+                // Delete from D1
+                await env.DB.prepare("DELETE FROM ai_rag_documents WHERE id = ?").bind(existingRAG.id).run();
+            } else {
+                console.log(`RAG content already exists for ${cropTitle}. Skipping generation.`);
+                return { success: true, skipped: true, message: "RAG already exists." };
+            }
+        }
+
+        const promptText = `
+Act as an expert Agronomist in Bangladesh.
+Create a highly detailed, comprehensive encyclopedia and cultivation guide for the crop "${cropName}" (Variety: "${varietyName || 'যেকোনো'}") in Bangladesh.
+Write in pure Bengali language.
+Break it down into the following clear sections using Markdown headings (##):
+## পরিচিতি ও উপযুক্ত পরিবেশ
+## মাটি তৈরি ও বপন পদ্ধতি
+## সেচ ও সার ব্যবস্থাপনা
+## রোগবালাই ও পোকামাকড় দমন
+## ফসল সংগ্রহ ও সংরক্ষণ
+## ফলন ও বাজার সম্ভাবনা
+
+Make the content as informative and practical as possible. Only output the guide, no intro/outro conversational text.
+`;
+
+        // API Key Rotation System
+        const keysRes = await env.DB.prepare("SELECT id, api_key FROM ai_api_keys WHERE status = 'active'").all();
+        let availableKeys = keysRes.results || [];
+        if (availableKeys.length === 0) throw new Error('No active API keys');
+
+        let aiRawText = null;
+        let successKeyId = null;
+
+        while (availableKeys.length > 0) {
+            const index = Math.floor(Math.random() * availableKeys.length);
+            const keyObj = availableKeys[index];
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${keyObj.api_key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }],
+                        generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
+                    })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                if (!data.candidates || !data.candidates[0].content) {
+                    throw new Error("Invalid Gemini response format (Possibly blocked by Safety Settings)");
+                }
+                aiRawText = data.candidates[0].content.parts[0].text;
+                successKeyId = keyObj.id;
+                break;
+            } catch (err) {
+                console.error("Gemini Failure:", err.message);
+                availableKeys.splice(index, 1);
+            }
+        }
+
+        if (!aiRawText) {
+            await env.DB.prepare("INSERT INTO ai_logs (feature_type, crop_name, status, error_message) VALUES ('rag_encyclopedia_generation', ?, 'failed', ?)").bind(cropTitle, 'Failed to generate content (All keys exhausted or models failed)').run().catch(()=>{});
+            return { success: false, error: 'Failed to generate content' };
+        }
+
+        // The user requested a single giant row for the entire crop RAG instead of chunking
+        const fullText = aiRawText;
+
+        // 3. Generate Vector Embeddings using Cloudflare AI
+        // bge-base-en-v1.5 automatically truncates to 512 tokens. We pass the full text as an array of 1.
+        const embeddingsResponse = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: [fullText] });
+        const vectorData = embeddingsResponse.data[0];
+
+        const id = crypto.randomUUID();
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+        // 4. Insert into D1 and Vectorize (Single Row)
+        await env.VECTORIZE.upsert([{
+            id: id,
+            values: vectorData,
+            metadata: { crop_name: cropTitle }
+        }]);
+
+        await env.DB.prepare("INSERT INTO ai_rag_documents (id, crop_name, chunk_text, created_at) VALUES (?, ?, ?, ?)").bind(id, cropTitle, fullText, timestamp).run();
+
+        // Track DB API Hit
+        await env.DB.prepare(`UPDATE ai_api_keys SET last_used = CURRENT_TIMESTAMP, today_usage = today_usage + 1, total_usage = total_usage + 1 WHERE id = ?`).bind(successKeyId).run().catch(()=>{});
+        // Log the structural operation successfully
+        await env.DB.prepare("INSERT INTO ai_logs (feature_type, crop_name, status, error_message) VALUES ('rag_encyclopedia_generation', ?, 'success', ?)").bind(cropTitle, `Generated 1 chunk successfully.`).run().catch(()=>{});
+
+        return { success: true, chunks: 1 };
+
+    } catch (err) {
+        console.error("RAG Encyclopedia Error:", err);
+        await env.DB.prepare("INSERT INTO ai_logs (feature_type, crop_name, status, error_message) VALUES ('rag_encyclopedia_generation', ?, 'failed', ?)").bind(cropName, err.message).run().catch(()=>{});
+        return { success: false, error: err.message };
+    }
+};

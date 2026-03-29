@@ -4,6 +4,9 @@ compatibility_date = "2023-12-01"
 
 # Environment Variables
 [vars]
+# TODO (Phase 8.1): Add your Cloudflare credentials here for Live Quota Telemetry Tracking
+CF_ACCOUNT_ID = "56c92f2a4088a1e2118779d94f2a3b80"
+CF_API_TOKEN = "cfat_og84DbE15erDiOpL7l3w91FfbtCmhknaHCWXEO512d99e467"
 # API_SECRET = "super_secret_jwt_key_here" # We will set this securely using `wrangler secret put`
 
 [[d1_databases]]
@@ -18,6 +21,9 @@ index_name = "agritech_knowledge_db"
 [[r2_buckets]]
 binding = "IMAGE_BUCKET"
 bucket_name = "agritech-images"
+
+[ai]
+binding = "AI"
 
 [triggers]
 crons = ["0 2 * * *"] # Run daily at 2:00 AM UTC

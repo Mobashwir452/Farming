@@ -9,7 +9,7 @@ import { getDoctorRules, saveDoctorRules } from './ai_doctor.js';
 import { getAiConfig, saveAiConfig, getAiPrompts, saveAiPrompt } from './ai_config.js';
 
 import { uploadKnowledge, getKnowledgeDocuments } from './ai_rag.js';
-import { getAiLogs } from './ai_logs.js';
+import { getCfQuota } from './cf_telemetry.js';
 
 export const aiRouter = Router({ base: '/api/admin/ai' });
 
@@ -18,6 +18,7 @@ aiRouter.all('*', withAuth(['admin']));
 
 // Tab 1: Overview
 aiRouter.get('/stats', getAiStats);
+aiRouter.get('/cf-quota', getCfQuota);
 
 // Tab 2: Prediction
 aiRouter.get('/prediction-rules', getPredictionRules);
@@ -53,4 +54,7 @@ aiRouter.post('/rag/upload', uploadKnowledge);
 aiRouter.get('/rag/documents', getKnowledgeDocuments);
 
 // Tab 6: Logs
+import { getAiLogs, getChatLogs, getMissedQueries } from './ai_logs.js';
 aiRouter.get('/logs', getAiLogs);
+aiRouter.get('/logs/chat', getChatLogs);
+aiRouter.get('/logs/missed', getMissedQueries);

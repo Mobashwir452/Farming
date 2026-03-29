@@ -1,4 +1,29 @@
 import { error, json } from 'itty-router';
+import { generateCropEncyclopedia } from '../utils/ai_engine.js';
+
+export const getCropRagContext = async (request, env) => {
+    try {
+        const cropName = request.query ? request.query.crop : null;
+
+        if (!cropName) {
+            return new Response(JSON.stringify({ success: false, error: 'Crop name is required' }), { status: 400, headers: { 'Content-Type': 'application/json' }});
+        }
+
+        const query = `
+            SELECT chunk_text 
+            FROM ai_rag_documents 
+            WHERE crop_name = ?
+            ORDER BY id ASC
+        `;
+        const { results } = await env.DB.prepare(query).bind(cropName).all();
+        
+        const combinedText = results.map(r => r.chunk_text).join('\n\n');
+
+        return new Response(JSON.stringify({ success: true, context: combinedText }), { status: 200, headers: { 'Content-Type': 'application/json' }});
+    } catch (err) {
+        return new Response(JSON.stringify({ success: false, error: err.message, stack: err.stack }), { status: 500, headers: { 'Content-Type': 'application/json' }});
+    }
+};
 
 const formatVarietyName = (cropName, varietyName) => {
     let cleanVariety = (varietyName || '').trim();
@@ -136,7 +161,7 @@ export const addBulkMasterCrops = async (request, env) => {
     }
 };
 
-export const updateCropStatus = async (request, env) => {
+export const updateCropStatus = async (request, env, ctx) => {
     try {
         const id = request.params.id;
         const body = await request.json();
@@ -154,13 +179,14 @@ export const updateCropStatus = async (request, env) => {
 
         // Approve: set verified_status = 1
         await env.DB.prepare(`UPDATE crops_master_data SET verified_status = 1 WHERE id = ?`).bind(id).run();
-        return json({ success: true, message: 'Crop approved successfully' });
+
+        return json({ success: true, message: 'Crop approved successfully.' });
     } catch (err) {
         return error(500, err.message);
     }
 };
 
-export const syncCropFromCache = async (request, env) => {
+export const syncCropFromCache = async (request, env, ctx) => {
     try {
         const id = request.params.id;
         
@@ -196,6 +222,24 @@ export const syncCropFromCache = async (request, env) => {
 
         return json({ success: true, message: 'ক্যাশ থেকে মাস্টার টেবিলে সফলভাবে ডাটা সিঙ্ক হয়েছে এবং অ্যাপ্রুভ হয়েছে!' });
     } catch (err) {
+        return error(500, err.message);
+    }
+};
+
+export const generateMissingRag = async (request, env, ctx) => {
+    try {
+        const id = request.params.id;
+        // Parse the URL search params manually for Hono request obj if needed, but wait it is request.url
+        const url = new URL(request.url);
+        const forceRegenerate = url.searchParams.get('force') === 'true';
+
+        const crop = await env.DB.prepare("SELECT crop_name, variety_name FROM crops_master_data WHERE id = ?").bind(id).first();
+        if (!crop) return error(404, 'ফসল পাওয়া যায়নি');
+        
+        await generateCropEncyclopedia(env, crop.crop_name, crop.variety_name, forceRegenerate);
+
+        return json({ success: true, message: 'RAG manually generated successfully' });
+    } catch(err) {
         return error(500, err.message);
     }
 };
