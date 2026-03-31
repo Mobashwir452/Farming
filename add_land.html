@@ -72,7 +72,7 @@
                         stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
                     </svg>
-                    হাঁটা শুরু করুন
+                    জমির মাপ শুরু করুন
                 </button>
 
                 <!-- NEW: Manual Entry Button -->
@@ -96,8 +96,15 @@
                     <span id="liveAreaDisplay">০.০০</span>
                     <span style="font-size: 14px; color: var(--text-muted); font-weight: 500;">শতাংশ</span>
                 </p>
+                <button class="btn-primary w-100" style="padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #3b82f6;" onclick="addCornerPoint()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    পয়েন্ট যোগ করুন
+                </button>
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-primary w-100" style="padding: 16px;" onclick="finishMapping()">মাপা শেষ</button>
+                    <button class="btn-primary w-100" style="padding: 16px; background: #10b981; border: none;" onclick="finishMapping()">মাপা শেষ</button>
                     <button class="btn-outline-primary" style="padding: 16px;" onclick="cancelMapping()">বাতিল</button>
                 </div>
             </div>

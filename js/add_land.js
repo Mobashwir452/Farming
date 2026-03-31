@@ -7,6 +7,7 @@ let map = null;
 let polyline = null;
 let userMarker = null;
 let watchId = null;
+let pointMarkers = [];
 window.walkedCoordinates = []; // Will store [lat, lng]
 window.calculatedAreaShotangsho = 0;
 
@@ -63,7 +64,10 @@ window.startMapping = function () {
             }
 
             window.walkedCoordinates = [];
-            if (statusText) statusText.textContent = "ম্যাপিং চলছে... জমির সীমানা ধরে হাঁটুন।";
+            // Clear previous points if re-starting
+            pointMarkers.forEach(m => { if(map) map.removeLayer(m); });
+            pointMarkers = [];
+            if (statusText) statusText.textContent = "ম্যাপিং চলছে... জমির সীমানায় গিয়ে পয়েন্ট যোগ করুন।";
 
             // Start watching position
             watchId = navigator.geolocation.watchPosition(
@@ -75,30 +79,12 @@ window.startMapping = function () {
                     const clat = pos.coords.latitude;
                     const clng = pos.coords.longitude;
 
-                    // Update UI
+                    // Update UI User Marker only
                     userMarker.setLatLng([clat, clng]);
                     map.panTo([clat, clng]);
-
-                    const newPoint = [clat, clng];
-                    window.walkedCoordinates.push(newPoint);
-                    polyline.addLatLng(newPoint);
                     
                     window.currentLat = clat;
                     window.currentLng = clng;
-
-                    // Live area update
-                    if (window.walkedCoordinates.length >= 3) {
-                        try {
-                            const coordsCopy = [...window.walkedCoordinates];
-                            coordsCopy.push(coordsCopy[0]); // close polygon
-                            const turfCoords = coordsCopy.map(p => [p[1], p[0]]);
-                            const poly = turf.polygon([turfCoords]);
-                            const area = turf.area(poly) / 40.4686;
-                            
-                            const liveAreaE = document.getElementById('liveAreaDisplay');
-                            if (liveAreaE) liveAreaE.textContent = area.toFixed(2);
-                        } catch(e) {}
-                    }
                 },
                 (err) => {
                     console.error("Watch error:", err);
@@ -134,11 +120,60 @@ window.cancelMapping = function () {
     }
 
     if (map) {
+        pointMarkers.forEach(m => map.removeLayer(m));
+        pointMarkers = [];
         map.remove();
         map = null;
         polyline = null;
         userMarker = null;
     }
+};
+
+window.addCornerPoint = function() {
+    if (!window.currentLat || !window.currentLng) {
+        alert("লোকেশন এখনও পাওয়া যায়নি, একটু অপেক্ষা করুন।");
+        return;
+    }
+    
+    // Prevent double clicking very fast or adding exact same point
+    if (window.walkedCoordinates.length > 0) {
+        let lastP = window.walkedCoordinates[window.walkedCoordinates.length - 1];
+        if (lastP[0] === window.currentLat && lastP[1] === window.currentLng) {
+            return;
+        }
+    }
+
+    const newPoint = [window.currentLat, window.currentLng];
+    window.walkedCoordinates.push(newPoint);
+    polyline.addLatLng(newPoint);
+    
+    // Add marker for corner
+    const marker = L.circleMarker(newPoint, {
+        radius: 6,
+        fillColor: "#ef4444", // Red for corner point
+        color: "#fff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 1
+    }).addTo(map);
+    pointMarkers.push(marker);
+
+    // Live area update if >= 3 elements
+    if (window.walkedCoordinates.length >= 3) {
+        try {
+            const coordsCopy = [...window.walkedCoordinates];
+            coordsCopy.push(coordsCopy[0]); // close polygon for area calculation
+            const turfCoords = coordsCopy.map(p => [p[1], p[0]]);
+            const poly = turf.polygon([turfCoords]);
+            const area = turf.area(poly) / 40.4686;
+            
+            const liveAreaE = document.getElementById('liveAreaDisplay');
+            if (liveAreaE) liveAreaE.textContent = area.toFixed(2);
+        } catch(e) {}
+    }
+
+    const statusText = document.getElementById('gpsStatusText');
+    if (statusText) statusText.textContent = `পয়েন্ট যোগ হয়েছে: ${window.walkedCoordinates.length} টি`;
 };
 
 window.finishMapping = function () {
