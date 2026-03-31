@@ -84,7 +84,21 @@ export const generateAdminCacheAI = async (request, env) => {
             console.error("Master table RAG error:", e);
         }
 
-        const aiData = await generateCropData(env, cropName, varietyName, { govtContext, featureType: 'admin_cache' });
+        let exclusionListStr = "[]";
+        if (body.is_new_discovery) {
+            try {
+                const existingVarieties = await env.DB.prepare("SELECT variety_name FROM crops_master_data WHERE crop_name LIKE ? OR variety_name LIKE ?").bind(`%${cropName}%`, `%${varietyName}%`).all();
+                const names = (existingVarieties.results || []).map(r => r.variety_name);
+                exclusionListStr = JSON.stringify(names);
+            } catch(e) { console.error("Exclusion list error:", e); }
+        }
+
+        const aiData = await generateCropData(env, cropName, varietyName, { 
+            govtContext, 
+            featureType: 'admin_cache',
+            isNewVarietySearch: !!body.is_new_discovery,
+            exclusionListStr
+        });
 
         const {
             base_yield_kg,
@@ -94,15 +108,30 @@ export const generateAdminCacheAI = async (request, env) => {
             base_revenue_taka,
             risks,
             timeline,
-            daily_tasks
+            daily_tasks,
+            actual_crop_name,
+            variety_name: ai_variety_name
         } = aiData;
+
+        // Extract raw core names exactly as they are in the DB to sync with Public API
+        const finalCropName = actual_crop_name || cropName;
+        const finalVarietyName = ai_variety_name || varietyName;
 
         const cacheData = { guideline: timeline, tasks: daily_tasks };
 
         // Set expiry dynamically (6 months for AI generated)
         await env.DB.prepare("INSERT OR REPLACE INTO ai_timeline_cache (crop_name, variety_name, base_yield_kg, base_cost_taka, base_revenue_taka, timeline_json, risks_json, resources_json, crop_market_price_bdt, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+6 months'))")
-            .bind(cropName, varietyName, base_yield_kg, base_cost_taka, base_revenue_taka, JSON.stringify(cacheData), JSON.stringify(risks), JSON.stringify(financial_resources), crop_market_price_bdt)
+            .bind(finalCropName, finalVarietyName, base_yield_kg, base_cost_taka, base_revenue_taka, JSON.stringify(cacheData), JSON.stringify(risks), JSON.stringify(financial_resources), crop_market_price_bdt)
             .run();
+
+        // Admin quick AI generate feature - insert into Pending AI!
+        if (body.is_new_discovery) {
+             const existing = await env.DB.prepare("SELECT id FROM crops_master_data WHERE crop_name = ? AND variety_name = ?").bind(finalCropName, finalVarietyName).first();
+             if (!existing) {
+                 await env.DB.prepare("INSERT INTO crops_master_data (crop_category, crop_name, variety_name, base_yield_per_shotangsho_kg, avg_duration_days, verified_status) VALUES (?, ?, ?, ?, ?, 0)")
+                    .bind('Uncategorized', finalCropName, finalVarietyName, 0, 0).run().catch(e => { console.error("Admin AI quick add error:", e); });
+             }
+        }
 
         return json({ success: true, message: 'AI Generated and Cached' });
 

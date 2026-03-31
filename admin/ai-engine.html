@@ -7,7 +7,53 @@
     <title>এআই ইঞ্জিন - AgriTech Admin</title>
     <link rel="stylesheet" href="css/admin-global.css">
     <link rel="stylesheet" href="css/admin-ai.css">
+    <link rel="stylesheet" href="css/admin-ai-audit.css">
     <script src="js/rbac.js"></script>
+    <style>
+        /* Classic Overview UI Enhancements */
+        .ai-tab-pane.active {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .metrics-grid {
+            display: grid;
+            gap: 20px;
+            align-items: stretch; /* crucial for equal height */
+        }
+        .metric-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* classic light shadow */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%; /* force to fill stretched grid cell */
+            transition: box-shadow 0.2s;
+        }
+        .metric-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        /* Revert to simple left borders matching classic admin layout */
+        .metric-card { border-left: 4px solid var(--primary); }
+        .metric-card.highlight { border-left-color: #10B981; }
+        
+        .metric-card .mc-title { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 12px; display:flex; align-items:center; gap:8px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .metric-card .mc-value { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 12px;}
+        .metric-card .mc-subinfo { font-size: 12px; font-weight: 500; color: #64748b;}
+        .metric-card .mc-subinfo.success span { color: #059669; }
+        .metric-card .mc-subinfo.warning span { color: #d97706; }
+        
+        .progress-container { background: #e2e8f0; border-radius: 4px; overflow: hidden; height: 6px; margin: 8px 0;}
+        
+        .recent-error-btn {
+            background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+        }
+        .recent-error-btn:hover { background: #fecaca; }
+    </style>
 </head>
 
 <body class="admin-layout">
@@ -34,14 +80,6 @@
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">প্ল্যাটফর্মের মস্তিষ্ক
                         конফিগার ও মনিটর করুন</p>
                 </div>
-                <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    টেস্ট কনসোল
-                </button>
             </div>
 
             <!-- Tabs -->
@@ -50,7 +88,8 @@
                 <button class="ai-tab-btn" onclick="switchAITab('tab-api-management')">API টোকেন ম্যানেজমেন্ট</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-config')">প্রম্পট স্টুডিও</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-crop-doctor')">ক্রপ ডাক্তার</button>
-                <button class="ai-tab-btn" onclick="switchAITab('tab-rag')">নলেজ বেস (RAG)</button>
+
+                <button class="ai-tab-btn" onclick="switchAITab('tab-security')">সিকিউরিটি অডিট</button>
                 <button class="ai-tab-btn" onclick="switchAITab('tab-logs')">সিস্টেম লগস</button>
             </div>
 
@@ -87,82 +126,8 @@
                         <div class="mc-subinfo"><span style="color: var(--danger);">ব্যর্থতা: <span id="stats-failed-rate">০</span>% (কোটা লিমিটের কারণে)</span></div>
                     </div>
 
-                    <div class="metric-card">
-                        <div class="mc-title">সিস্টেমের সময় ও অর্থ সাশ্রয়</div>
-                        <div class="mc-value" id="stats-hours-saved">০ ঘণ্টা</div>
-                        <div class="mc-subinfo success"><span>AI দ্বারা স্বয়ংক্রিয়ভাবে এত ঘণ্টার কাজ বাঁচানো হয়েছে</span></div>
-                    </div>
                 </div>
 
-                <!-- NEW: Cloudflare Quota Telemetry Row (Phase 8.1) -->
-                <div style="margin-top: 24px;">
-                    <h3 class="form-title" style="margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                        <span>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6821f" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
-                                <path d="M17.5 19h-11A4.5 4.5 0 0 1 2 14.5c0-2.3 1.7-4.2 3.9-4.5 1-3.4 4.1-5.8 7.6-5.8 3.7 0 6.8 2.5 7.8 6 2 0.3 3.5 2 3.5 4.1 0 2.2-1.9 4-4.2 4z"></path>
-                            </svg>
-                            Cloudflare Live Quota (Free Tier)
-                        </span>
-                        <span id="cf-telemetry-status" style="font-size: 11px; font-weight: normal; background: #E2E8F0; padding: 4px 8px; border-radius: 4px; color: var(--text-muted);">Syncing...</span>
-                    </h3>
-                    <div class="metrics-grid" style="grid-template-columns: repeat(5, 1fr); gap: 12px;">
-                        
-                        <!-- Workers -->
-                        <div class="metric-card" style="padding: 12px;">
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Workers Load</div>
-                            <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;" id="q-workers">0 / 100k</div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 4px;">
-                                <div id="q-bar-workers" class="progress-fill warning" style="width: 0%; background: #3b82f6;"></div>
-                            </div>
-                            <div style="font-size: 10px; color: var(--text-muted);">Daily Limit</div>
-                        </div>
-
-                        <!-- Vectorize -->
-                        <div class="metric-card" style="padding: 12px;">
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Vectorize Usage</div>
-                            <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;" id="q-vectorize">0 / 5M</div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 4px;">
-                                <div id="q-bar-vectorize" class="progress-fill warning" style="width: 0%; background: #8b5cf6;"></div>
-                            </div>
-                            <div style="font-size: 10px; color: var(--text-muted);">Monthly Limit</div>
-                        </div>
-
-                        <!-- AI Neurons -->
-                        <div class="metric-card" style="padding: 12px;">
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">AI Neurons</div>
-                            <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;" id="q-ai">0 / 10k</div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 4px;">
-                                <div id="q-bar-ai" class="progress-fill warning" style="width: 0%; background: #10b981;"></div>
-                            </div>
-                            <div style="font-size: 10px; color: var(--text-muted);">Daily Limit</div>
-                        </div>
-
-                        <!-- D1 Database -->
-                        <div class="metric-card" style="padding: 12px;">
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">D1 Database</div>
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">R: <span id="q-d1-read">0 / 5M</span></div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 6px;">
-                                <div id="q-bar-d1-read" class="progress-fill warning" style="width: 0%; background: #f59e0b;"></div>
-                            </div>
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">W: <span id="q-d1-write">0 / 100k</span></div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 4px;">
-                                <div id="q-bar-d1-write" class="progress-fill warning" style="width: 0%; background: #f43f5e;"></div>
-                            </div>
-                        </div>
-
-                        <!-- R2 Storage -->
-                        <div class="metric-card" style="padding: 12px;">
-                            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">R2 Storage (<span id="q-r2-size">0 / 10GB</span>)</div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">Ops (A): <span id="q-r2-a">0/1M</span></div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Ops (B): <span id="q-r2-b">0/10M</span></div>
-                            <div class="progress-container" style="height: 4px; margin-bottom: 4px;">
-                                <div id="q-bar-r2" class="progress-fill warning" style="width: 0%; background: #0ea5e9;"></div>
-                            </div>
-                            <div style="font-size: 10px; color: var(--text-muted);">Storage Used %</div>
-                        </div>
-
-                    </div>
-                </div>
 
                 <!-- NEW: Crop Doctor Vision Metrics Row -->
                 <div style="margin-top: 24px;">
@@ -188,6 +153,76 @@
                             <div class="mc-value" id="stats-vision-top-disease" style="font-size: 20px; text-transform: capitalize;">নেই</div>
                             <div class="mc-subinfo warning"><span id="stats-vision-disease-list">ডেটা লোড হচ্ছে...</span></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Cloudflare Quota Telemetry Row (Phase 8.1) -->
+                <div style="margin-top: 24px;">
+                    <h3 class="form-title" style="margin-bottom: 16px; border-bottom: 1px solid rgba(226, 232, 240, 0.8); padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6821f" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+                                <path d="M17.5 19h-11A4.5 4.5 0 0 1 2 14.5c0-2.3 1.7-4.2 3.9-4.5 1-3.4 4.1-5.8 7.6-5.8 3.7 0 6.8 2.5 7.8 6 2 0.3 3.5 2 3.5 4.1 0 2.2-1.9 4-4.2 4z"></path>
+                            </svg>
+                            Cloudflare Live Quota (Free Tier)
+                        </span>
+                        <span id="cf-telemetry-status" style="font-size: 11px; font-weight: normal; background: #E2E8F0; padding: 4px 8px; border-radius: 4px; color: var(--text-muted);">Syncing...</span>
+                    </h3>
+                    <div class="metrics-grid" style="grid-template-columns: repeat(5, 1fr); gap: 16px;">
+                        
+                        <!-- Workers -->
+                        <div class="metric-card" style="padding: 16px; border-left: 4px solid #3b82f6;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Workers Load</div>
+                            <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px;" id="q-workers">0 / 100k</div>
+                            <div class="progress-container" style="height: 4px; margin: 6px 0;">
+                                <div id="q-bar-workers" class="progress-fill warning" style="width: 0%; background: #3b82f6;"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Daily Limit</div>
+                        </div>
+
+                        <!-- Vectorize -->
+                        <div class="metric-card" style="padding: 16px; border-left: 4px solid #8b5cf6;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Vectorize Usage</div>
+                            <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px;" id="q-vectorize">0 / 5M</div>
+                            <div class="progress-container" style="height: 4px; margin: 6px 0;">
+                                <div id="q-bar-vectorize" class="progress-fill warning" style="width: 0%; background: #8b5cf6;"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Monthly Limit</div>
+                        </div>
+
+                        <!-- AI Neurons -->
+                        <div class="metric-card" style="padding: 16px; border-left: 4px solid #10b981;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">AI Neurons</div>
+                            <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px;" id="q-ai">0 / 10k</div>
+                            <div class="progress-container" style="height: 4px; margin: 6px 0;">
+                                <div id="q-bar-ai" class="progress-fill warning" style="width: 0%; background: #10b981;"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Daily Limit</div>
+                        </div>
+
+                        <!-- D1 Database -->
+                        <div class="metric-card" style="padding: 16px; border-left: 4px solid #f59e0b;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">D1 Database</div>
+                            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">R: <span id="q-d1-read">0 / 5M</span></div>
+                            <div class="progress-container" style="height: 4px; margin: 4px 0 8px 0;">
+                                <div id="q-bar-d1-read" class="progress-fill warning" style="width: 0%; background: #f59e0b;"></div>
+                            </div>
+                            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">W: <span id="q-d1-write">0 / 100k</span></div>
+                            <div class="progress-container" style="height: 4px; margin: 4px 0 2px 0;">
+                                <div id="q-bar-d1-write" class="progress-fill warning" style="width: 0%; background: #f43f5e;"></div>
+                            </div>
+                        </div>
+
+                        <!-- R2 Storage -->
+                        <div class="metric-card" style="padding: 16px; border-left: 4px solid #0ea5e9;">
+                            <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">R2 Storage (<span id="q-r2-size">0 / 10GB</span>)</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">Ops (A): <span id="q-r2-a">0/1M</span></div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Ops (B): <span id="q-r2-b">0/10M</span></div>
+                            <div class="progress-container" style="height: 4px; margin: 6px 0;">
+                                <div id="q-bar-r2" class="progress-fill warning" style="width: 0%; background: #0ea5e9;"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Storage Used %</div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -460,45 +495,16 @@
                 </div>
             </div>
 
-            <!-- TAB: RAG Knowledge Base -->
-            <div id="tab-rag" class="ai-tab-pane">
-                <div class="split-layout">
-                    <!-- Upload -->
-                    <div class="form-section">
-                        <h3 class="form-title">নতুন ডেটা আপলোড করুন</h3>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">পিডিএফ বা টেক্সট
-                            আপলোড করলে তা ভেক্টরে রূপান্তর হয়ে AI-এর জ্ঞানভান্ডারে যুক্ত হবে।</p>
 
-                        <div class="upload-area">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                style="color: var(--primary); margin-bottom: 12px;">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <h4 style="font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
-                                ব্রাউজ করুন বা ড্র্যাগ করে আনুন</h4>
-                            <p style="font-size: 13px; color: var(--text-muted);">PDF, TXT, CSV (Max: 10MB)</p>
-                        </div>
 
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label>অথবা ওয়েবসাইটের লিংক দিন</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="url" class="form-control" placeholder="https://ais.gov.bd/...">
-                                <button class="btn-primary" style="white-space: nowrap;">স্ক্র্যাপ ও সিংক</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Indexed List -->
-                    <div class="form-section">
-                        <h3 class="form-title">বর্তমানে যুক্ত ডকুমেন্টস</h3>
-                        <ul id="rag-documents-list"
-                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
-                            <li style="text-align: center; color: var(--text-muted); padding: 24px;">এখনও কোনো নলেজ
-                                আপলোড করা হয়নি।</li>
-                        </ul>
+            <!-- TAB: Security Audit -->
+            <div id="tab-security" class="ai-tab-pane">
+                <div class="card">
+                    <h3 class="card-title">সুপার-অ্যাডমিন অ্যাক্টিভিটি লগস</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">এআই কনফিগারেশন, প্রম্পট আপডেট বা নলেজ বেসে যেসব পরিবর্তন আনা হয়েছে তার রেকর্ড।</p>
+                    
+                    <div class="security-timeline" id="security-audit-timeline">
+                        <div style="text-align: center; color: var(--text-muted); padding: 20px;">লগ ফেচ করা হচ্ছে...</div>
                     </div>
                 </div>
             </div>
@@ -509,7 +515,7 @@
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
                     <button class="btn-primary logs-subtab-btn" onclick="switchLogsTab('logs-chat', this)" style="padding: 8px 16px; border-radius: 6px;">চ্যাটবট এআই লগস</button>
                     <button class="btn-outline logs-subtab-btn" onclick="switchLogsTab('logs-missed', this)" style="padding: 8px 16px; border-radius: 6px;">Missed Queries</button>
-                    <button class="btn-outline logs-subtab-btn" onclick="switchLogsTab('logs-prompts', this)" style="padding: 8px 16px; border-radius: 6px;">জেনারেল প্রম্পট ট্র্যাকার</button>
+                    <button class="btn-outline logs-subtab-btn" onclick="switchLogsTab('logs-errors', this)" style="padding: 8px 16px; border-radius: 6px;">Error Logs (System)</button>
                 </div>
                 
                 <script>
@@ -538,9 +544,9 @@
                                     <tr>
                                         <th>ইউজার (ID)</th>
                                         <th>ফসল (Crop)</th>
-                                        <th style="width: 30%;">প্রশ্ন (Query)</th>
-                                        <th style="width: 30%;">এআই উত্তর (Reply)</th>
-                                        <th>সময়</th>
+                                        <th>মোট মেসেজ (Total)</th>
+                                        <th>সময় (Time)</th>
+                                        <th>অ্যাকশন (View)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="chat-logs-tbody">
@@ -576,65 +582,36 @@
                     </div>
                 </div>
 
-                <!-- Prompt Tracker -->
-                <div id="logs-prompts" class="logs-subtab-pane" style="display: none;">
+                <!-- Error Logs (System) -->
+                <div id="logs-errors" class="logs-subtab-pane" style="display: none;">
                     <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin: 0;">
                         <div class="ai-header" style="margin-bottom: 16px;">
-                            <h3 class="form-title" style="margin: 0;">জেনারেল প্রম্পট ট্র্যাকার</h3>
-                            <button class="btn-outline-primary" style="padding: 8px 16px;">এক্সপোর্ট CSV</button>
+                            <h3 class="form-title" style="margin: 0; color: #DC2626;">সিস্টেম ও সার্ভার এরর লগস</h3>
+                            <button class="btn-outline-primary" style="padding: 8px 16px;" onclick="loadErrorLogs(1)">রিফ্রেশ</button>
                         </div>
                         <div style="overflow-x: auto;">
                             <table class="log-table">
                                 <thead>
                                     <tr>
-                                        <th>সময়</th>
-                                        <th>ইউজার</th>
-                                        <th>টাইপ</th>
-                                        <th style="width: 30%;">প্রম্পট / ইনপুট</th>
-                                        <th style="width: 30%;">AI রেসপন্স</th>
-                                        <th>Tokens</th>
+                                        <th style="width: 15%;">সময় (Time)</th>
+                                        <th style="width: 15%;">ফিচার (Feature)</th>
+                                        <th style="width: 15%;">ফসল (Crop)</th>
+                                        <th style="width: 45%;">বিস্তারিত এরর (Error Message)</th>
+                                        <th style="width: 10%;">অ্যাকশন</th>
                                     </tr>
                                 </thead>
-                            <tbody id="logs-tbody">
-                                <tr>
-                                    <td style="white-space: nowrap;">আজ, ১০:৪৫ AM</td>
-                                    <td>01712***890</td>
-                                    <td><span class="ai-badge info">টেক্সট</span></td>
-                                    <td>ইউরিয়া সার কখন দেওয়া উচিত?</td>
-                                    <td>ধান রোপণের ১৫-২০ দিন পর প্রথম...</td>
-                                    <td style="font-family: monospace; color: var(--text-muted);">248</td>
-                                </tr>
-                                <tr>
-                                    <td style="white-space: nowrap;">আজ, ০৯:১২ AM</td>
-                                    <td>01844***456</td>
-                                    <td><span class="ai-badge warning">ভয়েস</span></td>
-                                    <td><em>[Audio transcribed]</em> আলুর পাতায় দাগ, কী করব?</td>
-                                    <td>এটি লেট ব্লাইট হতে পারে। ম্যানকোজেব...</td>
-                                    <td style="font-family: monospace; color: var(--text-muted);">412</td>
-                                </tr>
-                                <tr>
-                                    <td style="white-space: nowrap;">গতকাল, ০৪:৩০ PM</td>
-                                    <td>01677***123</td>
-                                    <td><span class="ai-badge danger">এরর</span></td>
-                                    <td>কীভাবে বোমা বানাবো?</td>
-                                    <td><em>[Fallback]</em> দুঃখিত, কৃষি বিষয়ক...</td>
-                                    <td style="font-family: monospace; color: var(--text-muted);">45</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination Placeholder -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
-                        <span style="font-size: 13px; color: var(--text-muted);">১-১০ দেখাচ্ছে (মোট ৩,২৪০)</span>
-                        <div style="display: flex; gap: 8px;">
-                            <button
-                                style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer; color: var(--text-muted);"
-                                disabled>পূর্ববর্তী</button>
-                            <button
-                                style="padding: 6px 12px; border: 1px solid var(--primary); background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">১</button>
-                            <button
-                                style="padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 6px; cursor: pointer;">পরবর্তী</button>
+                                <tbody id="error-logs-tbody">
+                                    <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">লোড হচ্ছে...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div id="error-logs-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                            <div style="font-size: 13px; color: var(--text-muted);">Showing page <span id="er-curr-page">1</span> of <span id="er-total-page">1</span></div>
+                            <div style="display: flex; gap: 8px;">
+                                <button id="er-prev-btn" class="btn-outline" style="padding: 6px 12px; font-size: 13px;" onclick="changeErrorLogPage(-1)" disabled>Previous</button>
+                                <button id="er-next-btn" class="btn-outline" style="padding: 6px 12px; font-size: 13px;" onclick="changeErrorLogPage(1)" disabled>Next</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -670,7 +647,7 @@
                 const navItems = document.querySelectorAll('.nav-item');
                 navItems.forEach(item => {
                     item.classList.remove('active');
-                    if (item.textContent.trim().includes('AI ইঞ্জিন')) {
+                    if (item.textContent.trim().includes('AI প্রম্পট ইঞ্জিন')) {
                         item.classList.add('active');
                     }
                 });
@@ -743,6 +720,35 @@
             </button>
         </div>
         <div style="padding: 24px;" id="scanDetailsModalContent">
+            <!-- Dynamically populated via JS -->
+        </div>
+    </div>
+
+    <!-- Chat History Modal Overlay -->
+    <div class="user-panel-overlay" id="chatHistoryModalOverlay" onclick="closeChatHistoryModal()"></div>
+
+    <!-- Chat History Modal -->
+    <div id="chatHistoryModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f8fafc; width: 90%; max-width: 600px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1001; max-height: 90vh; flex-direction: column; overflow: hidden;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin: 0;" id="chatModalTitle">চ্যাট হিস্ট্রি</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;" id="chatModalSubtitle">সেশন ডিটেইলস</p>
+                </div>
+            </div>
+            <button onclick="closeChatHistoryModal()" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div style="padding: 20px; flex: 1; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 16px;" id="chatHistoryModalContent">
             <!-- Dynamically populated via JS -->
         </div>
     </div>

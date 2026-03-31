@@ -1652,15 +1652,48 @@ window.toggleChatbot = function() {
         
         if (badge) badge.style.transform = 'scale(0)';
         
-        // Add initial greeting if empty
+        // Restore History or Add initial greeting
         const msgs = document.getElementById('chatMessages');
-        if (msgs && msgs.children.length === 0) {
+        if (msgs && !msgs.hasAttribute('data-history-loaded')) {
+            msgs.setAttribute('data-history-loaded', 'true');
+            const activeFarmId = new URLSearchParams(window.location.search).get('id') || 'unknown';
             const cName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : 'আপনার ফসল';
-            msgs.innerHTML = `<div style="margin-bottom: 12px; text-align: left;">
+            
+            // Build the initial dynamic greeting
+            let html = `<div style="margin-bottom: 12px; text-align: left;">
                 <div style="background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
-                    আসসালামু আলাইকুম! আমি আপনার এআই কৃষি সহকারী। <strong>${cName}</strong> সম্পর্কে কোনো প্রশ্ন থাকলে আমাকে করতে পারেন।
+                    আসসালামু আলাইকুম! আমি আপনার স্মার্ট কৃষি অ্যাসিস্ট্যান্ট। <strong>${cName}</strong> সম্পর্কে কোনো প্রশ্ন থাকলে আমাকে করতে পারেন।
                 </div>
             </div>`;
+
+            const sessionDataStr = localStorage.getItem(`agritech_chat_${activeFarmId}`);
+            let sessionData = null;
+            if (sessionDataStr) {
+                try { sessionData = JSON.parse(sessionDataStr); } catch(e){}
+            }
+
+            if (sessionData && sessionData.history && sessionData.history.length > 0) {
+                // Restore UI from history
+                sessionData.history.forEach(item => {
+                    if (item.role === 'user') {
+                        html += `<div style="margin-bottom: 12px; text-align: right;">
+                            <div style="background: #10b981; color: white; padding: 10px 14px; border-radius: 12px; border-bottom-right-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5; text-align: left;">
+                                ${item.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                            </div>
+                        </div>`;
+                    } else if (item.role === 'assistant') {
+                        const formattedNodes = typeof marked !== 'undefined' ? marked.parse(item.content) : item.content.replace(/\n/g, '<br>');
+                        html += `<div style="margin-bottom: 12px; text-align: left;">
+                            <div style="background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5; overflow: hidden;">
+                                ${formattedNodes}
+                            </div>
+                        </div>`;
+                    }
+                });
+            }
+            
+            msgs.innerHTML = html;
+            setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 100);
         }
     } else {
         // Close
@@ -1704,7 +1737,19 @@ window.sendChatMessage = async function() {
     
     try {
         const cropName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : localStorage.getItem('agritech_active_crop_name');
-        const masterCropId = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.master_crop_id : null;
+        const activeFarmId = new URLSearchParams(window.location.search).get('id') || 'unknown';
+        const sessionKey = `agritech_chat_${activeFarmId}`;
+        
+        // Load session history
+        let sessionData = { sessionId: null, history: [] };
+        const storedStr = localStorage.getItem(sessionKey);
+        if (storedStr) {
+            try { sessionData = JSON.parse(storedStr); } catch(e){}
+        }
+
+        const farmerProfileStr = localStorage.getItem('farmer_profile');
+        const farmerProfile = farmerProfileStr ? JSON.parse(farmerProfileStr) : {};
+        const userId = farmerProfile.id || 'anonymous';
         
         const res = await fetch('https://agritech-backend.mobashwir9.workers.dev/api/public/crop-chat', {
             method: 'POST',
@@ -1714,8 +1759,11 @@ window.sendChatMessage = async function() {
             },
             body: JSON.stringify({
                 query: msg,
-                cropName: cropName,
-                masterCropId: masterCropId
+                cropTitle: cropName,
+                farmId: activeFarmId !== 'unknown' ? activeFarmId : null,
+                sessionId: sessionData.sessionId,
+                userId: userId,
+                history: sessionData.history
             })
         });
         
@@ -1730,6 +1778,13 @@ window.sendChatMessage = async function() {
                     ${formattedNodes}
                 </div>
             </div>`;
+            
+            // Save updated session to local storage
+            sessionData.sessionId = data.sessionId || sessionData.sessionId;
+            sessionData.history.push({ role: 'user', content: msg });
+            sessionData.history.push({ role: 'assistant', content: data.answer });
+            localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+            
         } else {
             console.error(data.error);
             msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">

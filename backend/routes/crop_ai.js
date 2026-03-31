@@ -56,6 +56,7 @@ export const predictCrop = async (request, env) => {
         const cropString = url.searchParams.get('crop_name');
         const varietyString = url.searchParams.get('variety_name');
         const forceOffSeason = url.searchParams.get('force_off_season') === 'true';
+        const forceAi = url.searchParams.get('force_ai') === 'true';
 
         if (!farmId || !cropString) {
             return Response.json({ success: false, error: 'farm_id and crop_name are required' }, { status: 400 });
@@ -81,7 +82,10 @@ export const predictCrop = async (request, env) => {
 
         try {
             // First, check if exact match exists for the specific variety or crop
-            const exactGovtData = await env.DB.prepare("SELECT * FROM crops_master_data WHERE variety_name = ? OR (crop_name = ? AND variety_name = ?) LIMIT 1").bind(targetVarietyName, targetCropName, targetCropName).first();
+            let exactGovtData = null;
+            if (!forceAi) {
+                exactGovtData = await env.DB.prepare("SELECT * FROM crops_master_data WHERE variety_name = ? OR (crop_name = ? AND variety_name = ?) LIMIT 1").bind(targetVarietyName, targetCropName, targetVarietyName).first();
+            }
 
             if (exactGovtData) {
                 targetCropName = exactGovtData.crop_name;
@@ -119,7 +123,10 @@ export const predictCrop = async (request, env) => {
 
         // 2. CACHE-ASIDE: Check our D1 Timeline Cache Database!
         try {
-            const cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name = ? AND expires_at > datetime('now')").bind(targetCropName, targetVarietyName).first();
+            let cache = null;
+            if (!forceAi) {
+                cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name = ? AND expires_at > datetime('now')").bind(targetCropName, targetVarietyName).first();
+            }
 
             if (cache) {
                 // CACHE HIT! The AI already generated this timeline previously for someone else.
@@ -193,13 +200,12 @@ export const predictCrop = async (request, env) => {
         } = aiData;
 
         // 6. CACHING AND NEW MASTER TRACKING!
-        // 6. CACHING AND NEW MASTER TRACKING!
-        const cropNameToSave = isNewVarietySearch ? cropString.trim() : targetCropName;
+        const cropNameToSave = (isNewVarietySearch && aiData.actual_crop_name) ? aiData.actual_crop_name : (isNewVarietySearch ? cropString.trim() : targetCropName);
         let rawVarietyNameToSave = isNewVarietySearch ? aiData.variety_name : targetVarietyName;
         const varietyNameToSave = cleanVarietyName(cropNameToSave, rawVarietyNameToSave);
 
         // If AI found a completely new variety, store it into Master Table as Unverified!
-        if (isNewVarietySearch && varietyNameToSave !== targetVarietyName) {
+        if (isNewVarietySearch && cropNameToSave !== varietyNameToSave) {
             await env.DB.prepare("INSERT OR IGNORE INTO crops_master_data (crop_category, crop_name, variety_name, base_yield_per_shotangsho_kg, avg_duration_days, verified_status) VALUES (?, ?, ?, ?, ?, 0)")
                 .bind('Uncategorized', cropNameToSave, varietyNameToSave, 0, 0).run().catch(e => console.error("New Variety Tracking Error:", e.message));
         }

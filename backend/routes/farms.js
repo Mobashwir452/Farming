@@ -2,7 +2,7 @@ import { error, json } from 'itty-router';
 
 export const createFarm = async (request, env) => {
     try {
-        const { name, area_shotangsho, location, lat, lng } = await request.json();
+        const { name, area_shotangsho, location, lat, lng, map_coordinates } = await request.json();
 
         if (!name || !area_shotangsho) {
             return error(400, 'Valid name and area_shotangsho are required.');
@@ -11,10 +11,10 @@ export const createFarm = async (request, env) => {
         const farmerId = request.user.id;
 
         const insertQuery = `
-            INSERT INTO farms (farmer_id, name, area_shotangsho, location, lat, lng) 
-            VALUES (?, ?, ?, ?, ?, ?) RETURNING id;
+            INSERT INTO farms (farmer_id, name, area_shotangsho, location, lat, lng, map_coordinates) 
+            VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id;
         `;
-        const result = await env.DB.prepare(insertQuery).bind(farmerId, name, parseFloat(area_shotangsho), location || null, lat || null, lng || null).first();
+        const result = await env.DB.prepare(insertQuery).bind(farmerId, name, parseFloat(area_shotangsho), location || null, lat || null, lng || null, map_coordinates || null).first();
 
         return json({
             success: true,

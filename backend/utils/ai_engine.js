@@ -36,20 +36,12 @@ export const generateCropData = async (env, cropName, varietyName, options = {})
     // Dynamic Context Injection
     let templateBody = promptRow?.template_body || '';
 
-    // If templateBody contains the legacy hardcoded string we need to patch it out programmatically for non-new-variety searches
-    if (!isNewVarietySearch && templateBody.includes('Find a completely NEW and profitable variety!')) {
+    // If templateBody contains the legacy hardcoded string we need to patch it out programmatically
+    if (templateBody.includes('Find a completely NEW and profitable variety!')) {
         const splitIndex = templateBody.indexOf('[CRITICAL NEW INSTRUCTION for PLANTING METHOD]');
         if (splitIndex !== -1) {
             templateBody = templateBody.substring(splitIndex);
         }
-
-        promptText += `Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land specifically for the Crop: "${cropName}" and Variety: "${varietyName}".\n`;
-        promptText += `<variety_name>${varietyName}</variety_name>\n`;
-        if (govtContext) promptText += `Use this official Government Database context strictly to govern your output: ${govtContext}\n`;
-    } else if (isNewVarietySearch && !templateBody.includes('Find a completely NEW and profitable variety!')) {
-        promptText += `The user requested to grow crop: "${cropName}" and gave variety: "${varietyName}". Your FIRST JOB is to identify the single BEST, highest-yielding, disease-resistant specific variety (জাত) for this crop in Bangladesh. Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land for this chosen variety.
-Output the chosen specific variety name strictly inside <variety_name> Tags (e.g. <variety_name>তরমুজ (বিগ বস)</variety_name>).
-CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALREADY EXIST IN OUR DATABASE: ${exclusionListStr}. Find a completely NEW and profitable variety!\n`;
     }
 
     // Now replace variables in the remaining or untouched templateBody
@@ -57,14 +49,27 @@ CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALRE
         .replace(/{varietyName}/g, varietyName)
         .replace(/{exclusionListStr}/g, exclusionListStr);
 
-    promptText += templateBody + '\n';
+    promptText += templateBody + '\n\n';
+
+    // Unconditionally append the strict instructions at the very end to guarantee correct focus
+    if (!isNewVarietySearch) {
+        promptText += `Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land specifically for the Crop: "${cropName}" and Variety: "${varietyName}".\n`;
+        promptText += `Must output exactly: <variety_name>${varietyName}</variety_name>\n`;
+        if (govtContext) promptText += `Use this official Government Database context strictly to govern your output: ${govtContext}\n`;
+    } else {
+        promptText += `The user requested to grow crop: "${cropName}". Your FIRST JOB is to identify the single BEST, highest-yielding, disease-resistant specific variety (জাত) for this crop in Bangladesh. Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land for this chosen variety.
+Output the chosen specific variety name strictly inside <variety_name> Tags (e.g. <variety_name>তরমুজ (বিগ বস)</variety_name>).
+If the user provided a variety name instead of a crop name, you MUST identify the actual generic crop name (e.g., পেঁপে, ধান, আলু) and output it strictly inside <actual_crop_name> Tags.
+CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALREADY EXIST IN OUR DATABASE: ${exclusionListStr}. Find a completely NEW and profitable variety!\n`;
+    }
 
     if (isOffSeason && forceOffSeason) {
         promptText += `\n[CRITICAL WARNING]: The farmer is planting this OFF-SEASON (currently ${MONTH_MAP[new Date().getMonth() + 1]}). You MUST reduce the yield output drastically compared to normal, explicitly mention the weather risks in the <risks> section, and adjust the timeline for adverse conditions!\n`;
     }
 
     // API Keys Daily Check & Reactivation
-    await env.DB.prepare("UPDATE ai_api_keys SET today_usage = 0 WHERE date(last_used) < date('now')").run().catch(() => { });
+    // Google AI Studio resets quota at midnight Pacific Time (PT), which is UTC-8 (or UTC-7 PDT).
+    await env.DB.prepare("UPDATE ai_api_keys SET today_usage = 0 WHERE date(last_used, '-8 hours') < date('now', '-8 hours')").run().catch(() => { });
     await env.DB.prepare("UPDATE ai_api_keys SET status = 'active', reset_date = NULL WHERE status = 'exhausted' AND reset_date <= datetime('now', '-24 hours')").run().catch(() => { });
 
     // 4. API Key Rotation System
@@ -147,7 +152,14 @@ CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALRE
     };
 
     const extractedVariety = aiRawText.match(/<variety_name>(.*?)<\/variety_name>/i);
-    const finalVarietyName = (extractedVariety && extractedVariety[1]) ? extractedVariety[1].replace(/<[^>]*>?/gm, '').trim() : varietyName;
+    let fallbackVarietyName = varietyName;
+    if (isNewVarietySearch && (!extractedVariety || !extractedVariety[1])) {
+        fallbackVarietyName = `${cropName} (AI Variety)`;
+    }
+    const finalVarietyName = (extractedVariety && extractedVariety[1]) ? extractedVariety[1].replace(/<[^>]*>?/gm, '').trim() : fallbackVarietyName;
+
+    const extractedActualCrop = aiRawText.match(/<actual_crop_name>(.*?)<\/actual_crop_name>/i);
+    const finalActualCropName = (extractedActualCrop && extractedActualCrop[1]) ? extractedActualCrop[1].replace(/<[^>]*>?/gm, '').trim() : null;
 
     const base_yield_kg = extractNum('base_yield_kg');
     const crop_market_price_bdt = extractNum('crop_market_price_bdt_per_kg') || 30; // fallback
@@ -238,6 +250,7 @@ CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALRE
 
     return {
         aiRawText, // Mostly for debugging if needed
+        actual_crop_name: finalActualCropName,
         variety_name: finalVarietyName,
         base_yield_kg,
         crop_market_price_bdt,
@@ -283,6 +296,10 @@ You MUST output your response strictly using ONLY the following XML tags:
 
 Do not include Markdown blocks. Output only the pure XML.
 `;
+
+    // API Keys Daily Check & Reactivation
+    await env.DB.prepare("UPDATE ai_api_keys SET today_usage = 0 WHERE date(last_used, '-8 hours') < date('now', '-8 hours')").run().catch(() => { });
+    await env.DB.prepare("UPDATE ai_api_keys SET status = 'active', reset_date = NULL WHERE status = 'exhausted' AND reset_date <= datetime('now', '-24 hours')").run().catch(() => { });
 
     // API Key Rotation System
     const keysRes = await env.DB.prepare("SELECT id, api_key FROM ai_api_keys WHERE status = 'active'").all();
@@ -421,9 +438,23 @@ export const generateCropEncyclopedia = async (env, cropName, varietyName, force
 
         const promptText = `
 Act as an expert Agronomist in Bangladesh.
-Create a highly detailed, comprehensive encyclopedia and cultivation guide for the crop "${cropName}" (Variety: "${varietyName || 'যেকোনো'}") in Bangladesh.
-Write in pure Bengali language.
-Break it down into the following clear sections using Markdown headings (##):
+Create a highly detailed, comprehensive crop encyclopedia and cultivation guide for the crop "${cropName}" (Variety: "${varietyName || 'যেকোনো'}") in Bangladesh.
+
+You MUST respond strictly with a valid JSON object containing exactly two keys: "english_guide" and "bengali_guide". Do not wrap the JSON in markdown code blocks.
+
+The "english_guide" value must be the complete guide written in English.
+The "bengali_guide" value must be the exact translation of the guide written in fluent Bengali.
+
+Both guides MUST use the following Markdown headings:
+In English:
+## Introduction & Environment
+## Soil & Sowing
+## Irrigation & Fertilizer
+## Disease & Pest Control
+## Harvest & Storage
+## Expected Yield & Market
+
+In Bengali:
 ## পরিচিতি ও উপযুক্ত পরিবেশ
 ## মাটি তৈরি ও বপন পদ্ধতি
 ## সেচ ও সার ব্যবস্থাপনা
@@ -431,8 +462,12 @@ Break it down into the following clear sections using Markdown headings (##):
 ## ফসল সংগ্রহ ও সংরক্ষণ
 ## ফলন ও বাজার সম্ভাবনা
 
-Make the content as informative and practical as possible. Only output the guide, no intro/outro conversational text.
+Make the content as informative and practical as possible. Ensure no intro/outro conversational text exists outside the JSON object.
 `;
+
+        // API Keys Daily Check & Reactivation
+        await env.DB.prepare("UPDATE ai_api_keys SET today_usage = 0 WHERE date(last_used, '-8 hours') < date('now', '-8 hours')").run().catch(() => { });
+        await env.DB.prepare("UPDATE ai_api_keys SET status = 'active', reset_date = NULL WHERE status = 'exhausted' AND reset_date <= datetime('now', '-24 hours')").run().catch(() => { });
 
         // API Key Rotation System
         const keysRes = await env.DB.prepare("SELECT id, api_key FROM ai_api_keys WHERE status = 'active'").all();
@@ -459,7 +494,13 @@ Make the content as informative and practical as possible. Only output the guide
                 if (!data.candidates || !data.candidates[0].content) {
                     throw new Error("Invalid Gemini response format (Possibly blocked by Safety Settings)");
                 }
-                aiRawText = data.candidates[0].content.parts[0].text;
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                const jsonDoc = JSON.parse(rawText);
+                if (!jsonDoc.english_guide || !jsonDoc.bengali_guide) {
+                     throw new Error("JSON response missing english_guide or bengali_guide.");
+                }
+                aiRawText = jsonDoc; // store as object
                 successKeyId = keyObj.id;
                 break;
             } catch (err) {
@@ -474,11 +515,12 @@ Make the content as informative and practical as possible. Only output the guide
         }
 
         // The user requested a single giant row for the entire crop RAG instead of chunking
-        const fullText = aiRawText;
+        const englishText = aiRawText.english_guide;
+        const bengaliText = aiRawText.bengali_guide;
 
         // 3. Generate Vector Embeddings using Cloudflare AI
-        // bge-base-en-v1.5 automatically truncates to 512 tokens. We pass the full text as an array of 1.
-        const embeddingsResponse = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: [fullText] });
+        // bge-base-en-v1.5 automatically truncates to 512 tokens. We pass the English text.
+        const embeddingsResponse = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: [englishText] });
         const vectorData = embeddingsResponse.data[0];
 
         const id = crypto.randomUUID();
@@ -491,7 +533,7 @@ Make the content as informative and practical as possible. Only output the guide
             metadata: { crop_name: cropTitle }
         }]);
 
-        await env.DB.prepare("INSERT INTO ai_rag_documents (id, crop_name, chunk_text, created_at) VALUES (?, ?, ?, ?)").bind(id, cropTitle, fullText, timestamp).run();
+        await env.DB.prepare("INSERT INTO ai_rag_documents (id, crop_name, chunk_text, chunk_text_bn, created_at) VALUES (?, ?, ?, ?, ?)").bind(id, cropTitle, englishText, bengaliText, timestamp).run();
 
         // Track DB API Hit
         await env.DB.prepare(`UPDATE ai_api_keys SET last_used = CURRENT_TIMESTAMP, today_usage = today_usage + 1, total_usage = total_usage + 1 WHERE id = ?`).bind(successKeyId).run().catch(()=>{});

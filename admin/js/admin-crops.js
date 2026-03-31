@@ -939,8 +939,19 @@ window.refreshCropsRagContext = async function() {
         });
         const data = await response.json();
         
-        if (data.success && data.context && data.context.trim() !== '') {
-            container.innerHTML = escapeHtml(data.context);
+        if (data.success && (data.context_en || data.context_bn)) {
+            const safeEn = escapeHtml(data.context_en || '');
+            const safeBn = escapeHtml(data.context_bn || '');
+            
+            container.innerHTML = `
+                <div style="display: flex; gap: 16px; border-bottom: 1px solid rgba(253, 230, 138, 0.5); padding-bottom: 8px; margin-bottom: 12px;">
+                    <button type="button" onclick="document.getElementById('rag_pane_en').style.display='block'; document.getElementById('rag_pane_bn').style.display='none'; this.style.fontWeight='700'; this.style.color='#92400E'; this.nextElementSibling.style.fontWeight='500'; this.nextElementSibling.style.color='#D97706';" style="background:none; border:none; color:#92400E; font-size:13px; font-weight:700; cursor:pointer; padding:4px 8px; border-radius:4px;">English Context (AI Token Savior)</button>
+                    <button type="button" onclick="document.getElementById('rag_pane_bn').style.display='block'; document.getElementById('rag_pane_en').style.display='none'; this.style.fontWeight='700'; this.style.color='#92400E'; this.previousElementSibling.style.fontWeight='500'; this.previousElementSibling.style.color='#D97706';" style="background:none; border:none; color:#D97706; font-size:13px; font-weight:500; cursor:pointer; padding:4px 8px; border-radius:4px;">Bengali Guide (Admin View)</button>
+                </div>
+                <!-- Content Panes -->
+                <div id="rag_pane_en" style="display:block; line-height: 1.6;">${safeEn || '<span style="color:#94a3b8; font-style:italic;">No English context found.</span>'}</div>
+                <div id="rag_pane_bn" style="display:none; line-height: 1.6; font-family: 'Inter', sans-serif;">${safeBn || '<span style="color:#94a3b8; font-style:italic;">No Bengali context found.</span>'}</div>
+            `;
         } else {
             container.innerHTML = '<div style="text-align:center; padding: 30px 20px; color: #64748b; font-size: 14px;">কোনো অটোমেটেড RAG ডেটাবেস পাওয়া যায়নি। উপরের বাটন থেকে জেনারেট করুন।</div>';
         }
@@ -1006,5 +1017,37 @@ window.regenerateRagNow = async function() {
             headingBtn.disabled = false;
             headingBtn.innerText = "নতুন RAG জেনারেট করুন";
         }
+    }
+};
+
+window.quickAICropGenerate = async function() {
+    const cropName = document.getElementById('ai_quick_crop_name').value.trim();
+    if(!cropName) return alert('দয়া করে ফসলের নাম লিখুন!');
+
+    const btn = document.getElementById('btnAdminQuickAI');
+    btn.disabled = true;
+    btn.innerText = 'টাইমলাইন জেনারেট হচ্ছে (৩০ সে.)...';
+
+    try {
+        const token = localStorage.getItem('agritech_admin_token');
+        const response = await fetch(`${window.ADMIN_CONFIG?.API_BASE_URL || 'https://agritech-backend.mobashwir9.workers.dev'}/api/admin/cache/generate`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ crop_string: cropName, crop_name: cropName, variety_name: cropName, is_new_discovery: true })
+        });
+        const data = await response.json();
+        if(data.success) {
+            alert('✅ সফলভাবে টাইমলাইন জেনারেট হয়েছে এবং এটি Pending AI লিস্টে চলে গেছে!\nএখন প্যানেল রিফ্রেশ করে Pending AI ট্যাবে যান এবং Verify করুন।');
+            document.getElementById('ai_quick_crop_name').value = '';
+            closeAddCropModal();
+            fetchCrops(); // Refresh table so it shows in Pending AI
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch(e) {
+        alert('Server connection failed.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'টাইমলাইন বানিয়ে পেন্ডিং এ পাঠান';
     }
 };

@@ -1,3 +1,5 @@
+import { logSecurityAudit } from './ai_logs.js';
+
 export const getApiKeys = async (request, env) => {
     try {
         const url = new URL(request.url);
@@ -34,6 +36,10 @@ export const addApiKeys = async (request, env) => {
             await env.DB.batch(statements);
         }
 
+        // Log Audit
+        const adminName = request.headers.get('x-admin-user');
+        await logSecurityAudit(env, adminName, 'API_KEY_ADDED', { count: keys.length });
+
         return Response.json({ success: true, message: 'API Keys added successfully' });
     } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
@@ -48,6 +54,10 @@ export const toggleApiKey = async (request, env) => {
 
         await env.DB.prepare("UPDATE ai_api_keys SET status = ?, reset_date = NULL WHERE id = ?").bind(status, id).run();
         
+        // Log Audit
+        const adminName = request.headers.get('x-admin-user');
+        await logSecurityAudit(env, adminName, 'API_KEY_STATUS_CHANGED', { id, status });
+
         return Response.json({ success: true });
     } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
@@ -58,6 +68,10 @@ export const deleteApiKey = async (request, env) => {
     try {
         const id = request.params.id;
         await env.DB.prepare("DELETE FROM ai_api_keys WHERE id = ?").bind(id).run();
+        // Log Audit
+        const adminName = request.headers.get('x-admin-user');
+        await logSecurityAudit(env, adminName, 'API_KEY_DELETED', { id });
+
         return Response.json({ success: true });
     } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });

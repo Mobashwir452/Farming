@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div style="padding: 12px 16px; background: white; cursor: pointer; color: var(--primary); font-weight: 600; text-align: center; transition: background 0.2s;"
                                 onmouseover="this.style.background='#F1F5F9'" 
                                 onmouseout="this.style.background='white'"
-                                onclick="selectAutocompleteItem('${val}', '${val}')">
+                                onclick="selectAutocompleteItem('${val}', '${val}', true)">
                                 🔍 "${val}" নিয়ে এআই-এর সন্ধান করুন
                             </div>
                         `;
@@ -253,10 +253,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-window.selectAutocompleteItem = function (varietyVal, cropVal) {
+window.selectAutocompleteItem = function (varietyVal, cropVal, isForceAi = false) {
     const input = document.getElementById('cropInput');
     input.value = varietyVal;
     window._selectedCropName = cropVal || varietyVal;
+    window._isForceAi = isForceAi;
     window._isCropSelected = true;
 
     document.getElementById('cropAutocompleteBox').style.display = 'none';
@@ -281,10 +282,12 @@ window.proceedToAI = function () {
         return;
     }
 
+    const forceAiParam = window._isForceAi ? '&force_ai=true' : '';
+
     window.closeMethodSheet();
 
     setTimeout(() => {
-        window.location.href = `ai_crop_prediction.html?farm_id=${farmId}&crop_name=${encodeURIComponent(cropName)}&variety_name=${encodeURIComponent(varietyName)}`;
+        window.location.href = `ai_crop_prediction.html?farm_id=${farmId}&crop_name=${encodeURIComponent(cropName)}&variety_name=${encodeURIComponent(varietyName)}${forceAiParam}`;
     }, 300);
 }
 

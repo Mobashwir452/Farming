@@ -54,7 +54,9 @@ aiRouter.post('/rag/upload', uploadKnowledge);
 aiRouter.get('/rag/documents', getKnowledgeDocuments);
 
 // Tab 6: Logs
-import { getAiLogs, getChatLogs, getMissedQueries } from './ai_logs.js';
+import { getAiLogs, getChatLogs, getMissedQueries, getSecurityLogs, getErrorLogs } from './ai_logs.js';
 aiRouter.get('/logs', getAiLogs);
 aiRouter.get('/logs/chat', getChatLogs);
 aiRouter.get('/logs/missed', getMissedQueries);
+aiRouter.get('/logs/errors', getErrorLogs);
+aiRouter.get('/security-logs', getSecurityLogs);

@@ -10,16 +10,22 @@ export const getCropRagContext = async (request, env) => {
         }
 
         const query = `
-            SELECT chunk_text 
+            SELECT chunk_text, chunk_text_bn 
             FROM ai_rag_documents 
             WHERE crop_name = ?
-            ORDER BY id ASC
+            ORDER BY created_at DESC LIMIT 1
         `;
-        const { results } = await env.DB.prepare(query).bind(cropName).all();
+        const result = await env.DB.prepare(query).bind(cropName).first();
         
-        const combinedText = results.map(r => r.chunk_text).join('\n\n');
+        if (!result) {
+            return new Response(JSON.stringify({ success: false, error: 'No RAG context found' }), { status: 404, headers: { 'Content-Type': 'application/json' }});
+        }
 
-        return new Response(JSON.stringify({ success: true, context: combinedText }), { status: 200, headers: { 'Content-Type': 'application/json' }});
+        return new Response(JSON.stringify({ 
+            success: true, 
+            context_en: result.chunk_text,
+            context_bn: result.chunk_text_bn || 'No Bengali Translation Available.'
+        }), { status: 200, headers: { 'Content-Type': 'application/json' }});
     } catch (err) {
         return new Response(JSON.stringify({ success: false, error: err.message, stack: err.stack }), { status: 500, headers: { 'Content-Type': 'application/json' }});
     }

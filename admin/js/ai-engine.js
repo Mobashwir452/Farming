@@ -3,7 +3,8 @@ const BASE_URL = 'https://agritech-backend.mobashwir9.workers.dev';
 const getAuthHeaders = () => {
     return {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('agritech_admin_token')}`
+        'Authorization': `Bearer ${localStorage.getItem('agritech_admin_token')}`,
+        'x-admin-user': localStorage.getItem('agritech_admin_user') || 'Unknown Admin'
     };
 };
 
@@ -391,8 +392,8 @@ async function loadAiStats() {
             const sucProg = document.getElementById('stats-success-progress');
             if (sucProg) sucProg.style.width = `${stats.success_rate || 0}%`;
 
-            // 4. Hours Saved
-            document.getElementById('stats-hours-saved').textContent = `${(stats.hours_saved || 0).toLocaleString('bn-BD')} ঘণ্টা`;
+            // 4. Hours Saved (Removed from UI)
+            // document.getElementById('stats-hours-saved').textContent = `${(stats.hours_saved || 0).toLocaleString('bn-BD')} ঘণ্টা`;
 
             // 5. Feature Breakdown
             const fbContainer = document.getElementById('stats-feature-breakdown');
@@ -478,11 +479,18 @@ async function loadAiStats() {
                 erContainer.innerHTML = '';
                 if (stats.recent_errors && stats.recent_errors.length > 0) {
                     stats.recent_errors.forEach(err => {
+                        const safeMsg = (err.error_message || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                        const shortened = (err.error_message || '').substring(0, 35);
                         erContainer.innerHTML += `
                             <tr>
-                                <td>${err.feature_type}</td>
+                                <td>${err.feature_type || '--'}</td>
                                 <td>${err.crop_name || '--'}</td>
-                                <td style="color: var(--danger);">${(err.error_message || '').substring(0, 40)}...</td>
+                                <td style="color: var(--danger);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>${shortened}...</span>
+                                        <button class="recent-error-btn" onclick="showFullError('${safeMsg}')">View Full</button>
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     });
@@ -589,76 +597,7 @@ async function loadDoctorRules() {
     } catch (e) { console.error('Failed to load doctor rules:', e); }
 }
 
-// --- Tab 5: RAG ---
-async function loadRagDocuments() {
-    try {
-        const response = await fetch(`${BASE_URL}/api/admin/ai/rag/documents`, { headers: getAuthHeaders() });
-        const data = await response.json();
-        if (data.success) {
-            const ul = document.getElementById('rag-documents-list');
-            if (ul) {
-                if (data.documents && data.documents.length > 0) {
-                    ul.innerHTML = '';
-                    data.documents.forEach(doc => {
-                        ul.innerHTML += `
-                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <div>
-                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main);">${doc.title}</div>
-                                    <div style="font-size: 12px; color: var(--text-muted);">${doc.size} • সিংক হয়েছে: ${doc.date}</div>
-                                </div>
-                                <span class="ai-badge success">Active</span>
-                            </li>
-                        `;
-                    });
-                } else {
-                    ul.innerHTML = '<li style="text-align: center; color: var(--text-muted); padding: 24px;">এখনও কোনো নলেজ আপলোড করা হয়নি।</li>';
-                }
-            }
-        }
-    } catch (e) { console.error('Failed to load RAG docs:', e); }
-}
 
-// --- Tab 6: Logs ---
-async function loadAiLogs() {
-    try {
-        const response = await fetch(`${BASE_URL}/api/admin/ai/logs`, { headers: getAuthHeaders() });
-        const data = await response.json();
-        const tbody = document.getElementById('logs-tbody');
-
-        if (data.success && tbody) {
-            tbody.innerHTML = '';
-
-            if (data.logs && data.logs.length > 0) {
-                data.logs.forEach(log => {
-                    const tr = document.createElement('tr');
-
-                    // Basic time format, can be customized later
-                    const timeStr = new Date(log.created_at || Date.now()).toLocaleString('bn-BD', {
-                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-
-                    let badgeClass = 'info';
-                    let featureLabel = 'Prediction';
-                    if (log.feature === 'crop_doctor') { badgeClass = 'warning'; featureLabel = 'Doctor'; }
-
-                    tr.innerHTML = `
-                        <td style="white-space: nowrap;">${timeStr}</td>
-                        <td>${log.farmer_phone || 'System'}</td>
-                        <td><span class="ai-badge ${badgeClass}">${featureLabel}</span></td>
-                        <td>${(log.input_prompt || '').substring(0, 45)}...</td>
-                        <td>${(log.ai_response || '').substring(0, 45)}...</td>
-                        <td style="font-family: monospace; color: var(--text-muted);">${log.tokens_used || 0}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">এখনও কোনো লগ এন্ট্রি নেই।</td></tr>';
-            }
-        }
-    } catch (e) {
-        console.error('Failed to load logs:', e);
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Load config for Tab 4
@@ -670,8 +609,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCfQuota();
     loadApiKeys();
     loadDoctorRules();
-    loadRagDocuments();
-    loadAiLogs();
 
     const savePromptBtn = document.getElementById('btn-save-prompt');
     if (savePromptBtn) {
@@ -949,21 +886,66 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${BASE_URL}/api/admin/ai/logs/chat`, { headers: getAuthHeaders() });
             const data = await res.json();
             if(data.success && data.logs.length > 0) {
-                tbody.innerHTML = data.logs.map(log => `
+                tbody.innerHTML = data.logs.map(log => {
+                    let history = [];
+                    try { history = JSON.parse(log.chat_history); } catch(e){}
+                    const historyHtml = encodeURIComponent(JSON.stringify(history));
+                    return `
                     <tr>
                         <td>${log.user_id ? log.user_id : 'Guest'}</td>
-                        <td>${log.master_crop_id ? `Crop #${log.master_crop_id}` : 'N/A'}</td>
-                        <td style="white-space: pre-wrap; word-break: break-word;">${log.user_query}</td>
-                        <td style="white-space: pre-wrap; word-break: break-word; color: #334155;">${log.ai_response.length > 150 ? log.ai_response.substring(0, 150) + '...' : log.ai_response}</td>
+                        <td><span style="background:var(--bg-hover); padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">${log.crop_name || 'General'}</span></td>
+                        <td><span style="color:var(--text-muted);">${Math.floor(history.length / 2)} জোড়া মেসেজ</span></td>
                         <td style="white-space: nowrap; font-size: 13px;">${new Date(log.created_at).toLocaleString('bn-BD')}</td>
+                        <td>
+                            <button class="btn-outline-primary" style="padding:6px 14px; font-size:12px; border-radius: 20px; font-weight: 500;" onclick="window.showChatHistoryModal('${historyHtml}', '${log.session_id}')">
+                                চ্যাট দেখুন
+                            </button>
+                        </td>
                     </tr>
-                `).join('');
+                `}).join('');
             } else {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">কোনো চ্যাট লগ পাওয়া যায়নি।</td></tr>';
             }
         } catch(e) {
             tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Network Error: ${e.message}</td></tr>`;
         }
+    };
+
+    // UI Chat History View
+    window.showChatHistoryModal = (historyEncoded, sessionId) => {
+        try {
+            const history = JSON.parse(decodeURIComponent(historyEncoded));
+            document.getElementById('chatModalSubtitle').textContent = 'Session ID: ' + sessionId.substring(0, 13) + '...';
+            
+            const contentBox = document.getElementById('chatHistoryModalContent');
+            
+            if (!history || history.length === 0) {
+                contentBox.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding:20px;">কোনো মেসেজ নেই।</div>';
+            } else {
+                contentBox.innerHTML = history.map(msg => {
+                    const isUser = msg.role === 'user';
+                    return `
+                        <div style="display: flex; flex-direction: column; align-items: ${isUser ? 'flex-end' : 'flex-start'}; gap: 4px;">
+                            <span style="font-size: 11px; color: #94a3b8; padding: 0 4px; font-weight: 500;">${isUser ? 'কৃষক (ইউজার)' : 'AgriTech AI'}</span>
+                            <div style="max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; ${isUser ? 'background: #10B981; color: white; border-bottom-right-radius: 4px;' : 'background: white; border: 1px solid #e2e8f0; color: #334155; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); white-space: pre-wrap; word-break: break-word;'}">
+                                ${msg.content}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('chatHistoryModalOverlay').classList.add('active');
+            document.getElementById('chatHistoryModal').style.display = 'flex';
+        } catch(e) {
+            alert('Error parsing chat history JSON: ' + e.message);
+        }
+    };
+
+    window.closeChatHistoryModal = () => {
+        document.getElementById('chatHistoryModalOverlay').classList.remove('active');
+        document.getElementById('chatHistoryModal').style.display = 'none';
+        document.getElementById('chatHistoryModalContent').innerHTML = '';
     };
 
     window.loadMissedQueries = async () => {
@@ -991,11 +973,128 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.loadSecurityAuditLogs = async () => {
+        const timeline = document.getElementById('security-audit-timeline');
+        if(!timeline) return;
+
+        timeline.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">লগ ফেচ করা হচ্ছে <i class="fas fa-spinner fa-spin"></i></div>';
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/ai/security-logs`, { headers: getAuthHeaders() });
+            const data = await res.json();
+
+            if(data.success && data.logs.length > 0) {
+                timeline.innerHTML = data.logs.map(log => {
+                    let badgeClass = 'primary';
+                    if(log.action_type.includes('DELETE') || log.action_type.includes('STOP')) badgeClass = 'danger';
+                    else if(log.action_type.includes('UPDATE') || log.action_type.includes('CHANGE')) badgeClass = 'warning';
+
+                    let detailsHtml = '';
+                    try {
+                        const parsed = JSON.parse(log.details);
+                        detailsHtml = `<pre style="font-size:11px; margin-top: 8px; background: #f8fafc; padding: 6px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; font-family: monospace;">${JSON.stringify(parsed, null, 2)}</pre>`;
+                    } catch(e) {
+                        detailsHtml = `<div style="font-size:12px; margin-top: 8px; color: var(--text-muted);">${log.details || ''}</div>`;
+                    }
+
+                    return `
+                        <div class="st-item ${badgeClass}">
+                            <div class="st-header">
+                                <span class="st-title" style="color: var(--${badgeClass});">${log.action_type}</span>
+                                <span class="st-time">${new Date(log.created_at).toLocaleString('bn-BD')}</span>
+                            </div>
+                            <div class="st-body">
+                                <div>Admin: <strong>${log.admin_name}</strong></div>
+                                ${detailsHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                timeline.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">কোনো সিকিউরিটি অডিট লগ পাওয়া যায়নি।</div>';
+            }
+        } catch(e) {
+            timeline.innerHTML = `<div style="text-align: center; color: var(--danger); padding: 20px;">Network Error: ${e.message}</div>`;
+        }
+    };
+
     // Pre-load them initially if Tab Logs exist
     if (document.getElementById('tab-logs')) {
         setTimeout(() => {
             if(window.loadChatLogs) window.loadChatLogs();
             if(window.loadMissedQueries) window.loadMissedQueries();
+            if(window.loadErrorLogs) window.loadErrorLogs();
+            if(window.loadSecurityAuditLogs) window.loadSecurityAuditLogs();
         }, 1000); // delay auto-fetch to allow other primary data to load first
     }
 });
+
+// Global Error Show Function
+window.showFullError = function(msg) {
+    alert("Full Error Message:\n\n" + msg);
+};
+
+// ==========================================
+// SYSTEM LOGS: ERROR LOGS (Sub-Tab)
+// ==========================================
+let currentErrorPage = 1;
+window.loadErrorLogs = async function(page = 1) {
+    try {
+        currentErrorPage = page;
+        const tbody = document.getElementById('error-logs-tbody');
+        if(!tbody) return;
+        
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">লোড হচ্ছে...</td></tr>';
+        
+        const response = await fetch(`${BASE_URL}/api/admin/ai/logs/errors?page=${page}&limit=25`, { headers: getAuthHeaders() });
+        const res = await response.json();
+        if (res.success && res.logs) {
+            tbody.innerHTML = '';
+            if (res.logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">কোনো এরর লগ পাওয়া যায়নি।</td></tr>';
+            } else {
+                res.logs.forEach(log => {
+                    const dateObj = new Date(log.created_at);
+                    const formattedDate = dateObj.toLocaleDateString('bn-BD') + ' ' + dateObj.toLocaleTimeString('bn-BD');
+                    
+                    const safeMsg = (log.error_message || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const shortMsg = (log.error_message || '').substring(0, 50);
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td>${log.feature_type || '--'}</td>
+                            <td>${log.crop_name || '--'}</td>
+                            <td style="color: #DC2626;">${shortMsg}${log.error_message?.length > 50 ? '...' : ''}</td>
+                            <td>
+                                <button class="btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="showFullError('${safeMsg}')">Full Text</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Update Pagination UI
+            document.getElementById('er-curr-page').textContent = res.page || 1;
+            document.getElementById('er-total-page').textContent = res.totalPages || 1;
+            
+            const prevBtn = document.getElementById('er-prev-btn');
+            const nextBtn = document.getElementById('er-next-btn');
+            
+            if(prevBtn) prevBtn.disabled = (res.page <= 1);
+            if(nextBtn) nextBtn.disabled = (res.page >= res.totalPages);
+            
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--danger);">ডেটা লোড করতে সমস্যা হয়েছে।</td></tr>';
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+window.changeErrorLogPage = function(delta) {
+    const newPage = currentErrorPage + delta;
+    if (newPage > 0) {
+        loadErrorLogs(newPage);
+    }
+};

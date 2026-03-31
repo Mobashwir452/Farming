@@ -11,12 +11,10 @@ window.onload = async () => {
     currentCropName = params.get('crop_name');
     currentVarietyName = params.get('variety_name') || '';
     window.currentPlantingMethod = params.get('planting_method') || '';
+    window.isForceAi = params.get('force_ai') === 'true';
 
-    if (currentVarietyName && currentVarietyName !== currentCropName) {
-        document.getElementById('crop-name-display').textContent = `${currentCropName} (${currentVarietyName})`;
-    } else {
-        document.getElementById('crop-name-display').textContent = currentCropName || 'অজানা ফসল';
-    }
+    document.getElementById('crop-name-display').textContent = currentCropName || 'অজানা ফসল';
+    document.getElementById('variety-name-display').textContent = currentVarietyName || 'অজানা জাত';
 
     if (!currentFarmId || !currentCropName) {
         alert("দুঃখিত, জমির তথ্য বা ফসলের নাম পাওয়া যায়নি। গাইডলাইন লোড করা সম্ভব নয়।");
@@ -89,7 +87,11 @@ window.fetchPrediction = async function (forceOffSeason = false) {
     }, 2800);
 
     try {
-        const fetchUrl = `${API_URL}/api/ai/predict-crop?farm_id=${currentFarmId}&crop_name=${encodeURIComponent(currentCropName)}${currentVarietyName ? '&variety_name=' + encodeURIComponent(currentVarietyName) : ''}${forceOffSeason ? '&force_off_season=true' : ''}`;
+        let fetchUrl = `${API_URL}/api/ai/predict-crop?farm_id=${currentFarmId}&crop_name=${encodeURIComponent(currentCropName)}${currentVarietyName ? '&variety_name=' + encodeURIComponent(currentVarietyName) : ''}${forceOffSeason ? '&force_off_season=true' : ''}`;
+        if (window.isForceAi) {
+            fetchUrl += `&force_ai=true`;
+        }
+        
         const response = await fetch(fetchUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -126,16 +128,11 @@ window.fetchPrediction = async function (forceOffSeason = false) {
         // Keep a reference to the ENTIRE AI DATA so we can preview and save it later
         window.fullAIData = resData.data;
         aiGeneratedTimeline = resData.data.timeline;
-        // Variety display is handled upfront directly from URL input on page load.
-        // Update it if the AI surprisingly selected a new variety.
-        if (resData.data.variety_name) {
-            currentVarietyName = resData.data.variety_name;
-            if (currentVarietyName !== currentCropName) {
-                document.getElementById('crop-name-display').textContent = `${currentCropName} (${currentVarietyName})`;
-            } else {
-                document.getElementById('crop-name-display').textContent = currentCropName;
-            }
-        }
+        if (resData.data.crop_name) currentCropName = resData.data.crop_name;
+        if (resData.data.variety_name) currentVarietyName = resData.data.variety_name;
+        
+        document.getElementById('crop-name-display').textContent = currentCropName;
+        document.getElementById('variety-name-display').textContent = currentVarietyName;
 
         loadingState.style.display = 'none';
         document.getElementById('ai-result-content').style.display = 'block';

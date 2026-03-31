@@ -1,3 +1,5 @@
+import { logSecurityAudit } from './ai_logs.js';
+
 export const getAiConfig = async (request, env) => {
     try {
         const { results: keys } = await env.DB.prepare("SELECT * FROM ai_api_keys ORDER BY id").all();
@@ -42,6 +44,13 @@ export const saveAiConfig = async (request, env) => {
             await env.DB.prepare(`UPDATE ai_api_keys SET status = 'active' WHERE status = 'disabled'`).run();
         }
 
+        // Log Audit
+        const adminName = request.headers.get('x-admin-user');
+        await logSecurityAudit(env, adminName, 'GLOBAL_CONFIG_UPDATE', {
+            emergency_stop: emStop === 1,
+            system_prompt: sysPrompt ? 'Updated' : 'Unchanged'
+        });
+
         return Response.json({ success: true, message: 'Configuration updated successfully!' });
     } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
@@ -74,6 +83,10 @@ export const saveAiPrompt = async (request, env) => {
                 fallback_message=excluded.fallback_message,
                 updated_at=CURRENT_TIMESTAMP
         `).bind(prompt_key, system_role || '', template_body, fallback_message || '').run();
+
+        // Log Audit
+        const adminName = request.headers.get('x-admin-user');
+        await logSecurityAudit(env, adminName, 'PROMPT_TEMPLATE_UPDATE', { prompt_key });
 
         return Response.json({ success: true, message: 'Prompt updated successfully!' });
     } catch (e) {
