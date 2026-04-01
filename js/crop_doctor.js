@@ -208,7 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await response.json();
             if(!res.success) {
                 switchState('state-landing');
-                window.showToast?.(res.error || 'স্ক্যান করতে সমস্যা হয়েছে', 'error');
+                if (window.handleApiError) { 
+                    window.handleApiError(res, 'ক্রপ স্ক্যান'); 
+                } else { 
+                    window.showToast?.(res.error || 'স্ক্যান করতে সমস্যা হয়েছে'); 
+                }
                 return;
             }
 

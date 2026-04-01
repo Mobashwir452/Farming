@@ -62,6 +62,12 @@ export const predictCrop = async (request, env) => {
             return Response.json({ success: false, error: 'farm_id and crop_name are required' }, { status: 400 });
         }
 
+        // Limit Check
+        const farmerInfo = await env.DB.prepare("SELECT subscription_status, remaining_timelines FROM farmers WHERE id = ?").bind(request.user.id).first();
+        if (farmerInfo && farmerInfo.subscription_status !== 'pro' && farmerInfo.remaining_timelines <= 0) {
+            return Response.json({ success: false, error: 'Limit reached' }, { status: 402 });
+        }
+
         // Fetch farm area_shotangsho to calculate math
         const farm = await env.DB.prepare("SELECT area_shotangsho FROM farms WHERE id = ?").bind(farmId).first();
         if (!farm) {

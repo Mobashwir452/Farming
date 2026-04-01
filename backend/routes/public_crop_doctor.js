@@ -26,6 +26,19 @@ export const analyzePublicCropImage = async (request, env) => {
             userId = body.userId || null;
         }
 
+        // --- Subscription & Limit Check ---
+        if (request.user && request.user.role !== 'admin' && request.user.role !== 'Super Admin' && userId && userId !== 0) {
+            const farmerInfo = await env.DB.prepare("SELECT subscription_status, remaining_scans FROM farmers WHERE id = ?").bind(userId).first();
+            if (farmerInfo && farmerInfo.subscription_status !== 'pro') {
+                if (farmerInfo.remaining_scans <= 0) {
+                    return Response.json({ success: false, error: 'Limit reached. Please upgrade to Pro.' }, { status: 402 });
+                }
+                // Deduct 1 Scan
+                await env.DB.prepare("UPDATE farmers SET remaining_scans = remaining_scans - 1 WHERE id = ?").bind(userId).run();
+            }
+        }
+        // ----------------------------------
+
         if (!imageBase64) {
             return Response.json({ success: false, error: 'Image base64 data is required.' }, { status: 400 });
         }

@@ -28,10 +28,21 @@ window.switchTab = function (tabName) {
         verifyBtn.style.display = tabName === 'pending' ? 'block' : 'none';
     }
 
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    window.history.replaceState({}, '', url);
+
     handleSearch();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Restore Main Tab from URL
+    const params = new URLSearchParams(window.location.search);
+    const activeTab = params.get('tab');
+    if (activeTab === 'pending') {
+        switchTab('pending');
+    }
+
     setTimeout(() => {
         fetchCrops();
     }, 500);

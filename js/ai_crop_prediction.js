@@ -139,7 +139,12 @@ window.fetchPrediction = async function (forceOffSeason = false) {
 
     } catch (e) {
         console.error(e);
-        loadingState.innerHTML = `<p style="color:red; font-size: 15px; text-align: center; font-weight: 600;">${e.message || 'সার্ভার সমস্যা, পরে চেষ্টা করুন'}</p>`;
+        if (e.message && (e.message.toLowerCase().includes('payment required') || e.message.toLowerCase().includes('limit exceeded'))) {
+            loadingState.innerHTML = `<p style="color:#BE185D; font-size: 15px; text-align: center; font-weight: 600;">লিমিট শেষ!</p>`;
+            if (window.showPaywallModal) window.showPaywallModal('এআই ক্রপ প্ল্যানিং');
+        } else {
+            loadingState.innerHTML = `<p style="color:red; font-size: 15px; text-align: center; font-weight: 600;">${e.message || 'সার্ভার সমস্যা, পরে চেষ্টা করুন'}</p>`;
+        }
     }
 }
 

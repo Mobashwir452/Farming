@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS farmers (
     full_name TEXT,                     -- Collected during step 4 of signup
     pin_hash TEXT,                      -- Secured local PIN (backup/alternative auth)
     is_active BOOLEAN DEFAULT 1,        -- Whether the account is active/banned
+    subscription_status TEXT DEFAULT 'free', -- 'free' or 'pro'
+    subscription_expiry DATETIME NULL,
+    remaining_scans INTEGER DEFAULT 3,
+    remaining_timelines INTEGER DEFAULT 5,
+    remaining_chats INTEGER DEFAULT 15,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

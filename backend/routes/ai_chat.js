@@ -8,6 +8,20 @@ export const handleCropChat = async (request, env) => {
         if (!query) return json({ success: false, error: 'Query is missing' }, { status: 400 });
 
         let filterCropTitle = cropTitle;
+
+        // --- Subscription & Limit Check ---
+        if (request.user && request.user.role !== 'admin' && request.user.role !== 'Super Admin' && userId) {
+            const farmerInfo = await env.DB.prepare("SELECT subscription_status, remaining_chats FROM farmers WHERE id = ?").bind(userId).first();
+            if (farmerInfo && farmerInfo.subscription_status !== 'pro') {
+                if (farmerInfo.remaining_chats <= 0) {
+                    return Response.json({ success: false, error: 'Limit reached. Please upgrade to Pro for unlimited chat.' }, { status: 402 });
+                }
+                // Deduct 1 Chat
+                await env.DB.prepare("UPDATE farmers SET remaining_chats = remaining_chats - 1 WHERE id = ?").bind(userId).run();
+            }
+        }
+        // ----------------------------------
+
         if (farmId && !filterCropTitle) {
             const farm = await env.DB.prepare(`
                 SELECT c.crop_name, c.variety_name 

@@ -272,7 +272,12 @@ window.saveGpsLand = async function (event) {
         if (data.success) {
             window.location.href = 'add_crop.html';
         } else {
-            alert("জমি সেভ করতে সমস্যা হয়েছে: " + (data.error || 'Unknown error'));
+            if (data && data.error && (data.error.toLowerCase().includes('payment required') || data.error.toLowerCase().includes('limit exceeded'))) {
+                if(window.showPaywallModal) window.showPaywallModal('জমি যোগ করা');
+                else alert(data.error);
+            } else {
+                alert("জমি সেভ করতে সমস্যা হয়েছে: " + (data.error || 'Unknown error'));
+            }
             btn.innerHTML = originalText; btn.disabled = false;
         }
     } catch (e) {
@@ -354,7 +359,13 @@ window.saveManualLand = async function (event) {
             window.closeManualEntry();
             window.location.href = 'khamar.html';
         } else {
-            alert("জমি সেভ করতে সমস্যা হয়েছে: " + (data.error || 'Unknown error'));
+            if (data && data.error && (data.error.toLowerCase().includes('payment required') || data.error.toLowerCase().includes('limit exceeded'))) {
+                window.closeManualEntry();
+                if(window.showPaywallModal) window.showPaywallModal('জমি যোগ করা');
+                else alert(data.error);
+            } else {
+                alert("জমি সেভ করতে সমস্যা হয়েছে: " + (data.error || 'Unknown error'));
+            }
             if (btn && btn.tagName === 'BUTTON') { btn.innerHTML = originalText; btn.disabled = false; }
         }
     } catch (e) {

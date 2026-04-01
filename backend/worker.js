@@ -6,12 +6,14 @@ import { adminLogin, adminDashboard } from './routes/admin.js';
 import { getMasterCrops, addMasterCrop, editMasterCrop, deleteMasterCrop, addBulkMasterCrops, updateCropStatus, syncCropFromCache, getCropRagContext, generateMissingRag } from './routes/admin_crops.js';
 import { getAdminCache, saveAdminCache, deleteAdminCache, generateAdminCacheAI } from './routes/admin_cache.js';
 import { getAdminSettings, saveAdminSettings } from './routes/admin_settings.js';
-import { verifyFirebase, updateProfile, checkUser, loginPin } from './routes/auth.js';
+import { verifyFirebase, updateProfile, checkUser, loginPin, getProfile, submitManualPayment } from './routes/auth.js';
 import { createFarm, getFarms, getFarmDetails, updateFarm, deleteFarm } from './routes/farms.js';
 import { saveCropTimeline, searchCrops, updateCropState, deleteCrop, completeCrop, updateCropStatusManually, addCropNote } from './routes/crops.js';
 import { predictCrop, suggestCrop } from './routes/crop_ai.js';
 import { analyzePublicCropImage, getPublicScanLogs } from './routes/public_crop_doctor.js';
 import { getScanLogs, updateDiagnosticRules, getDiagnosticRules } from './routes/admin_crop_doctor.js';
+import { getUsers, getUserDetails, toggleUserStatus, clearUserPin, getUserTransactions } from './routes/admin_users.js';
+import { getPackages, updatePackage, addPackage, deletePackage, getActiveSubscribers, getPaymentHistory, manualUpgrade, getPaymentSettings, updatePaymentSettings, getPendingPayments, approvePayment, rejectPayment, downgradeUser } from './routes/admin_subscriptions.js';
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
 import { handleCropChat } from './routes/ai_chat.js';
@@ -20,6 +22,7 @@ import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
 import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
 import { cleanOldCropScanImages } from './services/r2_cleaner.js';
+import { resetMonthlyLimits } from './services/limitResetter.js';
 
 const router = Router();
 
@@ -41,6 +44,28 @@ router.post('/api/admin/crops/:id/generate-rag', withAuth(['admin']), generateMi
 router.get('/api/admin/settings', withAuth(['admin']), getAdminSettings);
 router.post('/api/admin/settings', withAuth(['admin']), saveAdminSettings);
 router.get('/api/admin/test/weather-sync', withAuth(['admin']), testWeatherSync);
+
+// Admin Users & Subscriptions
+router.get('/api/admin/users', withAuth(['admin']), getUsers);
+router.get('/api/admin/users/:id/details', withAuth(['admin']), getUserDetails);
+router.get('/api/admin/users/:id/transactions', withAuth(['admin']), getUserTransactions);
+router.put('/api/admin/users/:id/status', withAuth(['admin']), toggleUserStatus);
+router.post('/api/admin/users/:id/clear-pin', withAuth(['admin']), clearUserPin);
+router.get('/api/admin/packages', withAuth(['admin']), getPackages);
+router.post('/api/admin/packages', withAuth(['admin']), addPackage);
+router.put('/api/admin/packages/:id', withAuth(['admin']), updatePackage);
+router.delete('/api/admin/packages/:id', withAuth(['admin']), deletePackage);
+router.get('/api/admin/subscriptions/active-users', withAuth(['admin']), getActiveSubscribers);
+router.get('/api/admin/subscriptions/history', withAuth(['admin']), getPaymentHistory);
+router.post('/api/admin/subscriptions/manual-upgrade', withAuth(['admin']), manualUpgrade);
+router.post('/api/admin/subscriptions/downgrade/:id', withAuth(['admin']), downgradeUser);
+router.get('/api/admin/subscriptions/pending', withAuth(['admin']), getPendingPayments);
+router.post('/api/admin/subscriptions/approve/:id', withAuth(['admin']), approvePayment);
+router.post('/api/admin/subscriptions/reject/:id', withAuth(['admin']), rejectPayment);
+router.get('/api/admin/payment-settings', withAuth(['admin']), getPaymentSettings);
+router.post('/api/admin/payment-settings', withAuth(['admin']), updatePaymentSettings);
+router.get('/api/payment-settings', getPaymentSettings); // Public equivalent for farmer app
+
 router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (request, env, ctx) => {
     try {
         let cropId = null;
@@ -71,7 +96,9 @@ router.post('/api/admin/crop-doctor/rules', withAuth(['admin']), updateDiagnosti
 router.post('/api/auth/verify-firebase', verifyFirebase);
 router.post('/api/auth/check-user', checkUser);
 router.post('/api/auth/login-pin', loginPin);
+router.get('/api/auth/profile', withAuth(['farmer']), getProfile);
 router.put('/api/auth/profile', withAuth(['farmer']), updateProfile);
+router.post('/api/auth/submit-payment', withAuth(['farmer']), submitManualPayment);
 
 // 3.5. Public Farm & Land Routes (Farmers only)
 router.post('/api/farms', withAuth(['farmer']), createFarm);
@@ -154,7 +181,8 @@ export default {
             runCropVerification(env),
             checkOverdueTasks(env),
             syncWeatherData(env),
-            cleanOldCropScanImages(env)
+            cleanOldCropScanImages(env),
+            resetMonthlyLimits(env)
         ]));
     }
 };

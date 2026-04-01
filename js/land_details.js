@@ -231,6 +231,20 @@ async function fetchFarmAndCropDetails() {
                 fetchCropScansForLand();
 
             } else {
+                const cropNameEl = document.querySelector('.ld-crop-text h4');
+                const cropStatusEl = document.querySelector('.ld-crop-text p:nth-child(3) span');
+                const plantingAgeEl = document.querySelector('.ld-crop-text p strong');
+                
+                if (cropNameEl) cropNameEl.textContent = "খালি জমি";
+                if (cropStatusEl) cropStatusEl.textContent = "বর্তমানে কোনো ফসল নেই";
+                if (plantingAgeEl && plantingAgeEl.parentElement) plantingAgeEl.parentElement.innerHTML = "--";
+
+                const currentCostEl = document.getElementById('current-cost-display');
+                if (currentCostEl) currentCostEl.textContent = '৳ 0';
+                
+                const currentRevEl = document.getElementById('current-rev-display');
+                if (currentRevEl) currentRevEl.textContent = '৳ 0';
+
                 document.getElementById('render-tasks').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো ফসল রোপণ করা নেই।</p>';
                 document.getElementById('render-resources').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো রিসোর্স নেই।</p>';
                 document.getElementById('render-finance').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো ফিন্যান্সিয়াল ট্র্যাকিং নেই।</p>';
@@ -1787,11 +1801,18 @@ window.sendChatMessage = async function() {
             
         } else {
             console.error(data.error);
-            msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
-                <div style="background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
-                    দুঃখিত, কোনো উত্তর পাওয়া যায়নি।
-                </div>
-            </div>`;
+            if (data && data.error && (data.error.toLowerCase().includes('payment required') || data.error.toLowerCase().includes('limit exceeded'))) {
+                if(window.showPaywallModal) {
+                    window.toggleChatbot(); // Close chat interface
+                    setTimeout(() => window.showPaywallModal('এআই চ্যাট অ্যাসিস্ট্যান্ট'), 350);
+                } else alert(data.error);
+            } else {
+                msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
+                    <div style="background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
+                        ${data.error || 'দুঃখিত, কোনো উত্তর পাওয়া যায়নি।'}
+                    </div>
+                </div>`;
+            }
         }
     } catch (e) {
         console.error(e);

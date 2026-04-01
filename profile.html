@@ -41,24 +41,23 @@
             <span class="material-icons-round">edit</span>
         </button>
     </header>
-
     <main class="profile-main">
         <!-- User Info Card -->
         <div class="user-profile-card">
             <div class="profile-image-container">
-                <img src="https://i.pravatar.cc/150?img=33" alt="Rahim Mia" class="profile-avatar">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" id="userAvatar" alt="User Avatar" class="profile-avatar">
                 <button class="edit-image-btn" aria-label="Change photo">
                     <span class="material-icons-round">photo_camera</span>
                 </button>
             </div>
             <h2 class="user-name">
-                রহিম মিয়া
-                <span class="material-icons-round verified-badge" title="NID Verified">verified</span>
+                <span id="userNameDisplay">অপেক্ষা করুন...</span>
+                <span class="material-icons-round verified-badge" title="Verified">verified</span>
             </h2>
-            <p class="user-phone">+৮৮০ ১৩২৩ ০০০ ০০০</p>
+            <p class="user-phone" id="userPhoneDisplay">...</p>
             <p class="user-address">
                 <span class="material-icons-round" style="font-size: 16px;">location_on</span>
-                বগুড়া সদর, রাজশাহী
+                <span id="userAddressDisplay">ঠিকানা লোড হচ্ছে...</span>
             </p>
         </div>
 
@@ -70,7 +69,7 @@
                 </div>
                 <div class="stat-info">
                     <h5>মোট জমি</h5>
-                    <h3>৪৫০ শতাংশ</h3>
+                    <h3 id="totalLandsCount">০ শতাংশ</h3>
                 </div>
             </div>
             <div class="stat-card">
@@ -79,7 +78,40 @@
                 </div>
                 <div class="stat-info">
                     <h5>সাবস্ক্রিপশন</h5>
-                    <h3>ফ্রি ইউজার</h3>
+                    <h3 id="subscriptionStatusText">ফ্রি ইউজার</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Panel -->
+        <div id="subscriptionDetailsPanel" style="display: none; background: linear-gradient(135deg, #10b981, #059669); border-radius: 16px; padding: 20px; color: white; margin: 0 16px 24px 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); position: relative; overflow: hidden; font-family: 'Moto Sans Bengali', sans-serif;">
+            <div style="position: absolute; top: -20px; right: -20px; opacity: 0.1;">
+                <span class="material-icons-round" style="font-size: 150px;">workspace_premium</span>
+            </div>
+            <div style="position: relative; z-index: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons-round" style="color: #fbbf24; font-size: 20px;">star</span>
+                            <span id="subPackageName">AgriTech Pro</span>
+                        </h3>
+                        <p id="subExpiryText" style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;">মেয়াদ শেষ: ৩১/১২/২০২৬</p>
+                    </div>
+                    <button class="upgrade-btn" onclick="openPremiumModal()" style="background: white; color: #059669; border: none; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; font-family: inherit; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">প্যাকেজ দেখুন</button>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; backdrop-filter: blur(4px);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px;">
+                        <span>AI বিশ্লেষণ লিমিট:</span>
+                        <strong id="limitScans">আনলিমিটেড</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px;">
+                        <span>AI রুটিন গাইডলাইন:</span>
+                        <strong id="limitTimeline">আনলিমিটেড</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span>AI কৃষিবিদ চ্যাট:</span>
+                        <strong id="limitChat">আনলিমিটেড</strong>
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,7 +126,7 @@
                     </div>
                     <div class="setting-text">
                         <span class="setting-title">ব্যক্তিগত তথ্য</span>
-                        <span class="setting-desc">নাম, এনআইডি এবং ঠিকানা</span>
+                        <span class="setting-desc">নাম এবং ঠিকানা</span>
                     </div>
                 </div>
                 <div class="setting-right">
@@ -211,16 +243,13 @@
                 </div>
                 <div class="form-group-p">
                     <label>ফোন নম্বর</label>
-                    <input type="tel" value="+৮৮০ ১৩২৩ ০০০ ০০০" disabled>
+                    <input type="tel" id="editPhone" value="" disabled>
                 </div>
                 <div class="form-group-p">
                     <label>ঠিকানা</label>
-                    <input type="text" id="editAddress" value="বগুড়া সদর, রাজশাহী">
+                    <input type="text" id="editAddress" placeholder="যেমন: বগুড়া সদর, রাজশাহী">
                 </div>
-                <div class="form-group-p">
-                    <label>জাতীয় পরিচয়পত্র (NID)</label>
-                    <input type="number" id="editNid" value="1234567890" disabled>
-                </div>
+                
             </div>
             <div class="modal-footer-bottom">
                 <button class="btn-save-full" id="btnSaveProfile">সংরক্ষণ করুন</button>
@@ -257,6 +286,50 @@
 
     <!-- Bottom Navigation -->
     <app-bottom-nav></app-bottom-nav>
+
+    <!-- Premium Upgrade Modal (Manual Payment) -->
+    <div class="profile-modal" id="premiumModal">
+        <div class="modal-content-bottom" style="background: white; padding: 0; overflow: hidden;">
+            <div class="modal-header-bottom" style="border-bottom: none; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; position: relative; display: block;">
+                <button class="close-modal-btn" data-close="premiumModal" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); color: white;">&times;</button>
+                <h4 style="margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px;">AgriTech Pro <span class="material-icons-round" style="color: #fbbf24;">workspace_premium</span></h4>
+                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9; padding-right: 40px;">সাশ্রয়ী মূল্যে পান সকল প্রিমিয়াম সুবিধা</p>
+            </div>
+            <div class="modal-body-form" style="padding: 20px;">
+                <ul style="list-style: none; padding: 0; margin: 0 0 20px 0;">
+                    <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> আনলিমিটেড AI স্ক্যান ও স্প্যাম ফ্রি চ্যাট</li>
+                    <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> আনলিমিটেড স্মার্ট ক্রপ প্ল্যান জেনারেশন</li>
+                    <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> এক্সক্লুসিভ ২৪/৭ এগ্রিকালচার স্পেশালিস্ট সাপোর্ট</li>
+                </ul>
+                <div style="background: #f1f5f9; padding: 16px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #059669;">
+                    <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">কিভাবে সাবস্ক্রাইব করবেন?</p>
+                    <p style="margin: 0; font-size: 13px; color: #475569;">নিচের নম্বরে <strong>৳৪৯৯</strong> সেন্ড মানি করে ফর্মটি পূরণ করুন:</p>
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                        <span id="instructionBkashNumber" style="background: #e2136e; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; width: fit-content;">বিকাশ: লোড হচ্ছে...</span>
+                        <span id="instructionNagadNumber" style="background: #f97316; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; width: fit-content; display: none;">নগদ: লোড হচ্ছে...</span>
+                    </div>
+                </div>
+                
+                <h5 style="margin: 0 0 12px 0; font-size: 15px;">পেমেন্ট ইনফরমেশন</h5>
+                <form id="paymentForm">
+                    <div class="form-group-p">
+                        <label>পেমেন্ট মেথড</label>
+                        <select id="payMethod" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 14px; background: #f8fafc; margin-bottom: 12px;" required>
+                            <option value="bkash">বিকাশ (bKash)</option>
+                            <option value="nagad">নগদ (Nagad)</option>
+                        </select>
+                    </div>
+                    <div class="form-group-p">
+                        <label>TrxID</label>
+                        <input type="text" id="payTrxId" placeholder="e.g. 9GH3K8L" style="margin-bottom: 12px;" required>
+                    </div>
+                    <button type="submit" class="btn-save-full" style="background: #10b981; margin-top: 10px; width: 100%;" id="btnSubmitPayment">পেমেন্ট সাবমিট করুন</button>
+                    <div id="paymentMessage" style="color: #e2136e; font-size: 12px; text-align: center; margin-top: 8px;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
+
 
 </html>

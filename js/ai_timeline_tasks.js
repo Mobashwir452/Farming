@@ -324,7 +324,13 @@ window.finalizeAndSave = async function () {
                 window.location.href = 'khamar.html';
             }, 1000);
         } else {
-            alert(data.error || "সেভ হতে সমস্যা হয়েছে");
+            if (data && data.error && (data.error.toLowerCase().includes('payment required') || data.error.toLowerCase().includes('limit exceeded') || data.error.toLowerCase().includes('limit reached'))) {
+                document.getElementById('datePickerOverlay').style.display = 'none'; // hide date picker modal
+                if(window.showPaywallModal) window.showPaywallModal('ফার্মিং রুটিন জেনারেশন');
+                else alert(data.error);
+            } else {
+                alert(data.error || "সেভ হতে সমস্যা হয়েছে");
+            }
             btn.innerHTML = originalText;
         }
     } catch (e) {

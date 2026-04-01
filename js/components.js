@@ -519,3 +519,168 @@ window.showToast = function (message) {
         toast.style.opacity = '0';
     }, 3000);
 }
+
+// Global Paywall Modal System
+window.showPaywallModal = function (featureName = 'এই ফিচারটি') {
+    let modal = document.getElementById('global-paywall-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'global-paywall-modal';
+        modal.className = 'calendar-modal active'; // utilizing existing modal styles
+        modal.style.zIndex = '10005';
+        
+        modal.innerHTML = `
+            <div class="calendar-content" style="max-height: 90vh; overflow-y: auto; padding: 0; border-radius: 20px; overflow: hidden; background: white;">
+                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; position: relative;">
+                    <button class="close-modal" aria-label="Close modal" onclick="window.closePaywallModal()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    <h4 style="margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px;">লিমিট শেষ! <span class="material-icons-round" style="color: #fbbf24; font-size: 24px;">error_outline</span></h4>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9; padding-right: 40px;"><span id="paywallFeatureName" style="font-weight: 600;">এই ফিচারটি</span> ব্যবহারের লিমিট শেষ। আনলিমিটেড এক্সেস পেতে আপগ্রেড করুন।</p>
+                </div>
+                <div style="padding: 20px; text-align: left;">
+                    <ul style="list-style: none; padding: 0; margin: 0 0 20px 0;">
+                        <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> আনলিমিটেড AI স্ক্যান ও স্প্যাম ফ্রি চ্যাট</li>
+                        <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> আনলিমিটেড স্মার্ট ক্রপ প্ল্যান জেনারেশন</li>
+                        <li style="margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span class="material-icons-round" style="color: #10b981; font-size: 18px;">check_circle</span> এক্সক্লুসিভ ২৪/৭ এগ্রিকালচার স্পেশালিস্ট সাপোর্ট</li>
+                    </ul>
+                    
+                    <div style="background: #f1f5f9; padding: 16px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #059669;">
+                        <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">কিভাবে সাবস্ক্রাইব করবেন?</p>
+                        <p style="margin: 0; font-size: 13px; color: #475569;">নিচের নম্বরে <strong>৳৪৯৯</strong> সেন্ড মানি করে ফর্মটি পূরণ করুন:</p>
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                            <span id="globalInstructionBkashNumber" style="background: #e2136e; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; width: fit-content;">বিকাশ: لوڈ হচ্ছে...</span>
+                            <span id="globalInstructionNagadNumber" style="background: #f97316; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; width: fit-content; display: none;">নগদ: لوڈ হচ্ছে...</span>
+                        </div>
+                    </div>
+                    
+                    <h5 style="margin: 0 0 12px 0; font-size: 15px;">পেমেন্ট ইনফরমেশন</h5>
+                    <form id="globalPaymentForm">
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #334155;">পেমেন্ট মেথড</label>
+                            <select id="globalPayMethod" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;" required>
+                                <option value="bkash">বিকাশ (bKash)</option>
+                                <option value="nagad">নগদ (Nagad)</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #334155;">TrxID</label>
+                            <input type="text" id="globalPayTrxId" placeholder="e.g. 9GH3K8L" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;" required>
+                        </div>
+                        <button type="submit" id="btnSubmitGlobalPayment" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s;">পেমেন্ট সাবমিট করুন</button>
+                        <div id="globalPaymentMessage" style="color: #e2136e; font-size: 12px; text-align: center; margin-top: 8px;"></div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Form Logic
+        setTimeout(() => {
+            const submitBtn = document.getElementById('btnSubmitGlobalPayment');
+            const methodSelect = document.getElementById('globalPayMethod');
+            const trxInput = document.getElementById('globalPayTrxId');
+
+            if (submitBtn) {
+                if (localStorage.getItem('agritech_pending_payment') === 'true') {
+                    submitBtn.textContent = 'আপনার রিকোয়েস্ট পেন্ডিং আছে';
+                    submitBtn.style.background = '#d97706';
+                    submitBtn.disabled = true;
+                    if(methodSelect) methodSelect.disabled = true;
+                    if(trxInput) trxInput.disabled = true;
+                } else {
+                    submitBtn.textContent = 'পেমেন্ট সাবমিট করুন';
+                    submitBtn.style.background = '#10b981';
+                    submitBtn.disabled = false;
+                    if(methodSelect) methodSelect.disabled = false;
+                    if(trxInput) trxInput.disabled = false;
+                }
+            }
+
+            const globalPaymentForm = document.getElementById('globalPaymentForm');
+            if (globalPaymentForm) {
+                globalPaymentForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = document.getElementById('btnSubmitGlobalPayment');
+                    const msg = document.getElementById('globalPaymentMessage');
+                    const method = document.getElementById('globalPayMethod').value;
+                    const trxId = document.getElementById('globalPayTrxId').value;
+                    const token = localStorage.getItem('farmer_jwt');
+                    
+                    btn.textContent = 'সাবমিট হচ্ছে...'; btn.disabled = true;
+                    msg.textContent = ''; msg.style.color = '#10b981';
+                    
+                    const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+                    try {
+                        const res = await fetch(API_URL + '/api/auth/submit-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ payment_method: method, trx_id: trxId, amount_paid: 499 })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            msg.textContent = data.message;
+                            globalPaymentForm.reset();
+                            setTimeout(() => { window.closePaywallModal(); }, 3000);
+                        } else {
+                            msg.style.color = '#e2136e';
+                            msg.textContent = data.error || 'পেমেন্ট সাবমিট করতে সমস্যা হয়েছে';
+                        }
+                    } catch(err) {
+                        msg.style.color = '#e2136e';
+                        msg.textContent = 'নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।';
+                    } finally {
+                        btn.textContent = 'পেমেন্ট সাবমিট করুন'; btn.disabled = false;
+                    }
+                });
+            }
+            
+            // Fetch Payment Settings
+            const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+            fetch(API_URL + '/api/payment-settings')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.data) {
+                        const bkashEl = document.getElementById('globalInstructionBkashNumber');
+                        const nagadEl = document.getElementById('globalInstructionNagadNumber');
+                        if (bkashEl && d.data.bkash) {
+                            bkashEl.textContent = 'বিকাশ: ' + d.data.bkash;
+                        }
+                        if (nagadEl && d.data.nagad) {
+                            nagadEl.style.display = 'block';
+                            nagadEl.textContent = 'নগদ: ' + d.data.nagad;
+                        }
+                    }
+                })
+                .catch(e => console.error('Failed to fetch payment settings:', e));
+                
+        }, 100);
+
+        // Add minimal CSS for active state just in case
+        if(!document.getElementById('paywall-css')){
+            const style = document.createElement('style');
+            style.id = 'paywall-css';
+            style.innerHTML = `
+                #global-paywall-modal { display: none; }
+                #global-paywall-modal.active { display: flex; }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    
+    document.getElementById('paywallFeatureName').innerText = featureName;
+    modal.classList.add('active');
+}
+
+window.closePaywallModal = function () {
+    const modal = document.getElementById('global-paywall-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Global Error Handler to seamlessly trigger Paywall
+window.handleApiError = function (errorData, featureName) {
+    if (errorData.error && (errorData.error.toLowerCase().includes('payment required') || errorData.error.toLowerCase().includes('limit exceeded') || errorData.error.toLowerCase().includes('limit reached'))) {
+        window.showPaywallModal(featureName);
+    } else {
+        window.showToast(errorData.error || 'একটি ত্রুটি হয়েছে। আবার চেষ্টা করুন।');
+    }
+}

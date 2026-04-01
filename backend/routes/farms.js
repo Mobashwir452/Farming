@@ -10,6 +10,15 @@ export const createFarm = async (request, env) => {
 
         const farmerId = request.user.id;
 
+        // Limit Check
+        const farmerInfo = await env.DB.prepare("SELECT subscription_status FROM farmers WHERE id = ?").bind(farmerId).first();
+        if (farmerInfo && farmerInfo.subscription_status !== 'pro') {
+            const countRes = await env.DB.prepare("SELECT COUNT(id) as total FROM farms WHERE farmer_id = ?").bind(farmerId).first();
+            if (countRes && countRes.total >= 5) {
+                return Response.json({ success: false, error: 'Maximum land limit (5) reached. Please upgrade to Pro.' }, { status: 402 });
+            }
+        }
+
         const insertQuery = `
             INSERT INTO farms (farmer_id, name, area_shotangsho, location, lat, lng, map_coordinates) 
             VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id;

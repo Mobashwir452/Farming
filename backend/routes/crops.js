@@ -9,6 +9,19 @@ export const saveCropTimeline = async (request, env) => {
             return Response.json({ success: false, error: 'Unauthorized farm access' }, { status: 403 });
         }
 
+        // --- Subscription & Limit Check ---
+        if (body.is_ai_generated) {
+            const farmerInfo = await env.DB.prepare("SELECT subscription_status, remaining_timelines FROM farmers WHERE id = ?").bind(farmerId).first();
+            if (farmerInfo && farmerInfo.subscription_status !== 'pro') {
+                if (farmerInfo.remaining_timelines <= 0) {
+                    return Response.json({ success: false, error: 'Limit reached. Please upgrade to Pro.' }, { status: 402 });
+                }
+                // Deduct 1 limit
+                await env.DB.prepare("UPDATE farmers SET remaining_timelines = remaining_timelines - 1 WHERE id = ?").bind(farmerId).run();
+            }
+        }
+        // ----------------------------------
+
         // Handle Image Upload to Cloudflare R2 if provided
         let r2Key = null;
         if (body.base64_image) {
