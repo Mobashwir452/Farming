@@ -119,7 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const BASE_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
         try {
-            const response = await fetch(`${BASE_URL}/api/public/crop-scans?limit=10`, {
+            const urlParams = new URLSearchParams(window.location.search);
+            const farmId = urlParams.get('farm_id');
+            const cropId = urlParams.get('crop_id');
+            let fetchUrl = `${BASE_URL}/api/public/crop-scans?limit=10`;
+            if (farmId) fetchUrl += `&farm_id=${farmId}`;
+            if (cropId) fetchUrl += `&crop_id=${cropId}`;
+
+            const response = await fetch(fetchUrl, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -190,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedLandValue = landSelect.value;
         const token = localStorage.getItem('farmer_jwt');
         const BASE_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+        const urlParams = new URLSearchParams(window.location.search);
+        const passedCropId = urlParams.get('crop_id');
 
         try {
             const response = await fetch(`${BASE_URL}/api/public/crop-scan`, {
@@ -201,7 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     imageBase64: imageUrl,
                     compressedBase64: compressedUrl || imageUrl,
-                    farmId: selectedLandValue || null
+                    farmId: selectedLandValue || null,
+                    cropId: passedCropId || null
                 })
             });
 

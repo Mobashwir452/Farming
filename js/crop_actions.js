@@ -90,41 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) { alert('Connection error adding note: ' + e.message); }
     };
 
-    window.handleMarkCropCompleted = async function() {
-        if(!confirm('আপনি কি নিশ্চিত যে এই ফসলটি সম্পূর্ণ/কাটা হয়েছে? (ইহা ইতিহাস সেকশনে চলে যাবে)')) return;
-        
-        try {
-            const token = localStorage.getItem('farmer_jwt');
-            const res = await fetch(`${CROP_API_URL}/api/crops/${activeCrop.id}/complete`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if(data.success) {
-                alert('ফসলটি সফলভাবে সম্পন্ন হিসেবে মার্ক করা হয়েছে!');
-                closeCropActionModals();
-                window.location.reload(); 
-            } else alert(data.error);
-        } catch(e) { alert('Connection error'); }
-    };
-
-    window.handleDeleteCrop = async function() {
-        if(!confirm('সতর্কতা: আপনি কি সম্পূর্ণ ফসলটি মুছে ফেলতে চান? এই ডেটা আর ফিরে পাওয়া যাবে না!')) return;
-        
-        try {
-            const token = localStorage.getItem('farmer_jwt');
-            const res = await fetch(`${CROP_API_URL}/api/crops/${activeCrop.id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if(data.success) {
-                alert('ফসলটি ডাটাবেস থেকে রিমুভ করা হয়েছে।');
-                closeCropActionModals();
-                window.location.href = 'khamar.html';
-            } else alert(data.error);
-        } catch(e) { alert('Connection error'); }
-    };
 
     window.generateCropReport = async function() {
         if(!activeCrop) return;

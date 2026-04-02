@@ -191,3 +191,36 @@ export const getUserTransactions = async (request, env) => {
     }
 };
 
+// GET /api/admin/users/:id/farms/:farmId
+export const getAdminFarmDetails = async (request, env) => {
+    try {
+        const farmerId = request.params.id;
+        const farmId = request.params.farmId;
+
+        const farmQuery = `SELECT * FROM farms WHERE id = ? AND farmer_id = ?`;
+        const farm = await env.DB.prepare(farmQuery).bind(farmId, farmerId).first();
+
+        if (!farm) return error(404, 'Land not found');
+
+        const cropsQuery = `
+            SELECT c.*, 
+            (SELECT COUNT(*) FROM crop_scans cs WHERE cs.farm_id = c.farm_id) as scan_count
+            FROM crops c 
+            WHERE c.farm_id = ? 
+            ORDER BY c.created_at DESC
+        `;
+        const { results: crops } = await env.DB.prepare(cropsQuery).bind(farmId).all();
+
+        const txQuery = `SELECT * FROM transactions WHERE farm_id = ? AND farmer_id = ? ORDER BY transaction_date DESC`;
+        const { results: transactions } = await env.DB.prepare(txQuery).bind(farmId, farmerId).all();
+
+        return json({
+            success: true,
+            farm,
+            crops,
+            transactions
+        });
+    } catch (err) {
+        return error(500, 'Server Error: ' + err.message);
+    }
+};

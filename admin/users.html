@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="css/admin-users.css">
     <script src="js/rbac.js"></script>
 </head>
+
 <body class="admin-layout">
 
     <!-- Sidebar Injected Here -->
@@ -21,12 +23,15 @@
             <!-- Page Title Area -->
             <div class="users-header">
                 <div>
-                    <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">ইউজার ও ফার্মার</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; margin: 0;">সিস্টেমের সকল নিবন্ধিত কৃষকদের তালিকা ও প্রোফাইল</p>
+                    <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">ইউজার ও
+                        ফার্মার</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 0;">সিস্টেমের সকল নিবন্ধিত কৃষকদের
+                        তালিকা ও প্রোফাইল</p>
                 </div>
-            <div class="users-controls">
+                <div class="users-controls">
                     <div class="search-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
@@ -60,9 +65,10 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Pagination -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
                     <span id="paginationInfo" style="font-size: 13px; color: var(--text-muted);">০টি দেখাচ্ছে</span>
                     <div id="paginationControls" style="display: flex; gap: 8px;">
                         <!-- JS Pagination -->
@@ -81,14 +87,22 @@
             <div class="panel-title-area">
                 <img src="https://i.pravatar.cc/150?img=33" alt="Avatar" class="user-avatar-large">
                 <div class="panel-title">
-                    <h2>আব্দুর রহিম 
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="fill: #EFF6FF;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <h2>আব্দুর রহিম
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" style="fill: #EFF6FF;">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
                     </h2>
                     <p>+880 1712***890 • জয়েন: ১২ ডিসে ২০২৫</p>
                 </div>
             </div>
             <button class="btn-close-panel" onclick="closeUserPanel()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
         </div>
 
@@ -103,7 +117,7 @@
 
         <!-- Panel Body Content -->
         <div class="panel-content">
-            
+
             <!-- OVERVIEW TAB -->
             <div class="tab-pane active" id="tab-overview">
                 <!-- Data Grids -->
@@ -137,15 +151,31 @@
                 <!-- Admin Action Buttons inside Overview -->
                 <div class="action-row">
                     <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
                         এডিট প্রোফাইল
                     </button>
-                    <button class="btn-outline-primary" style="display: flex; align-items: center; gap: 8px; color: #8B5CF6; border-color: #8B5CF6;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <button class="btn-outline-primary"
+                        style="display: flex; align-items: center; gap: 8px; color: #8B5CF6; border-color: #8B5CF6;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                            </path>
+                        </svg>
                         আপগ্রেড প্ল্যান
                     </button>
-                    <button class="btn-outline-primary" style="display: flex; align-items: center; gap: 8px; color: var(--danger); border-color: var(--danger); margin-left: auto;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    <button class="btn-outline-primary"
+                        style="display: flex; align-items: center; gap: 8px; color: var(--danger); border-color: var(--danger); margin-left: auto;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
                         সাসপেন্ড অ্যাকাউন্ট
                     </button>
                 </div>
@@ -154,30 +184,41 @@
             <!-- LANDS & CROPS TAB -->
             <div class="tab-pane" id="tab-lands">
                 <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                         <div>
                             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">বাড়ির পেছনের জমি</h3>
                             <p style="font-size: 13px; color: var(--text-muted);">আয়তন: ২.০ শতাংশ</p>
                         </div>
                         <span class="badge badge-active">বোরো ধান</span>
                     </div>
-                    <div style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
-                        <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800&h=300" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
-                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">GPS: 24.8456, 89.3662</div>
+                    <div
+                        style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
+                        <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800&h=300"
+                            style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        <div
+                            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                            GPS: 24.8456, 89.3662</div>
                     </div>
                 </div>
 
                 <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                         <div>
                             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">পুকুর পাড়ের জমি</h3>
                             <p style="font-size: 13px; color: var(--text-muted);">আয়তন: ২.৫ শতাংশ</p>
                         </div>
-                        <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">আলু</span>
+                        <span class="badge"
+                            style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">আলু</span>
                     </div>
-                    <div style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
-                        <img src="https://images.unsplash.com/photo-1595844784411-eb6ac3014aef?auto=format&fit=crop&q=80&w=800&h=300" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
-                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">GPS: 24.8421, 89.3610</div>
+                    <div
+                        style="width: 100%; height: 120px; background: #e2e8f0; border-radius: 8px; position: relative; overflow: hidden;">
+                        <img src="https://images.unsplash.com/photo-1595844784411-eb6ac3014aef?auto=format&fit=crop&q=80&w=800&h=300"
+                            style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        <div
+                            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                            GPS: 24.8421, 89.3610</div>
                     </div>
                 </div>
             </div>
@@ -191,13 +232,15 @@
                             <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">সব খামার মিলিয়ে</p>
                         </div>
                         <div style="text-align: right;">
-                            <div id="financialNet" style="font-size: 20px; font-weight: 700; color: var(--primary);">৳ ০</div>
+                            <div id="financialNet" style="font-size: 20px; font-weight: 700; color: var(--primary);">৳ ০
+                            </div>
                         </div>
                     </div>
                     <div class="financial-stats">
                         <div class="f-stat expense">
                             <label style="font-size: 12px; color: var(--text-muted);">মোট খরচ</label>
-                            <span id="financialExpense" class="val" style="font-size: 16px; font-weight: 600;">৳ ০</span>
+                            <span id="financialExpense" class="val" style="font-size: 16px; font-weight: 600;">৳
+                                ০</span>
                         </div>
                         <div class="f-stat profit">
                             <label style="font-size: 12px; color: var(--text-muted);">মোট আয়</label>
@@ -206,8 +249,10 @@
                     </div>
                 </div>
 
-                <h4 style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin: 24px 0 12px 0;">ট্রানজেকশন হিস্ট্রি</h4>
-                <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; max-height: 350px; overflow-y: auto;">
+                <h4 style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin: 24px 0 12px 0;">
+                    ট্রানজেকশন হিস্ট্রি</h4>
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; max-height: 350px; overflow-y: auto;">
                     <table style="margin: 0; width: 100%;">
                         <thead style="background: #F8FAFC; position: sticky; top: 0;">
                             <tr>
@@ -222,8 +267,10 @@
                     </table>
                 </div>
                 <div style="text-align: center; margin-top: 12px;">
-                    <button id="loadMoreTxsBtn" class="btn-outline-primary" style="display: none; font-size: 12px; padding: 6px 16px;">আরও লোড করুন</button>
-                    <div id="txsLoading" style="display: none; font-size: 12px; color: var(--text-muted);">লোড হচ্ছে...</div>
+                    <button id="loadMoreTxsBtn" class="btn-outline-primary"
+                        style="display: none; font-size: 12px; padding: 6px 16px;">আরও লোড করুন</button>
+                    <div id="txsLoading" style="display: none; font-size: 12px; color: var(--text-muted);">লোড হচ্ছে...
+                    </div>
                 </div>
             </div>
 
@@ -238,7 +285,8 @@
 
                 <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); margin-bottom: 0px;">
                     <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 16px;">সাম্প্রতিক অ্যাক্টিভিটি লগ</h4>
-                    <ul id="activityList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                    <ul id="activityList"
+                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
                         <!-- Dynamic Logs -->
                     </ul>
                 </div>
@@ -246,27 +294,50 @@
 
             <!-- SECURITY TAB -->
             <div class="tab-pane" id="tab-security">
-                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px; background: #FEF2F2;">
-                    <div style="width: 40px; height: 40px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--danger); flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <div class="card"
+                    style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px; background: #FEF2F2;">
+                    <div
+                        style="width: 40px; height: 40px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--danger); flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 600; color: #991B1B; margin-bottom: 4px;">পিন ও লগইন এক্সেস ক্লিয়ার করুন</h3>
-                        <p style="font-size: 13px; color: #B91C1C; margin-bottom: 16px; line-height: 1.4;">খামারী যদি তার লগিন পিন ভুলে যায়, তবে অ্যাডমিন ডাটাবেস থেকে পিন মুছে দিতে পারেন। এতে করে কৃষক তার মোবাইল নম্বরে সাধারণ Firebase OTP এর সাহায্যে ভেরিফাই করে নিজে থেকেই বিনামূল্যে নতুন পিন সেট করে নিতে পারবেন।</p>
-                        <button id="clearPinBtn" class="btn-primary" style="background: var(--danger); display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 16px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
+                        <h3 style="font-size: 15px; font-weight: 600; color: #991B1B; margin-bottom: 4px;">পিন ও লগইন
+                            এক্সেস ক্লিয়ার করুন</h3>
+                        <p style="font-size: 13px; color: #B91C1C; margin-bottom: 16px; line-height: 1.4;">খামারী যদি
+                            তার লগিন পিন ভুলে যায়, তবে অ্যাডমিন ডাটাবেস থেকে পিন মুছে দিতে পারেন। এতে করে কৃষক তার
+                            মোবাইল নম্বরে সাধারণ Firebase OTP এর সাহায্যে ভেরিফাই করে নিজে থেকেই বিনামূল্যে নতুন পিন সেট
+                            করে নিতে পারবেন।</p>
+                        <button id="clearPinBtn" class="btn-primary"
+                            style="background: var(--danger); display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 16px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2.5 2v6h6M21.5 22v-6h-6" />
+                                <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2" />
+                            </svg>
                             পিন კ্লিয়ার করুন
                         </button>
                     </div>
                 </div>
 
-                <div class="card" style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px;">
-                     <div style="width: 40px; height: 40px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div class="card"
+                    style="box-shadow: none; border: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 16px;">
+                    <div
+                        style="width: 40px; height: 40px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #475569; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">ম্যানুয়াল NID ভেরিফিকেশন পেমেন্ট</h3>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">যদি অটোমেটিক NID সার্ভার কাজ না করে, অ্যাডমিন চাইলে ম্যানুয়ালি ইউজারের পরিচয়পত্র ভেরিফাই করে অ্যাপ্রুভ করতে পারেন।</p>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
+                            ম্যানুয়াল NID ভেরিফিকেশন পেমেন্ট</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">যদি
+                            অটোমেটিক NID সার্ভার কাজ না করে, অ্যাডমিন চাইলে ম্যানুয়ালি ইউজারের পরিচয়পত্র ভেরিফাই করে
+                            অ্যাপ্রুভ করতে পারেন।</p>
                         <button class="btn-outline-primary" style="font-size: 13px; padding: 10px 16px;" disabled>
                             ব্যবহারকারী ইতিমধ্যে ভেরিফাইড
                         </button>
@@ -274,6 +345,72 @@
                 </div>
             </div>
 
+        </div>
+    </aside>
+
+    <!-- Land Details Slide-over Panel (Stacked on top) -->
+    <div class="user-panel-overlay" id="landDrawerOverlay" style="z-index: 10002;" onclick="closeAdminLandDrawer()">
+    </div>
+    <aside class="user-panel" id="landDrawer" style="z-index: 10003;">
+        <!-- Panel Header -->
+        <div class="panel-header" id="dynamicAdminLandHeader"
+            style="border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 0px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- LEVEL 1: Land View -->
+        <div id="pane-land-level" style="display: block; height: calc(100% - 85px); overflow-y: auto;">
+            <div id="landDrawerLoader" style="padding: 40px 0; text-align: center; color: var(--text-muted);">
+                লোড হচ্ছে...
+            </div>
+            <div id="adminLandLevelContent" style="display: none; padding: 0 24px 24px 24px;">
+                <!-- Land-Level Overview Rendered Here -->
+            </div>
+        </div>
+
+        <!-- LEVEL 2: Crop View -->
+        <div id="pane-crop-level" style="display: none; height: calc(100% - 85px); flex-direction: column;">
+
+
+            <!-- Panel Tabs (Crop Drawer) -->
+            <div class="panel-tabs"
+                style="border-bottom: 1px solid var(--border-color); display: flex; overflow-x: auto; gap: 8px; padding: 12px 24px 0 24px; flex-shrink: 0;">
+                <button class="tab-btn active" onclick="switchAdminLandTab('admin-land-tab-overview', this)"
+                    style="white-space: nowrap; padding: 8px 12px; font-size: 13px;">ওভারভিউ</button>
+                <button class="tab-btn" onclick="switchAdminLandTab('admin-land-tab-guideline', this)"
+                    style="white-space: nowrap; padding: 8px 12px; font-size: 13px;">নির্দেশিকা</button>
+                <button class="tab-btn" onclick="switchAdminLandTab('admin-land-tab-tasks', this)"
+                    style="white-space: nowrap; padding: 8px 12px; font-size: 13px;">কাজের ক্যালেন্ডার</button>
+                <button class="tab-btn" onclick="switchAdminLandTab('admin-land-tab-resources', this)"
+                    style="white-space: nowrap; padding: 8px 12px; font-size: 13px;">রিসোর্স</button>
+                <button class="tab-btn" onclick="switchAdminLandTab('admin-land-tab-finance', this)"
+                    style="white-space: nowrap; padding: 8px 12px; font-size: 13px;">আয়-ব্যয়</button>
+            </div>
+
+            <div class="panel-content" style="padding: 24px; flex-grow: 1; overflow-y: auto;">
+                <div id="adminCropLevelContent">
+                    <!-- Tab Panes -->
+                    <div class="admin-land-pane active" id="admin-land-tab-overview" style="display: block;">
+                        <div id="render-admin-overview"></div>
+                    </div>
+
+                    <div class="admin-land-pane" id="admin-land-tab-guideline" style="display: none;">
+                        <div id="modal-guideline-content"></div>
+                    </div>
+
+                    <div class="admin-land-pane" id="admin-land-tab-tasks" style="display: none;">
+                        <div id="render-tasks"></div>
+                    </div>
+
+                    <div class="admin-land-pane" id="admin-land-tab-resources" style="display: none;">
+                        <div id="render-resources"></div>
+                    </div>
+
+                    <div class="admin-land-pane" id="admin-land-tab-finance" style="display: none;">
+                        <div id="render-finance"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -286,7 +423,7 @@
                 const navItems = document.querySelectorAll('.nav-item');
                 navItems.forEach(item => {
                     item.classList.remove('active');
-                    if(item.textContent.trim() === 'ইউজার ও ফার্মার') {
+                    if (item.textContent.trim() === 'ইউজার ও ফার্মার') {
                         item.classList.add('active');
                     }
                 });
@@ -325,7 +462,7 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             // Remove active from all panes
             document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-            
+
             if (btnElement) {
                 btnElement.classList.add('active');
             } else if (event && event.target) {
@@ -340,4 +477,5 @@
         }
     </script>
 </body>
+
 </html>

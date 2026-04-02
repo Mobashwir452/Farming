@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS crop_scans (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     farm_id INTEGER,
+    crop_id INTEGER,
     image_url TEXT,
     disease_name_bn TEXT,
     disease_name_en TEXT,

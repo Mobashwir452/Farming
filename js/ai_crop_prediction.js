@@ -245,9 +245,15 @@ window.acceptAITimeline = function () {
     }
 
     try { 
-        const finalCropSaveName = (currentVarietyName && currentVarietyName !== currentCropName)
-            ? `${currentCropName} (${currentVarietyName})`
-            : currentCropName;
+        let finalCropSaveName = currentCropName;
+        if (currentVarietyName && currentVarietyName !== currentCropName) {
+            // Prevent double stacking like "পেঁপে (পেঁপে (টপ লেডি))"
+            if (currentVarietyName.includes(currentCropName)) {
+                finalCropSaveName = `${currentVarietyName}`;
+            } else {
+                finalCropSaveName = `${currentCropName} (${currentVarietyName})`;
+            }
+        }
 
         const payload = {
             farm_id: currentFarmId,

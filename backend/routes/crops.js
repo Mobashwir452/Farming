@@ -153,6 +153,18 @@ export const updateCropState = async (request, env) => {
             updates.push('notes_json = ?');
             params.push(body.notes_json);
         }
+        if (body.initial_plant_count !== undefined) {
+            updates.push('initial_plant_count = ?');
+            params.push(body.initial_plant_count);
+        }
+        if (body.loss_events_json !== undefined) {
+            updates.push('loss_events_json = ?');
+            params.push(body.loss_events_json);
+        }
+        if (body.planted_date !== undefined) {
+            updates.push('planted_date = ?');
+            params.push(body.planted_date);
+        }
         
         if (updates.length > 0) {
             params.push(cropId);
@@ -190,11 +202,18 @@ export const completeCrop = async (request, env) => {
     try {
         const cropId = request.params.id;
         const farmerId = request.user.id;
+        const bodyObj = await request.json().catch(() => ({}));
         
         const check = await env.DB.prepare("SELECT c.id FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
         if (!check) return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
 
-        await env.DB.prepare("UPDATE crops SET status = 'Harvested' WHERE id = ?").bind(cropId).run();
+        let sql = "UPDATE crops SET status = ?, yield_amount_kg = yield_amount_kg + ?, harvest_notes = COALESCE(harvest_notes, '') || ? WHERE id = ?";
+        
+        const finalStatus = bodyObj.status || 'Harvested';
+        const addedYield = parseFloat(bodyObj.yield_amount_kg) || 0;
+        const addNotes = bodyObj.harvest_notes ? `\n[${new Date().toISOString().split('T')[0]}] ${bodyObj.harvest_notes}` : '';
+
+        await env.DB.prepare(sql).bind(finalStatus, addedYield, addNotes, cropId).run();
         
         return Response.json({ success: true, message: 'Crop marked as complete' });
     } catch(e) {

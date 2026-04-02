@@ -249,10 +249,30 @@ window.saveGpsLand = async function (event) {
     btn.disabled = true;
 
     try {
+        let finalLocationString = 'GPS Auto Mapping'; // Generic fallback
+        
+        // Attempt Reverse Geocoding via Nominatim
+        if (window.currentLat && window.currentLng) {
+            try {
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${window.currentLat}&lon=${window.currentLng}&format=json&accept-language=bn`);
+                const geoData = await geoRes.json();
+                if (geoData && geoData.address) {
+                    const district = geoData.address.state_district || geoData.address.county || geoData.address.city || geoData.address.state || '';
+                    const sub_district = geoData.address.suburb || geoData.address.town || geoData.address.village || '';
+                    const fullLoc = [sub_district, district].filter(Boolean).join(', ');
+                    if (fullLoc) {
+                        finalLocationString = fullLoc;
+                    }
+                }
+            } catch (err) {
+                console.warn("Failed to fetch accurate GPS location name, using fallback.", err);
+            }
+        }
+
         const payload = { 
             name: name, 
             area_shotangsho: area, 
-            location: 'GPS Auto Mapping', // Generic fallback
+            location: finalLocationString,
             lat: window.currentLat,
             lng: window.currentLng,
             map_coordinates: JSON.stringify(window.walkedCoordinates)

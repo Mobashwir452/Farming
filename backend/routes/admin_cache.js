@@ -14,8 +14,24 @@ export const getAdminCache = async (request, env) => {
 
         if (!cropKey || !varietyKey) return error(400, "Crop and Variety parameters are both required");
 
-        const cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name = ?")
+        // 1. Exact Match
+        let cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name = ?")
             .bind(cropKey, varietyKey).first();
+
+        // 2. Fallback: Like match in DB (e.g., DB has 'পেঁপে (টপ লেডি)' but request is 'টপ লেডি')
+        if (!cache) {
+            cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name LIKE ? ORDER BY expires_at DESC LIMIT 1")
+                .bind(cropKey, `%${varietyKey}%`).first();
+        }
+
+        // 3. Fallback: Request has 'পেঁপে (টপ লেডি)' but DB has 'টপ লেডি'
+        if (!cache && varietyKey.includes(cropKey)) {
+             const cleanVariety = varietyKey.replace(cropKey, '').replace(/[()]/g, '').trim();
+             if (cleanVariety.length > 2) {
+                 cache = await env.DB.prepare("SELECT * FROM ai_timeline_cache WHERE crop_name = ? AND variety_name LIKE ? ORDER BY expires_at DESC LIMIT 1")
+                     .bind(cropKey, `%${cleanVariety}%`).first();
+             }
+        }
 
         return json({ success: true, cache });
     } catch (e) {
@@ -90,11 +106,11 @@ export const generateAdminCacheAI = async (request, env) => {
                 const existingVarieties = await env.DB.prepare("SELECT variety_name FROM crops_master_data WHERE crop_name LIKE ? OR variety_name LIKE ?").bind(`%${cropName}%`, `%${varietyName}%`).all();
                 const names = (existingVarieties.results || []).map(r => r.variety_name);
                 exclusionListStr = JSON.stringify(names);
-            } catch(e) { console.error("Exclusion list error:", e); }
+            } catch (e) { console.error("Exclusion list error:", e); }
         }
 
-        const aiData = await generateCropData(env, cropName, varietyName, { 
-            govtContext, 
+        const aiData = await generateCropData(env, cropName, varietyName, {
+            govtContext,
             featureType: 'admin_cache',
             isNewVarietySearch: !!body.is_new_discovery,
             exclusionListStr
@@ -126,11 +142,11 @@ export const generateAdminCacheAI = async (request, env) => {
 
         // Admin quick AI generate feature - insert into Pending AI!
         if (body.is_new_discovery) {
-             const existing = await env.DB.prepare("SELECT id FROM crops_master_data WHERE crop_name = ? AND variety_name = ?").bind(finalCropName, finalVarietyName).first();
-             if (!existing) {
-                 await env.DB.prepare("INSERT INTO crops_master_data (crop_category, crop_name, variety_name, base_yield_per_shotangsho_kg, avg_duration_days, verified_status) VALUES (?, ?, ?, ?, ?, 0)")
+            const existing = await env.DB.prepare("SELECT id FROM crops_master_data WHERE crop_name = ? AND variety_name = ?").bind(finalCropName, finalVarietyName).first();
+            if (!existing) {
+                await env.DB.prepare("INSERT INTO crops_master_data (crop_category, crop_name, variety_name, base_yield_per_shotangsho_kg, avg_duration_days, verified_status) VALUES (?, ?, ?, ?, ?, 0)")
                     .bind('Uncategorized', finalCropName, finalVarietyName, 0, 0).run().catch(e => { console.error("Admin AI quick add error:", e); });
-             }
+            }
         }
 
         return json({ success: true, message: 'AI Generated and Cached' });

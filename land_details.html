@@ -41,9 +41,9 @@
 
         <!-- Top Navigation Header -->
         <div class="page-top-header"
-            style="justify-content: space-between; align-items: center; padding-right: 16px; flex-wrap: nowrap; gap: 8px;">
+            style="justify-content: space-between; align-items: center; padding: 12px 16px; flex-wrap: nowrap; gap: 8px;">
             <!-- Left: Back Button & Title -->
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                 <button class="back-btn" onclick="window.location.href='khamar.html'" aria-label="Go Back"
                     style="flex-shrink: 0;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -52,109 +52,133 @@
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
                 </button>
-                <h2 style="white-space: normal; line-height: 1.2; font-size: 16px;">লোড হচ্ছে...</h2>
+                <div style="min-width: 0;">
+                    <h2 id="farmNamePill" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; font-size: 16px; margin: 0; font-weight: 700; color: var(--text-dark);">লোড হচ্ছে...</h2>
+                    <span id="farmAreaPill" style="display: block; font-size: 11px; font-weight: 500; color: #64748B; margin-top: 2px;">-- শতাংশ</span>
+                </div>
             </div>
             
-            <!-- Right: Guideline Button -->
-            <button onclick="document.getElementById('aiGuidelineModal').classList.add('active'); document.body.style.overflow='hidden';"
-                style="display: flex; align-items: center; gap: 4px; background: #E0F2FE; color: #0284C7; border: none; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-                নির্দেশিকা
-            </button>
+            <!-- Right: History Button -->
+            <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                <button id="btnLandHistory" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F8FAFC; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>ইতিহাস</span>
+                </button>
+            </div>
         </div>
 
         <div class="ld-sections land-details-container">
             <!-- 1. Overview Card -->
-            <div class="ld-card">
-                <div class="ld-card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            style="color: var(--primary);">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                        লোড হচ্ছে...
-                    </h3>
-                    <button id="btnLandHistory"
-                        style="display: flex; align-items: center; gap: 4px; background: white; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <!-- 1. Unified Dashboard Hero -->
+            <div class="ld-card" style="padding: 16px;">
+                <!-- Slim Top Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="heroFarmArea" style="font-size: 13px; background: #E2E8F0; color: #475569; padding: 4px 10px; border-radius: 12px; font-weight: 600;">-- শতাংশ</span>
+                    </div>
+                    <button onclick="document.getElementById('aiGuidelineModal').classList.add('active'); document.body.style.overflow='hidden';"
+                        style="display: flex; align-items: center; gap: 6px; background: #ECFDF5; color: #047857; border: 1px solid #D1FAE5; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
                         </svg>
-                        ইতিহাস
+                        নির্দেশিকা
                     </button>
-                </div>
-                <div class="ld-overview-grid">
-                    <div class="ld-info-box">
-                        <span class="ld-info-label">আয়তন</span>
-                        <span class="ld-info-value">-- শতাংশ</span>
-                    </div>
-                    <div class="ld-info-box">
-                        <span class="ld-info-label">সর্বমোট লাভ/ক্ষতি</span>
-                        <span class="ld-info-value" id="current-profit-display" style="color: var(--primary-dark);">৳
-                            ০</span>
-                    </div>
-                    <!-- New Plant Count tracking snippet -->
-                    <div class="ld-info-box"
-                        style="grid-column: span 2; background: #FFFBEB; border: 1px dashed #FCD34D;">
-                        <span class="ld-info-label" style="display: flex; justify-content: space-between;">
-                            <span>🌱 বর্তমান গাছ/চারা</span>
-                            <span style="color: #EF4444; font-weight: 600; font-size: 13px;">- ০ টি নষ্ট</span>
-                        </span>
-                        <span class="ld-info-value" style="color: #B45309; font-size: 17px;">-- <span
-                                style="font-size: 13px; font-weight: 500; color: #D97706;">(প্রাথমিক:
-                                --)</span></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. AI Smart Crop Profile -->
-            <div class="ld-card">
-                <div class="ld-card-header" style="justify-content: space-between;">
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <h3>বর্তমান ফসল</h3>
-                        <span
-                            style="font-size: 11px; font-weight: 700; color: var(--primary-dark); background: var(--primary-light); padding: 4px 10px; border-radius: 12px;">এআই
-                            সুপারভাইজড</span>
-                    </div>
-                    <button id="cropActionBtn"
-                        style="background: none; border: none; padding: 4px; cursor: pointer; color: var(--text-muted);"
-                        onclick="openCropActionSheet()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="2"></circle>
-                            <circle cx="12" cy="5" r="2"></circle>
-                            <circle cx="12" cy="19" r="2"></circle>
-                        </svg>
-                    </button>
+                    <!-- Hidden elements so JS does not fail -->
+                    <h3 id="heroFarmName" style="display:none;"></h3>
+                    <div id="current-profit-display" style="display:none;"></div>
                 </div>
 
-                <div class="ld-crop-profile">
-                    <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=200&h=200"
-                        alt="Boro Paddy" class="ld-crop-img">
-                    <div class="ld-crop-text">
-                        <h4>ফসল লোড হচ্ছে...</h4>
-                        <p>রোপণের বয়স: <strong>--</strong></p>
-                        <p style="margin-top: 4px;">অবস্থা: <span
-                                style="color: var(--primary-dark); font-weight: 600;">লোড হচ্ছে...</span></p>
+                <!-- Hero Crop Profile -->
+                <div class="ld-crop-profile" style="align-items: center; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0; border-left: 4px solid var(--primary);">
+                    <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=200&h=200" alt="Crop" class="ld-crop-img" style="width: 50px; height: 50px; border-radius: 8px;">
+                    <div class="ld-crop-text" style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px;">
+                            <h4 style="font-size: 15px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">ফসল লোড হচ্ছে...</h4>
+                            <button onclick="openCropActionSheet()" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-label="Menu">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+                            </button>
+                        </div>
+                        <div style="font-size: 12px; margin: 0; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span class="crop-age-display">বয়স: <strong>--</strong></span>
+                            </div>
+                            <span style="font-weight: 600;" class="crop-status-display">লোড হচ্ছে...</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Financial Snapshot -->
-                <div class="ld-finance-row">
-                    <div class="ld-finance-item">
-                        <span class="ld-info-label">মোট খরচ</span>
-                        <span class="ld-info-value" id="current-cost-display">৳ ০</span>
+                <!-- 2. Smart Planting Flow UI -->
+
+
+                <!-- State B: Post-Plant Meta -->
+                <div id="plantCountContainer" style="display: none; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 12px; margin-top: 16px;">
+                    <span class="ld-info-label" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #065F46; font-size: 13px; font-weight: 600;">🌱 রোপণকৃত পরিমাণ</span>
+                        <span style="color: #EF4444; font-weight: 600; font-size: 12px;">- <span id="plantLossSpan">০ টি নষ্ট</span></span>
+                    </span>
+                    <div class="ld-info-value" style="color: #047857; font-size: 16px; margin-top: 4px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><span id="currentPlantSpan" style="font-weight: 700;">--</span> <span style="font-size: 12px; font-weight: 500; color: #059669;">(প্রাথমিক: <span id="initialPlantSpan">--</span>)</span></div>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="promptPlantCount()" style="background: #D1FAE5; border: 1px solid #A7F3D0; padding: 6px; border-radius:8px; color: #047857; cursor: pointer; display: flex; align-items:center; justify-content:center;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button id="cropActionBtn" style="background: white; border: 1px solid #A7F3D0; padding: 6px; border-radius: 8px; color: #047857; cursor: pointer; display: flex; align-items:center; justify-content:center;" onclick="openCropActionSheet()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                    <circle cx="12" cy="6" r="2"></circle>
+                                    <circle cx="12" cy="18" r="2"></circle>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="ld-finance-item profit">
-                        <span class="ld-info-label">প্রজেক্টেড আয়</span>
-                        <span class="ld-info-value" id="current-rev-display">৳ ০</span>
+                </div>
+                
+                <!-- 3. Premium Bento Grid Actions (Moved inside Hero Card) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px;">
+                    <!-- Action 1: AI Scan -->
+                    <div id="btnDisease" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">এআই স্ক্যান</div>
+                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">রোগ নির্ণয় ও পরামর্শ</div>
+                        </div>
+                    </div>
+
+                    <!-- Action 2: Finance -->
+                    <div id="btnFinance" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">আয়-ব্যয়</div>
+                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">সকল হিসাবপত্র</div>
+                        </div>
+                    </div>
+
+                    <!-- Action 3: Loss -->
+                    <div onclick="document.getElementById('lossModal').classList.add('active'); document.body.style.overflow='hidden';" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">ক্ষয়ক্ষতি</div>
+                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">লগ এন্ট্রি করুন</div>
+                        </div>
+                    </div>
+
+                    <!-- Action 4: Harvest -->
+                    <div id="btnHarvest" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">ফসল কর্তন</div>
+                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">কাজ সমাপ্ত করুন</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,64 +228,10 @@
                 </div>
             </div>
 
-            <!-- 4. Quick Actions -->
-            <div class="ld-actions-grid">
-                <div class="ld-action-btn" id="btnDisease">
-                    <div class="ld-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
-                            </path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                    </div>
-                    <span class="ld-action-label">রোগ নির্ণয়</span>
-                </div>
 
-                <div class="ld-action-btn" id="btnFinance">
-                    <div class="ld-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                    </div>
-                    <span class="ld-action-label">আয়-ব্যয়</span>
-                </div>
-
-                <!-- New action button for logging loss -->
-                <div class="ld-action-btn"
-                    onclick="document.getElementById('lossModal').classList.add('active'); document.body.style.overflow='hidden';">
-                    <div class="ld-action-icon" style="background-color: #FEF2F2; color: #EF4444;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
-                            </path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <span class="ld-action-label">ক্ষয়ক্ষতি</span>
-                </div>
-
-                <div class="ld-action-btn" id="btnHarvest">
-                    <div class="ld-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="6" cy="6" r="3"></circle>
-                            <circle cx="6" cy="18" r="3"></circle>
-                            <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
-                            <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
-                            <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
-                        </svg>
-                    </div>
-                    <span class="ld-action-label">ফসল কর্তন</span>
-                </div>
-            </div>
 
             <!-- Dynamic Data Tabs -->
-            <div class="ld-tabs-container">
+            <div class="ld-tabs-container" style="position: sticky; top: 56px; z-index: 50; background: white; margin: 0 -16px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; gap: 8px; overflow-x: auto;">
                 <button class="ld-tab-btn active" onclick="switchTab('tasks', this)">টাস্ক</button>
                 <button class="ld-tab-btn" onclick="switchTab('resources', this)">রিসোর্স লিস্ট</button>
                 <button class="ld-tab-btn" onclick="switchTab('finance', this)">আয়-ব্যয়</button>
@@ -408,7 +378,7 @@
                         <div>
                             <p style="font-size: 13px; color: #047857; margin: 0; font-weight: 600;">বর্তমানের গাছ/চারা
                             </p>
-                            <p style="font-size: 15px; font-weight: 700; color: #065F46; margin: 0;">৪,৭০০ টি</p>
+                            <p id="harvestPlantCount" style="font-size: 15px; font-weight: 700; color: #065F46; margin: 0;">-- টি</p>
                         </div>
                     </div>
 
@@ -417,9 +387,9 @@
                             style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">আজকের
                             কর্তনকৃত পরিমাণ</label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="number" placeholder="যেমন: ৪০"
+                            <input type="number" id="harvestAmountInput" placeholder="যেমন: ৪০"
                                 style="flex: 2; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
-                            <select
+                            <select id="harvestUnitSelect"
                                 style="flex: 1; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none; background: white;">
                                 <option value="kg">কেজি</option>
                                 <option value="mon">মণ</option>
@@ -432,14 +402,22 @@
                         <label
                             style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">কতটুকু
                             অংশ থেকে তোলা হলো?</label>
-                        <input type="text" placeholder="যেমন: ১০০০ গাছ বা ২০ শতাংশ জমি"
+                        <input type="text" id="harvestPortionInput" placeholder="যেমন: ১০০০ গাছ বা ২০ শতাংশ জমি"
                             style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 16px;">
+                        <label
+                            style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #B91C1C; background: #FEF2F2; padding: 12px; border-radius: 12px; cursor: pointer;">
+                            <input type="checkbox" id="isCropFailedCheck" style="width: 20px; height: 20px; accent-color: #B91C1C;" onchange="toggleHarvestInputs()">
+                            ফসল হয়নি বা সব মারা গেছে (Crop Failed)
+                        </label>
                     </div>
 
                     <div class="input-group" style="margin-bottom: 24px;">
                         <label
-                            style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #EF4444; background: #FEF2F2; padding: 12px; border-radius: 12px; border: 1px dashed #FCA5A5; cursor: pointer;">
-                            <input type="checkbox" style="width: 20px; height: 20px; accent-color: #EF4444;">
+                            style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #10B981; background: #F0FDF4; padding: 12px; border-radius: 12px; border: 1px dashed #6EE7B7; cursor: pointer;">
+                            <input type="checkbox" id="isFinalHarvestCheck" style="width: 20px; height: 20px; accent-color: #10B981;" onchange="toggleFailedCheckbox()">
                             এটি কি সর্বশেষ কর্তন?
                         </label>
                         <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px; margin-left: 32px;">চেক
@@ -449,8 +427,55 @@
                 </div>
                 <div class="calendar-footer">
                     <button class="btn-primary w-100" id="saveHarvest"
-                        onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow=''; alert('ফসল কর্তন এন্ট্রি করা হয়েছে');">সেভ
+                        onclick="submitHarvestEntry()">সেভ
                         করুন</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Crop Modal -->
+        <div class="calendar-modal" id="deleteCropModal">
+            <div class="calendar-content">
+                <div class="calendar-header">
+                    <h4>ফসল মুছে ফেলুন</h4>
+                    <button class="close-modal" id="closeDeleteModal" aria-label="Close modal"
+                        onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow='';">&times;</button>
+                </div>
+                <div class="calendar-body">
+                    <div id="deletePrePlantWarning" style="display: none; background: #FFFBEB; border: 1px solid #FDE68A; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                        <p style="font-size: 15px; color: #92400E; margin: 0; font-weight: 500;">
+                            আপনি কি নিশ্চিত যে আপনি এই ফসল এন্ট্রিটি বাতিল করতে চান? এটি একবার মুছে ফেললে আর ফিরে পাওয়া যাবে না।
+                        </p>
+                    </div>
+
+                    <div id="deletePostPlantWarning" style="display: none;">
+                        <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                            <p style="font-size: 14px; color: #991B1B; margin: 0; line-height: 1.5; font-weight: 500;">
+                                ⚠️ আপনার ফসলটি ইতোমধ্যে রোপণ করা হয়েছে এবং কিছু খরচও হয়েছে! মুছে ফেলার পরিবর্তে আপনি চাইলে এটিকে <strong>'ফিনিশ'</strong> অপশন থেকে হিস্ট্রিতে রেকর্ড করে রাখতে পারেন (ফসল নষ্ট হয়ে থাকলে তা-ও)। আপনি কি কোনো হিস্ট্রি ছাড়াই এটি চিরতরে মুছে ফেলতে চান?
+                            </p>
+                        </div>
+                        
+                        <div class="input-group" style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">মুছে ফেলার কারণ (ঐচ্ছিক)</label>
+                            <select id="deleteReasonSelect" style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none; background: white;">
+                                <option value="">কারণ নির্বাচন করুন...</option>
+                                <option value="Wrong Entry">ভুল করে এন্ট্রি করা হয়েছিল</option>
+                                <option value="Changed Crop">অন্য ফসল চাষ করবো এখন</option>
+                                <option value="Testing">শুধু টেস্ট করছিলাম</option>
+                                <option value="Other">অন্য কারণ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="calendar-footer" style="padding-top: 0; box-shadow: none;">
+                    <button id="confirmDeleteCropBtn" onclick="submitDeleteCrop()"
+                        style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 16px; background: #DC2626; color: white; border: none; cursor: pointer; margin-bottom: 8px;">
+                        হ্যাঁ, সম্পূর্ণ মুছে ফেলুন
+                    </button>
+                    <button onclick="document.getElementById('deleteCropModal').classList.remove('active'); document.body.style.overflow='';"
+                        style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 16px; background: #F3F4F6; color: #4B5563; border: none; cursor: pointer;">
+                        না, বাতিল করুন
+                    </button>
                 </div>
             </div>
         </div>
@@ -587,8 +612,8 @@
                             style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">তারিখ
                             নির্বাচন করুন</label>
                         <div style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #F8FAFC; cursor: pointer; display: flex; justify-content: space-between; align-items: center;"
-                            onclick="document.getElementById('calendarModal').classList.add('active'); window.calendarTargetId='lossStepDate';">
-                            <span id="lossStepDate" style="color: var(--text-main);">২০ মার্চ ২০২৬</span>
+                            onclick="openDatePickerFor('lossStepDate')">
+                            <span id="lossStepDate" data-value="" style="color: var(--text-main);">আজ</span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -603,27 +628,21 @@
                         <label
                             style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">নষ্ট
                             হওয়ার পরিমাণ (টি)</label>
-                        <input type="number" placeholder="যেমন: ৩০০"
+                        <input id="lossAmountInput" type="number" placeholder="যেমন: ৩০০"
                             style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; background: #F8FAFC;">
                     </div>
 
                     <div style="margin-bottom: 24px; text-align: left;">
                         <label
                             style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">কারণ</label>
-                        <select
-                            style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; background: #F8FAFC; color: var(--text-main); appearance: auto;">
-                            <option value="">কারণ নির্বাচন করুন</option>
-                            <option value="pest">পোকামাকড়</option>
-                            <option value="disease">রোগবালাই</option>
-                            <option value="weather">অতিবৃষ্টি/খরা</option>
-                            <option value="other">অন্যান্য</option>
-                        </select>
+                        <input id="lossReasonInput" type="text" placeholder="কী কারণে নষ্ট হয়েছে লিখুন (যেমন: পোকার আক্রমণ)..."
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; background: #F8FAFC; color: var(--text-main);">
                     </div>
 
                 </div>
                 <div class="calendar-footer" style="padding: 0;">
                     <button class="btn-primary w-100" style="background: #EF4444;"
-                        onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow=''; alert('ক্ষয়ক্ষতি এন্ট্রি করা হয়েছে');">এন্ট্রি
+                        onclick="saveLossEvent()">এন্ট্রি
                         সম্পন্ন করুন</button>
                 </div>
             </div>
@@ -896,8 +915,15 @@
         </div>
 
         <!-- Floating Chat Widget -->
+        <style>
+            @keyframes pulse-green {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
+        </style>
         <button id="chatbotToggleBtn" onclick="toggleChatbot()"
-            style="position: fixed; bottom: 84px; right: 20px; background: #0284C7; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); cursor: pointer; z-index: 99; transition: transform 0.2s;">
+            style="position: fixed; bottom: 84px; right: 20px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4); cursor: pointer; z-index: 99; transition: transform 0.2s; animation: pulse-green 2s infinite;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>

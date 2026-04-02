@@ -111,14 +111,11 @@ async function fetchFarmAndCropDetails() {
 
         if (resData.success) {
             // Update Farm Header Info
-            const pageTitle = document.querySelector('.page-top-header h2');
-            const overviewTitle = document.querySelector('.ld-card-header h3');
-            const areaValue = document.querySelector('.ld-info-value');
+            const farmNamePill = document.getElementById('farmNamePill');
+            const farmAreaPill = document.getElementById('farmAreaPill');
 
-            if (pageTitle) pageTitle.textContent = resData.farm.name;
-            if (overviewTitle) overviewTitle.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${resData.farm.name}`;
-            if (areaValue) areaValue.textContent = `${resData.farm.area_shotangsho} শতাংশ`;
-            
+            if (farmNamePill) farmNamePill.textContent = resData.farm.name;
+            if (farmAreaPill) farmAreaPill.textContent = `${resData.farm.area_shotangsho} শতাংশ`;
             window.currentFarmArea = parseFloat(resData.farm.area_shotangsho) || 1;
 
             // Connect land history button
@@ -130,7 +127,13 @@ async function fetchFarmAndCropDetails() {
             // Connect Crop Doctor UI with explicit scope mapping
             const btnDisease = document.getElementById('btnDisease');
             if (btnDisease) {
-                btnDisease.onclick = () => window.location.href = `crop_doctor.html?farm_id=${currentFarmId}`;
+                btnDisease.onclick = () => {
+                   if(window.activeCrop && window.activeCrop.id) {
+                       window.location.href = `crop_doctor.html?farm_id=${currentFarmId}&crop_id=${window.activeCrop.id}`;
+                   } else {
+                       window.location.href = `crop_doctor.html?farm_id=${currentFarmId}`;
+                   }
+                };
             }
 
             // Calculate total farm profit utilizing actual transactions
@@ -162,30 +165,144 @@ async function fetchFarmAndCropDetails() {
                 farmProfitEl.style.color = totalFarmProfit >= 0 ? 'var(--primary-dark)' : '#EF4444';
             }
 
-            // Display Active Crop
-            const activeCrops = (resData.crops || []).filter(c => c.status !== 'Harvested');
-            if (activeCrops.length > 0) {
-                activeCrop = activeCrops[0]; // For simplicity, take the first active one
+            // Display Active Crop or Specific History Crop
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetCropId = urlParams.get('crop_id');
+            let targetCrop = null;
+
+            if (targetCropId) {
+                targetCrop = (resData.crops || []).find(c => String(c.id) === String(targetCropId));
+            }
+
+            if (!targetCrop) {
+                const activeCrops = (resData.crops || []).filter(c => c.status !== 'Harvested');
+                if (activeCrops.length > 0) {
+                    targetCrop = activeCrops[0];
+                }
+            }
+
+            if (targetCrop) {
+                activeCrop = targetCrop;
                 window.activeCrop = activeCrop;
+
+                if (activeCrop.status === 'Harvested') {
+                    document.body.classList.add('history-mode');
+                }
 
                 // Set Crop Profile
                 const cropNameEl = document.querySelector('.ld-crop-text h4');
-                const cropStatusEl = document.querySelector('.ld-crop-text p:nth-child(3) span');
-                const plantingAgeEl = document.querySelector('.ld-crop-text p strong');
+                const cropStatusEl = document.querySelector('.crop-status-display');
+                const plantingAgeContainer = document.querySelector('.crop-age-display');
 
-                if (cropNameEl) cropNameEl.textContent = activeCrop.crop_name;
-                if (cropStatusEl) cropStatusEl.innerHTML = `${activeCrop.status} (এআই ম্যাপড)`;
+                if (cropNameEl) {
+                    let displayName = activeCrop.crop_name;
+                    if (displayName && displayName.includes('(')) {
+                         const match = displayName.match(/\(([^()]+)\)/g);
+                         if (match && match.length > 0) {
+                             let vName = match[match.length - 1].replace(/[()]/g, '').trim();
+                             let baseCName = displayName.split('(')[0].trim();
+                             if (vName && baseCName) displayName = `${baseCName} (${vName})`;
+                         }
+                    }
+                    cropNameEl.textContent = displayName;
+                }
+                // Populate Plant/Seed Counts
+                const initialCount = parseInt(activeCrop.initial_plant_count) || 0;
+
+                // Dynamically evaluate age and pre-plant state
+                let isPrePlant = false;
                 
-                // Dynamically evaluate age
-                if (plantingAgeEl) {
-                    if(activeCrop.planted_date) {
-                        const diffTime = Math.abs(Date.now() - new Date(activeCrop.planted_date));
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        plantingAgeEl.textContent = `${diffDays} দিন`;
+                // If the initial count is exactly 0 or no planted date, we can consider it pre-plant!
+                if (initialCount === 0 || !activeCrop.planted_date) {
+                    isPrePlant = true;
+                }
+                if (plantingAgeContainer) {
+                    let diffDaysVal = null;
+                    let remainingDaysVal = null;
+                    
+                    // Evaluate future planting date
+                    if (activeCrop.planted_date && !isPrePlant) {
+                        const historyMode = document.body.classList.contains('history-mode');
+                        const endDate = (historyMode && activeCrop.updated_at) ? new Date(activeCrop.updated_at) : new Date();
+                        const diffTime = endDate.getTime() - new Date(activeCrop.planted_date).getTime();
+                        if (diffTime < 0) {
+                            isPrePlant = true; // Future planting date
+                            remainingDaysVal = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+                        } else {
+                            diffDaysVal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        }
+                    }
+
+                    // Now that isPrePlant is fully evaluated, we can create the button HTML
+                    let btnHtml = '';
+                    if (isPrePlant && !document.body.classList.contains('history-mode')) {
+                        btnHtml = ` <button onclick="promptPlantCount()" style="margin-left: 8px; background: #059669; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(5,150,105,0.2);">রোপণ সম্পন্ন</button>`;
+                    }
+
+                    if (remainingDaysVal !== null) {
+                        plantingAgeContainer.innerHTML = `রোপণ বাকি: <strong>${remainingDaysVal} দিন</strong>` + btnHtml;
+                    } else if (diffDaysVal !== null) {
+                        plantingAgeContainer.innerHTML = `রোপণের বয়স: <strong>${diffDaysVal} দিন</strong>`;
+                    } else if (isPrePlant) {
+                        plantingAgeContainer.innerHTML = `চারা রোপণ বাকি` + btnHtml;
                     } else {
-                        plantingAgeEl.textContent = 'অজ্ঞাত';
+                        plantingAgeContainer.innerHTML = `বয়স: <strong>অজ্ঞাত</strong>`;
                     }
                 }
+
+                if (cropStatusEl) {
+                    if (document.body.classList.contains('history-mode')) {
+                        cropStatusEl.innerHTML = `সফল অতীত ফসল`;
+                        cropStatusEl.style.color = '#047857';
+                    } else if (isPrePlant) {
+                        let nextTaskTitle = 'চারা রোপণ বাকি';
+                        try {
+                            let tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
+                            tasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled');
+                            if (tasks.length > 0) {
+                                tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                                nextTaskTitle = tasks[0].title || nextTaskTitle;
+                            }
+                        } catch(e){}
+                        
+                        cropStatusEl.innerHTML = `পরবর্তী ধাপ: ${nextTaskTitle}`;
+                        cropStatusEl.style.color = '#D97706'; // Amber color for pending
+                    } else {
+                        cropStatusEl.innerHTML = `${activeCrop.status}`;
+                    }
+                }
+
+                // Update Hero Farm Area (Shotangsho)
+                const heroFarmAreaEl = document.getElementById('heroFarmArea');
+                if (heroFarmAreaEl && window.currentFarmArea) {
+                    heroFarmAreaEl.textContent = `${window.currentFarmArea} শতাংশ`;
+                }
+
+                // Smart Planting Flow Output
+                const plantCountContainer = document.getElementById('plantCountContainer');
+                if (plantCountContainer) {
+                    if (isPrePlant && !document.body.classList.contains('history-mode')) {
+                        plantCountContainer.style.display = 'none';
+                    } else {
+                        plantCountContainer.style.display = 'block';
+                    }
+                }
+
+                let lossCount = 0;
+                try {
+                    const losses = JSON.parse(activeCrop.loss_events_json || '[]');
+                    losses.forEach(l => lossCount += (parseInt(l.amount) || 0));
+                } catch(e) {}
+                
+                const currentCount = Math.max(0, initialCount - lossCount);
+                
+                const currentPlantSpan = document.getElementById('currentPlantSpan');
+                const initialPlantSpan = document.getElementById('initialPlantSpan');
+                const plantLossSpan = document.getElementById('plantLossSpan');
+                
+                if (currentPlantSpan) currentPlantSpan.textContent = `${currentCount}`;
+                if (initialPlantSpan) initialPlantSpan.textContent = `${initialCount}`;
+                if (plantLossSpan) plantLossSpan.textContent = `${lossCount} টি নষ্ট`;
 
                 // Fill Financial Snapshot
                 let currentActiveCost = 0;
@@ -215,8 +332,10 @@ async function fetchFarmAndCropDetails() {
                     }
                 }
 
-                document.getElementById('current-cost-display').textContent = `৳ ${currentActiveCost}`;
-                document.getElementById('current-rev-display').textContent = `৳ ${currentActiveIncome}`;
+                const currentCostEl = document.getElementById('current-cost-display');
+                if (currentCostEl) currentCostEl.textContent = `৳ ${currentActiveCost}`;
+                const currentRevEl = document.getElementById('current-rev-display');
+                if (currentRevEl) currentRevEl.textContent = `৳ ${currentActiveIncome}`;
 
                 // Render Tab Parameters
                 renderTasksTab(activeCrop.tasks_state_json);
@@ -238,6 +357,28 @@ async function fetchFarmAndCropDetails() {
                 if (cropNameEl) cropNameEl.textContent = "খালি জমি";
                 if (cropStatusEl) cropStatusEl.textContent = "বর্তমানে কোনো ফসল নেই";
                 if (plantingAgeEl && plantingAgeEl.parentElement) plantingAgeEl.parentElement.innerHTML = "--";
+
+                const cropImg = document.querySelector('.ld-crop-img');
+                if (cropImg) cropImg.src = 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=200&h=200'; // plowed field
+
+                const cropActionBtn = document.getElementById('cropActionBtn');
+                if (cropActionBtn) cropActionBtn.style.display = 'none';
+
+                const cropProfileText = document.querySelector('.ld-crop-text');
+                if (cropProfileText && !document.getElementById('addCropBtnEmpty')) {
+                    const addBtn = document.createElement('button');
+                    addBtn.id = 'addCropBtnEmpty';
+                    addBtn.className = 'btn-primary';
+                    addBtn.style.marginTop = '12px';
+                    addBtn.style.padding = '8px 16px';
+                    addBtn.style.fontSize = '12px';
+                    addBtn.style.display = 'inline-flex';
+                    addBtn.style.alignItems = 'center';
+                    addBtn.style.gap = '6px';
+                    addBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> নতুন ফসল যুক্ত করুন';
+                    addBtn.onclick = () => window.location.href = `add_crop.html?farm_id=${currentFarmId}`;
+                    cropProfileText.appendChild(addBtn);
+                }
 
                 const currentCostEl = document.getElementById('current-cost-display');
                 if (currentCostEl) currentCostEl.textContent = '৳ 0';
@@ -291,7 +432,8 @@ async function fetchCropScansForLand() {
     if (!token || !currentFarmId) return;
 
     try {
-        const response = await fetch(`${API_URL}/api/public/crop-scans?farm_id=${currentFarmId}&limit=10`, {
+        const fetchUrl = activeCrop ? `${API_URL}/api/public/crop-scans?farm_id=${currentFarmId}&crop_id=${activeCrop.id}&limit=10` : `${API_URL}/api/public/crop-scans?farm_id=${currentFarmId}&limit=10`;
+        const response = await fetch(fetchUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -1058,12 +1200,13 @@ window.renderGuidelineModal = async function () {
         let cName = activeCrop.crop_name || '';
         let vName = activeCrop.variety_name || cName;
 
-        // Extract variety if encoded in parenthesis "তরমুজ (পদ্মা)"
+        // Extract variety safely even if it's nested like "পেঁপে (পেঁপে (টপ লেডি))"
         if (!activeCrop.variety_name && cName.includes('(') && cName.includes(')')) {
-            const openIdx = cName.indexOf('(');
-            const closeIdx = cName.indexOf(')');
-            vName = cName.substring(openIdx + 1, closeIdx).trim();
-            cName = cName.substring(0, openIdx).trim();
+            const match = cName.match(/\(([^()]+)\)/g);
+            if (match && match.length > 0) {
+                vName = match[match.length - 1].replace(/[()]/g, '').trim();
+                cName = cName.split('(')[0].trim();
+            }
         }
 
         const cropQuery = encodeURIComponent(cName);
@@ -1680,7 +1823,10 @@ window.toggleChatbot = function() {
                 </div>
             </div>`;
 
-            const sessionDataStr = localStorage.getItem(`agritech_chat_${activeFarmId}`);
+            const cropSuffix = (typeof activeCrop !== 'undefined' && activeCrop && activeCrop.id) ? `_crop_${activeCrop.id}` : '';
+            const sessionKey = `agritech_chat_${activeFarmId}${cropSuffix}`;
+
+            const sessionDataStr = localStorage.getItem(sessionKey);
             let sessionData = null;
             if (sessionDataStr) {
                 try { sessionData = JSON.parse(sessionDataStr); } catch(e){}
@@ -1752,7 +1898,9 @@ window.sendChatMessage = async function() {
     try {
         const cropName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : localStorage.getItem('agritech_active_crop_name');
         const activeFarmId = new URLSearchParams(window.location.search).get('id') || 'unknown';
-        const sessionKey = `agritech_chat_${activeFarmId}`;
+        const activeCropId = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.id : null;
+        const cropSuffix = activeCropId ? `_crop_${activeCropId}` : '';
+        const sessionKey = `agritech_chat_${activeFarmId}${cropSuffix}`;
         
         // Load session history
         let sessionData = { sessionId: null, history: [] };
@@ -1775,6 +1923,7 @@ window.sendChatMessage = async function() {
                 query: msg,
                 cropTitle: cropName,
                 farmId: activeFarmId !== 'unknown' ? activeFarmId : null,
+                cropId: activeCropId,
                 sessionId: sessionData.sessionId,
                 userId: userId,
                 history: sessionData.history
@@ -1829,4 +1978,275 @@ window.sendChatMessage = async function() {
     input.disabled = false;
     input.focus();
     msgsContainer.scrollTop = msgsContainer.scrollHeight;
+};
+
+// ============================================
+// Add Plant Tracking & Loss Methods
+// ============================================
+
+window.promptPlantCount = async function() {
+    if (!activeCrop) return;
+    const count = prompt("জমিতে সর্বমোট রোপণকৃত বীজ/চারার সংখ্যা দিন (যেমন: ২৫০০):", activeCrop.initial_plant_count || "");
+    if (count === null || count.trim() === "") return;
+    const countInt = parseInt(count);
+    if (isNaN(countInt) || countInt < 0) return alert("দয়া করে শুধুমাত্র সঠিক সংখ্যা দিন!");
+    
+    const wasPrePlant = (parseInt(activeCrop.initial_plant_count) || 0) === 0;
+
+    // Fast local state update
+    activeCrop.initial_plant_count = countInt;
+    
+    let updatePayload = { initial_plant_count: countInt };
+    
+    // If it was just planted for the first time, mark today as planted_date!
+    if (wasPrePlant) {
+        const today = new Date().toISOString().slice(0, 10);
+        updatePayload.planted_date = today;
+        activeCrop.planted_date = today;
+    }
+
+    const btn = document.querySelector('.edit-plant-btn');
+    if(btn) {
+        btn.style.opacity = '0.5';
+        btn.disabled = true;
+    }
+    
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/state`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload)
+        });
+        if(!res.ok) throw new Error("API Note: Update Failed on backend.");
+    } catch(e) {
+        console.warn("API Note:", e.message);
+    }
+    
+    await fetchFarmAndCropDetails();
+    if(btn) {
+        btn.style.opacity = '1';
+        btn.disabled = false;
+    }
+};
+
+window.saveLossEvent = async function() {
+    if (!activeCrop) return;
+    const dateInputStr = document.getElementById('lossStepDate').innerText || document.getElementById('lossStepDate').textContent;
+    const amountInput = document.getElementById('lossAmountInput').value;
+    const reasonInput = document.getElementById('lossReasonInput').value;
+
+    if (!amountInput || !reasonInput) {
+        return alert("ক্ষয়ক্ষতির পরিমাণ এবং কারণ অবশ্যই দিতে হবে!");
+    }
+    const amountInt = parseInt(amountInput);
+    if (isNaN(amountInt) || amountInt <= 0) {
+        return alert("সঠিক পরিমাণ দিন!");
+    }
+
+    let currentLosses = [];
+    try {
+        currentLosses = JSON.parse(activeCrop.loss_events_json || '[]');
+    } catch(e) {}
+
+    currentLosses.push({
+        date: dateInputStr,
+        amount: amountInt,
+        reason: reasonInput,
+        created_at: new Date().toISOString()
+    });
+
+    const newLossJson = JSON.stringify(currentLosses);
+    activeCrop.loss_events_json = newLossJson;
+
+    const btn = document.querySelector('#lossModal .calendar-footer button');
+    const oldText = btn.textContent;
+    btn.textContent = 'এন্ট্রি হচ্ছে...';
+    btn.disabled = true;
+
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/state`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loss_events_json: newLossJson })
+        });
+        
+        if(!res.ok) throw new Error("API PATCH Error");
+        
+    } catch(e) {
+        console.warn("API Note:", e.message);
+    }
+
+    document.getElementById('lossModal').classList.remove('active');
+    document.body.style.overflow='';
+    
+    // Clear fields
+    document.getElementById('lossAmountInput').value = '';
+    document.getElementById('lossReasonInput').value = '';
+    
+    await fetchFarmAndCropDetails();
+    
+    btn.disabled = false;
+    btn.textContent = oldText;
+};
+
+// ----- HARVEST MODAL & ACTIONS -----
+window.handleMarkCropCompleted = function() {
+    closeCropActionModals();
+    document.getElementById('harvestModal').classList.add('active');
+    document.body.style.overflow='hidden';
+    
+    // Set dynamic plant count
+    const plantP = document.getElementById('harvestPlantCount');
+    if(activeCrop && plantP) {
+        plantP.textContent = (activeCrop.initial_plant_count || 0) + ' টি';
+    }
+};
+
+window.toggleHarvestInputs = function() {
+    const isFailed = document.getElementById('isCropFailedCheck').checked;
+    document.getElementById('harvestAmountInput').disabled = isFailed;
+    document.getElementById('harvestUnitSelect').disabled = isFailed;
+    document.getElementById('harvestPortionInput').disabled = isFailed;
+    
+    // Automatically force the final flag if it's failed
+    if(isFailed) {
+        document.getElementById('isFinalHarvestCheck').checked = true;
+        document.getElementById('isFinalHarvestCheck').disabled = true;
+    } else {
+        document.getElementById('isFinalHarvestCheck').disabled = false;
+    }
+};
+
+window.toggleFailedCheckbox = function() {
+    const isFinal = document.getElementById('isFinalHarvestCheck').checked;
+    if(!isFinal) {
+        document.getElementById('isCropFailedCheck').checked = false;
+        toggleHarvestInputs();
+    }
+};
+
+window.submitHarvestEntry = async function() {
+    if(!activeCrop) return;
+    
+    const isFailed = document.getElementById('isCropFailedCheck').checked;
+    const isFinal = document.getElementById('isFinalHarvestCheck').checked;
+    
+    let yieldKg = 0;
+    let note = '';
+    
+    if(!isFailed) {
+        let amount = parseFloat(document.getElementById('harvestAmountInput').value) || 0;
+        const unit = document.getElementById('harvestUnitSelect').value;
+        if(unit === 'mon') amount = amount * 40;
+        if(unit === 'ton') amount = amount * 1000;
+        yieldKg = amount;
+        
+        note = document.getElementById('harvestPortionInput').value.trim();
+        if(note) note = `অংশ: ${note}`;
+        
+        if (yieldKg <= 0 && isFinal===false) {
+            alert('দয়াকরে একটি সঠিক পরিমাণ দিন।');
+            return;
+        }
+    } else {
+        note = 'ফসল নষ্ট/মারা গেছে';
+    }
+    
+    // Ensure final is true when failed
+    const willComplete = isFinal || isFailed;
+    const statusText = isFailed ? 'Failed' : (willComplete ? 'Harvested' : 'Healthy');
+    
+    const btn = document.getElementById('saveHarvest');
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = 'লোড হচ্ছে...';
+    btn.disabled = true;
+    
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        
+        // If it's a final state, we trigger the /complete endpoint
+        // Otherwise just update state?
+        // Let's reuse /complete endpoint even for partial harvest, as it appends yield and notes!
+        // But if it's NOT final, we just keep status = Healthy
+        
+        const payload = {
+            status: statusText,
+            yield_amount_kg: yieldKg,
+            harvest_notes: note
+        };
+        
+        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/complete`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        if(!res.ok) throw new Error('API Error');
+        alert(willComplete ? 'ফসল বন্ধ করে হিস্ট্রিতে সেভ করা হয়েছে!' : 'কর্তন আপডেট হয়েছে।');
+        
+        document.getElementById('harvestModal').classList.remove('active');
+        document.body.style.overflow='';
+        
+        await fetchFarmAndCropDetails();
+    } catch(e) {
+        alert("Failed: " + e.message);
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = oldHtml;
+};
+
+window.handleDeleteCrop = function() {
+    closeCropActionModals();
+    if(!activeCrop) return;
+    
+    document.getElementById('deleteCropModal').classList.add('active');
+    document.body.style.overflow='hidden';
+    
+    // Check if planted
+    const planted = activeCrop.planted_date ? new Date(activeCrop.planted_date).getTime() : 0;
+    const now = Date.now();
+    const isPlanted = planted > 0 && planted <= now;
+    
+    if(isPlanted) {
+        document.getElementById('deletePrePlantWarning').style.display = 'none';
+        document.getElementById('deletePostPlantWarning').style.display = 'block';
+    } else {
+        document.getElementById('deletePrePlantWarning').style.display = 'block';
+        document.getElementById('deletePostPlantWarning').style.display = 'none';
+    }
+};
+
+window.submitDeleteCrop = async function() {
+    if(!activeCrop) return;
+    
+    // Optional: Could grab the reason from document.getElementById('deleteReasonSelect').value
+    // But since it's a hard delete on backend, we just proceed.
+    
+    const btn = document.getElementById('confirmDeleteCropBtn');
+    const oldText = btn.innerText;
+    btn.innerText = 'মুছে ফেলা হচ্ছে...';
+    btn.disabled = true;
+    
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if(!res.ok) throw new Error('Failed to delete');
+        
+        alert('ফসল সম্পূর্ণরূপে মুছে ফেলা হয়েছে।');
+        localStorage.removeItem('agritech_active_crop_name');
+        
+        document.getElementById('deleteCropModal').classList.remove('active');
+        document.body.style.overflow='';
+        window.location.href = 'khamar.html';
+    } catch(e) {
+        alert("Error: " + e.message);
+        btn.innerText = oldText;
+        btn.disabled = false;
+    }
 };

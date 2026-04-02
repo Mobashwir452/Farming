@@ -272,7 +272,7 @@ CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALRE
     };
 };
 
-export const analyzeCropImage = async (env, imageBase64, farmId = null, userId = null, compressedWebP = null) => {
+export const analyzeCropImage = async (env, imageBase64, farmId = null, userId = null, compressedWebP = null, cropId = null) => {
     let customRules = '';
     try {
         const rulesRow = await env.DB.prepare("SELECT setting_value FROM admin_settings WHERE setting_key = 'crop_doctor_rules'").first();
@@ -407,9 +407,9 @@ Do not include Markdown blocks. Output only the pure XML.
     // Store in Database
     try {
         await env.DB.prepare(`
-            INSERT INTO crop_scans (user_id, farm_id, image_url, disease_name_bn, disease_name_en, confidence_score, status, scan_result_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(userId, farmId, r2Key, scanResultObj.disease_name_bn, scanResultObj.disease_name_en, confidence_score, finalStatus, JSON.stringify(scanResultObj)).run();
+            INSERT INTO crop_scans (user_id, farm_id, crop_id, image_url, disease_name_bn, disease_name_en, confidence_score, status, scan_result_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(userId, farmId, cropId, r2Key, scanResultObj.disease_name_bn, scanResultObj.disease_name_en, confidence_score, finalStatus, JSON.stringify(scanResultObj)).run();
     } catch (dbErr) { console.error("Could not save to crop_scans:", dbErr.message); }
 
     return scanResultObj;

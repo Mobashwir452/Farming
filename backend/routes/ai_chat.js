@@ -3,7 +3,7 @@ import { json } from 'itty-router';
 export const handleCropChat = async (request, env) => {
     try {
         const body = await request.json();
-        const { query, farmId, cropTitle, sessionId, userId, history } = body;
+        const { query, farmId, cropTitle, cropId, sessionId, userId, history } = body;
 
         if (!query) return json({ success: false, error: 'Query is missing' }, { status: 400 });
 
@@ -131,8 +131,10 @@ User Query: ${query}`;
             await env.DB.prepare("UPDATE ai_chat_logs SET chat_history = ?, updated_at = datetime('now') WHERE session_id = ?")
                 .bind(historyJson, activeSessionId).run().catch((e)=> console.error("Update Log Error:", e));
         } else {
-            await env.DB.prepare("INSERT INTO ai_chat_logs (session_id, user_id, crop_name, chat_history, created_at, updated_at) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))")
-                .bind(activeSessionId, activeUserId, cropNameForPrompt, historyJson).run().catch((e)=> console.error("Insert Log Error:", e));
+            const dbFarmId = farmId || null;
+            const dbCropId = cropId || null;
+            await env.DB.prepare("INSERT INTO ai_chat_logs (session_id, user_id, farm_id, crop_id, crop_name, chat_history, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))")
+                .bind(activeSessionId, activeUserId, dbFarmId, dbCropId, cropNameForPrompt, historyJson).run().catch((e)=> console.error("Insert Log Error:", e));
         }
 
         if (contextTexts.length === 0) {

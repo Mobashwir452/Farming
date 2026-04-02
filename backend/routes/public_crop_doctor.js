@@ -14,6 +14,7 @@ export const analyzePublicCropImage = async (request, env) => {
         const imageBase64 = body.imageBase64;
         const compressedBase64 = body.compressedBase64 || null;
         const farmId = body.farmId || null; // Optional
+        const cropId = body.cropId || null; // Optional
         
         let userId = null;
         if (request.user) {
@@ -51,7 +52,7 @@ export const analyzePublicCropImage = async (request, env) => {
 
         // Forward to the central AI engine which handles the Gemini 3 Flash parsing
         // We pass the RAW BASE64 to Gemini, but the original compressed WebP string to R2
-        const scanResult = await analyzeCropImage(env, rawBase64, farmId, userId, compressedBase64);
+        const scanResult = await analyzeCropImage(env, rawBase64, farmId, userId, compressedBase64, cropId);
 
         return Response.json({ success: true, data: scanResult });
 
@@ -69,6 +70,7 @@ export const getPublicScanLogs = async (request, env) => {
         const url = new URL(request.url);
         const limit = parseInt(url.searchParams.get('limit')) || 20;
         const farmId = url.searchParams.get('farm_id');
+        const cropId = url.searchParams.get('crop_id');
 
         const userId = request.user ? (request.user.id || request.user.userId) : null;
         if (!userId) {
@@ -76,7 +78,7 @@ export const getPublicScanLogs = async (request, env) => {
         }
 
         let query = `
-            SELECT id, user_id, farm_id, image_url, disease_name_bn, disease_name_en, confidence_score, status, scan_result_json, created_at 
+            SELECT id, user_id, farm_id, crop_id, image_url, disease_name_bn, disease_name_en, confidence_score, status, scan_result_json, created_at 
             FROM crop_scans 
             WHERE user_id = ? 
         `;
@@ -85,6 +87,10 @@ export const getPublicScanLogs = async (request, env) => {
         if (farmId) {
             query += ` AND farm_id = ? `;
             params.push(farmId);
+        }
+        if (cropId) {
+            query += ` AND crop_id = ? `;
+            params.push(cropId);
         }
 
         query += ` ORDER BY created_at DESC LIMIT ?`;

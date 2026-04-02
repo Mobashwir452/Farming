@@ -359,17 +359,17 @@
     font-size: 14px;
     font-weight: 700;
     color: var(--text-muted);
-    background: transparent;
-    border: none;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .ld-tab-btn.active {
-    background: white;
-    color: var(--primary-dark);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: #059669; /* Brand Green */
+    color: white;
+    box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
 }
 
 .ld-tab-pane {
@@ -414,4 +414,44 @@
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* -------------------------------------
+   History Mode Overrides (Read-Only)
+-------------------------------------- */
+body.history-mode .ld-task-item input[type="checkbox"] {
+    display: none !important; /* Hide completion checkboxes */
+}
+body.history-mode .ld-task-item label {
+    pointer-events: none; /* Prevent clicking labels */
+}
+body.history-mode #btnHarvest,
+body.history-mode #btnDisease,
+body.history-mode button[onclick*="customStepModal"],
+body.history-mode button[onclick*="addResourceModal"],
+body.history-mode .resource-check-item .res-checkbox,
+body.history-mode button[onclick="openStatusUpdateModal()"],
+body.history-mode button[onclick="openAddNoteModal()"],
+body.history-mode button[onclick="handleMarkCropCompleted()"],
+body.history-mode button[onclick*="confirmDelete"],
+body.history-mode button[onclick*="handleDeleteCrop"],
+body.history-mode #chatbotToggleBtn {
+    display: none !important;
+}
+body.history-mode .resource-check-item input,
+body.history-mode .resource-check-item select {
+    pointer-events: none;
+    opacity: 0.8;
+}
+/* Note: #btnFinance and loss button are kept active by user request */
+body.history-mode .page-top-header h2::after {
+    content: ' (অতীত রেকর্ড)';
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 6px;
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 8px;
+    vertical-align: middle;
 }

@@ -12,7 +12,7 @@ import { saveCropTimeline, searchCrops, updateCropState, deleteCrop, completeCro
 import { predictCrop, suggestCrop } from './routes/crop_ai.js';
 import { analyzePublicCropImage, getPublicScanLogs } from './routes/public_crop_doctor.js';
 import { getScanLogs, updateDiagnosticRules, getDiagnosticRules } from './routes/admin_crop_doctor.js';
-import { getUsers, getUserDetails, toggleUserStatus, clearUserPin, getUserTransactions } from './routes/admin_users.js';
+import { getUsers, getUserDetails, toggleUserStatus, clearUserPin, getUserTransactions, getAdminFarmDetails } from './routes/admin_users.js';
 import { getPackages, updatePackage, addPackage, deletePackage, getActiveSubscribers, getPaymentHistory, manualUpgrade, getPaymentSettings, updatePaymentSettings, getPendingPayments, approvePayment, rejectPayment, downgradeUser } from './routes/admin_subscriptions.js';
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
@@ -49,6 +49,7 @@ router.get('/api/admin/test/weather-sync', withAuth(['admin']), testWeatherSync)
 router.get('/api/admin/users', withAuth(['admin']), getUsers);
 router.get('/api/admin/users/:id/details', withAuth(['admin']), getUserDetails);
 router.get('/api/admin/users/:id/transactions', withAuth(['admin']), getUserTransactions);
+router.get('/api/admin/users/:id/farms/:farmId', withAuth(['admin']), getAdminFarmDetails);
 router.put('/api/admin/users/:id/status', withAuth(['admin']), toggleUserStatus);
 router.post('/api/admin/users/:id/clear-pin', withAuth(['admin']), clearUserPin);
 router.get('/api/admin/packages', withAuth(['admin']), getPackages);
