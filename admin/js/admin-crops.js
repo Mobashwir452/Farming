@@ -755,6 +755,16 @@ window.renderTasksEditor = function () {
             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
                 <input type="text" value="${escapeHtml(task.title || '')}" oninput="updateTaskField(${idx}, 'title', this.value)" placeholder="কাজের নাম (যেমন: ১ম স্প্রে)" style="width: 100%; padding: 8px; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 13px; font-weight: 600;">
                 <textarea oninput="updateTaskField(${idx}, 'description', this.value)" placeholder="কী করতে হবে তার বিবরণ..." rows="2" style="width: 100%; padding: 8px; border: 1px solid #C7D2FE; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical;">${escapeHtml(task.description || '')}</textarea>
+                <div style="display: flex; gap: 8px; padding-top: 4px; border-top: 1px dashed #E0E7FF;">
+                    <div style="width: 120px; flex-shrink: 0;">
+                        <label style="font-size: 10px; color: #4338CA; font-weight: 600; display: block; margin-bottom: 2px;">ন্যূনতম গ্যাপ (দিন)</label>
+                        <input type="number" value="${task.min_gap_prev || 0}" oninput="updateTaskField(${idx}, 'min_gap_prev', this.value)" placeholder="0" style="width: 100%; padding: 6px; border: 1px solid #C7D2FE; border-radius: 4px; font-size: 12px; color: #3730A3;">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <label style="font-size: 10px; color: #4338CA; font-weight: 600; display: block; margin-bottom: 2px;">গ্যাপের কারণ</label>
+                        <input type="text" value="${escapeHtml(task.gap_reason || '')}" oninput="updateTaskField(${idx}, 'gap_reason', this.value)" placeholder="কেন গ্যাপ প্রয়োজন তার বিবরণ..." style="width: 100%; padding: 6px; border: 1px solid #C7D2FE; border-radius: 4px; font-size: 12px;">
+                    </div>
+                </div>
             </div>
             <button type="button" onclick="removeDailyTaskRow(${idx})" style="background: none; border: none; color: #4338CA; cursor: pointer; padding: 4px; flex-shrink: 0;" title="ডিলিট করুন">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -775,7 +785,11 @@ window.removeDailyTaskRow = function (index) {
 
 window.updateTaskField = function (index, field, value) {
     if (currentTasksData[index]) {
-        currentTasksData[index][field] = field === 'day_offset' ? parseInt(value) || 0 : value;
+        if (field === 'day_offset' || field === 'min_gap_prev') {
+            currentTasksData[index][field] = parseInt(value) || 0;
+        } else {
+            currentTasksData[index][field] = value;
+        }
     }
 }
 

@@ -95,6 +95,25 @@ export const saveCropTimeline = async (request, env) => {
     }
 };
 
+export const getCropById = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const query = `
+            SELECT c.id, c.farm_id, c.crop_name, c.status, c.planted_date, f.name as farm_name 
+            FROM crops c
+            JOIN farms f ON c.farm_id = f.id
+            WHERE c.id = ?
+        `;
+        const crop = await env.DB.prepare(query).bind(cropId).first();
+        if (!crop) {
+            return Response.json({ success: false, error: 'Crop not found' }, { status: 404 });
+        }
+        return Response.json({ success: true, crop });
+    } catch (e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
 export const searchCrops = async (request, env) => {
     try {
         const url = new URL(request.url);
@@ -186,13 +205,31 @@ export const deleteCrop = async (request, env) => {
         const check = await env.DB.prepare("SELECT c.id, c.image_r2_key FROM crops c JOIN farms f ON c.farm_id = f.id WHERE c.id = ? AND f.farmer_id = ?").bind(cropId, farmerId).first();
         if (!check) return Response.json({ success: false, error: 'Unauthorized or crop not found' }, { status: 403 });
 
-        if (check.image_r2_key && env.IMAGE_BUCKET) {
-            try { await env.IMAGE_BUCKET.delete(check.image_r2_key); } catch(e) { console.error("R2 cleanup fail:", e); }
+        if (env.IMAGE_BUCKET) {
+            // Delete main crop cover image
+            if (check.image_r2_key) {
+                try { await env.IMAGE_BUCKET.delete(check.image_r2_key); } catch(e) { console.error("R2 cover cleanup fail:", e); }
+            }
+
+            // Delete all plant images and related media in R2 using prefix bounds
+            try {
+                const prefix = `farmers/${farmerId}/crops/${cropId}/`;
+                const listed = await env.IMAGE_BUCKET.list({ prefix });
+                let objectsToDelete = [];
+                for (let obj of listed.objects) {
+                    objectsToDelete.push(obj.key);
+                }
+                if (objectsToDelete.length > 0) {
+                    await env.IMAGE_BUCKET.delete(objectsToDelete);
+                }
+            } catch(e) { 
+                console.error("R2 prefix cleanup fail:", e); 
+            }
         }
         
         await env.DB.prepare("DELETE FROM crops WHERE id = ?").bind(cropId).run();
         
-        return Response.json({ success: true, message: 'Crop deleted completely' });
+        return Response.json({ success: true, message: 'Crop deleted completely along with all R2 media' });
     } catch(e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
     }

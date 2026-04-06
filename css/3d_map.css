@@ -1,0 +1,363 @@
+/* Light Glassmorphic Sidebar */
+.plant-sidebar {
+    position: absolute;
+    top: 20px;
+    right: -450px; /* Hidden initially */
+    width: 350px;
+    height: calc(100vh - 40px);
+    background: rgba(255, 255, 255, 0.85); /* Light glass */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.05);
+    z-index: 20;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #0f172a; /* Dark text */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: inherit;
+}
+
+.plant-sidebar.active {
+    right: 20px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.health-badge {
+    margin-top: 8px;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(0,0,0,0.05);
+}
+
+.health-badge.h-healthy { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+.health-badge.h-sick { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.health-badge.h-dead { background: rgba(100, 116, 139, 0.1); color: #475569; border: 1px solid rgba(100, 116, 139, 0.2); }
+
+.close-sidebar-btn {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    color: #0f172a;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.close-sidebar-btn:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+/* 2.5D Isometric Engine Map Styles */
+.iso-viewport {
+    width: 100%;
+    height: 100vh;
+    overflow: auto; /* allows scrolling */
+    position: relative;
+    background: #e0f2fe; /* Light sky blue background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+}
+.iso-viewport:active { cursor: grabbing; }
+
+.iso-wrapper {
+    position: relative;
+    /* Move to center but allow large padding for scrolling */
+    padding: 200px; 
+    transform-style: preserve-3d;
+}
+
+#isometric-farm-grid {
+    position: relative;
+    /* The Magic CSS Transform for pseudo-3D isometric */
+    transform: rotateX(60deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+    /* Will dynamically set width/height based on beds */
+}
+
+/* Individual Beds */
+.bed-soil {
+    position: absolute;
+    background: linear-gradient(145deg, #166534, #14532d);
+    border: 1px solid #14532d;
+    border-radius: 8px;
+    /* Creating a dirt thick base giving it 3D depth */
+    box-shadow: 
+        -1px 1px 0 #064e3b,
+        -2px 2px 0 #064e3b,
+        -3px 3px 0 #064e3b,
+        -4px 4px 0 #064e3b,
+        -5px 5px 0 #064e3b,
+        -6px 6px 10px rgba(0,0,0,0.4);
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Plants inside beds */
+.plant-orb {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    /* We cancel the container's rotation so plant orb faces the camera directly 
+       (Billboard effect) */
+    transform: rotateZ(45deg) rotateX(-60deg) translateY(-20px);
+    transform-origin: bottom center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+.plant-orb:hover {
+    transform: rotateZ(45deg) rotateX(-60deg) translateY(-25px) scale(1.1);
+}
+
+.plant-orb.health-h { 
+    background: radial-gradient(circle at 30% 30%, #34d399, #059669);
+    border: 2px solid #a7f3d0;
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+.plant-orb.health-s { 
+    background: radial-gradient(circle at 30% 30%, #fca5a5, #ef4444);
+    border: 2px solid #fecaca;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+    animation: sickPulse 2s infinite;
+}
+
+.plant-orb.health-dead {
+    background: radial-gradient(circle at 30% 30%, #94a3b8, #475569);
+    border: 2px solid #cbd5e1;
+    opacity: 0.8;
+}
+
+@keyframes sickPulse {
+    0% { box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 8px 30px rgba(239, 68, 68, 0.8); }
+    100% { box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
+}
+
+/* Edit Mode Toggle Button */
+.floating-edit-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #0f172a;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+.floating-edit-btn.active {
+    background: #059669;
+    color: white;
+    border-color: #047857;
+    animation: flashEdit 1.5s infinite;
+}
+@keyframes flashEdit {
+    0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+/* Health Ring */
+.health-ring-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 120px;
+    max-height: 120px;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.05);
+    stroke-width: 2.5;
+}
+
+.circle {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease-out;
+}
+
+.circular-chart.green .circle { stroke: #10B981; }
+.circular-chart.red .circle { stroke: #EF4444; }
+.circular-chart.grey .circle { stroke: #64748b; }
+
+.percentage {
+    fill: #0f172a;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+/* Action Grid */
+.action-grid {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.action-btn {
+    flex: 1;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #475569;
+    padding: 10px 5px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.action-btn:hover { background: #f8fafc; color: #0f172a; border-color: rgba(0,0,0,0.15); }
+.action-btn.delete { color: #ef4444; }
+.action-btn.delete:hover { background: #fef2f2; border-color: #fecaca; }
+
+/* Timeline */
+.timeline-container {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-container h3 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.timeline-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.tl-item {
+    display: flex;
+    gap: 12px;
+}
+
+.tl-dot {
+    width: 32px;
+    height: 32px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.tl-dot.ai { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); }
+
+.tl-content {
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 1;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.tl-date {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.add-log-box {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.add-log-box input {
+    flex: 1;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 13px;
+}
+.add-log-box input::placeholder { color: #94a3b8; }
+
+.add-log-box button {
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.add-log-box button:hover {
+    background: #047857;
+}

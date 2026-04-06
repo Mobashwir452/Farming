@@ -8,7 +8,7 @@ import { getAdminCache, saveAdminCache, deleteAdminCache, generateAdminCacheAI }
 import { getAdminSettings, saveAdminSettings } from './routes/admin_settings.js';
 import { verifyFirebase, updateProfile, checkUser, loginPin, getProfile, submitManualPayment } from './routes/auth.js';
 import { createFarm, getFarms, getFarmDetails, updateFarm, deleteFarm } from './routes/farms.js';
-import { saveCropTimeline, searchCrops, updateCropState, deleteCrop, completeCrop, updateCropStatusManually, addCropNote } from './routes/crops.js';
+import { saveCropTimeline, searchCrops, getCropById, updateCropState, deleteCrop, completeCrop, updateCropStatusManually, addCropNote } from './routes/crops.js';
 import { predictCrop, suggestCrop } from './routes/crop_ai.js';
 import { analyzePublicCropImage, getPublicScanLogs } from './routes/public_crop_doctor.js';
 import { getScanLogs, updateDiagnosticRules, getDiagnosticRules } from './routes/admin_crop_doctor.js';
@@ -18,11 +18,13 @@ import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
 import { handleCropChat } from './routes/ai_chat.js';
 import { getTransactions, addTransaction, deleteTransaction } from './routes/transactions.js';
+import { getPlantGrid, generatePlantGrid, updateBedConfig, getPlantLogs, addPlantLog, uploadPlantImage, syncCropBeds } from './routes/plants.js';
 import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
 import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
 import { cleanOldCropScanImages } from './services/r2_cleaner.js';
 import { resetMonthlyLimits } from './services/limitResetter.js';
+
 
 const router = Router();
 
@@ -73,11 +75,11 @@ router.post('/api/admin/trigger-ai-verification', withAuth(['admin']), async (re
         try {
             const body = await request.json();
             cropId = body.cropId || null;
-        } catch(e) {} // ignore empty bodies
-        
+        } catch (e) { } // ignore empty bodies
+
         const stats = await runCropVerification(env, cropId, ctx);
         return Response.json({ success: true, message: 'AI Verification cycle executed successfully.', details: stats });
-    } catch(e) {
+    } catch (e) {
         return Response.json({ success: false, error: e.message }, { status: 500 });
     }
 });
@@ -114,16 +116,25 @@ router.get('/api/public/crop-scans', withAuth(['farmer']), getPublicScanLogs);
 router.post('/api/public/crop-chat', withAuth(['farmer', 'admin']), handleCropChat);
 
 // 3.7 Public Image Server (R2 Bucket)
-router.get('/api/public/images/:key', async (request, env) => {
+router.get('/api/public/images/*', async (request, env) => {
     try {
-        const { key } = request.params;
-        const object = await env.IMAGE_BUCKET.get(`crop-scans/${key}`);
+        const url = new URL(request.url);
+        let key = url.pathname.replace('/api/public/images/', '');
+        key = decodeURIComponent(key);
+        // Fallback for older crop-scans images that just have standard uuids without prefixes
+        if (!key.includes('/')) {
+            key = `crop-scans/${key}`;
+        }
+
+        const object = await env.IMAGE_BUCKET.get(key);
         if (!object) return new Response('Image Not Found', { status: 404 });
         const headers = new Headers();
         object.writeHttpMetadata(headers);
         headers.set('etag', object.httpEtag);
+        // Important for CORS:
+        headers.set('Access-Control-Allow-Origin', '*');
         return new Response(object.body, { headers });
-    } catch(err) {
+    } catch (err) {
         return new Response('Error fetching image', { status: 500 });
     }
 });
@@ -131,6 +142,8 @@ router.get('/api/public/cache', withAuth(['farmer']), getAdminCache);
 router.get('/api/ai/suggest-crop', withAuth(['farmer']), suggestCrop);
 router.get('/api/ai/predict-crop', withAuth(['farmer']), predictCrop);
 router.get('/api/crops/search', withAuth(['farmer']), searchCrops);
+router.get('/api/crops/:id', withAuth(['farmer']), getCropById);
+
 router.post('/api/crops', withAuth(['farmer']), saveCropTimeline);
 router.put('/api/crops/:id/state', withAuth(['farmer']), updateCropState);
 router.delete('/api/crops/:id', withAuth(['farmer']), deleteCrop);
@@ -141,6 +154,15 @@ router.get('/api/crops/:id/report', withAuth(['farmer']), generateCropReport);
 router.get('/api/crops/:id/transactions', withAuth(['farmer']), getTransactions);
 router.post('/api/crops/:id/transactions', withAuth(['farmer']), addTransaction);
 router.delete('/api/crops/:id/transactions/:txId', withAuth(['farmer']), deleteTransaction);
+
+// 3.8 Plant Tracking 3D Grids & Logs
+router.post('/api/crops/:id/upload-image', withAuth(['farmer']), uploadPlantImage);
+router.get('/api/crops/:id/plants', withAuth(['farmer']), getPlantGrid);
+router.post('/api/crops/:id/plants/generate', withAuth(['farmer']), generatePlantGrid);
+router.put('/api/crops/:id/beds/:bedId', withAuth(['farmer']), updateBedConfig);
+router.put('/api/crops/:id/beds-sync', withAuth(['farmer']), syncCropBeds);
+router.get('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), getPlantLogs);
+router.post('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), addPlantLog);
 
 // 4. AI Engine Sub-Router (Admin Only - auth handled in sub-router)
 router.all('/api/admin/ai/*', aiRouter.handle);

@@ -238,10 +238,14 @@ CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALRE
         daily_tasks = taskMatches.map((m) => {
             const block = m[1];
             const dayMatch = block.match(/<day_offset>([\s\S]*?)<\/day_offset>/i);
+            const minGapMatch = block.match(/<min_gap_prev>([\s\S]*?)<\/min_gap_prev>/i);
+            const gapReasonMatch = block.match(/<gap_reason>([\s\S]*?)<\/gap_reason>/i);
             const titleMatch = block.match(/<title>([\s\S]*?)<\/title>/i);
             const descMatch = block.match(/<desc>([\s\S]*?)<\/desc>/i);
             return {
                 day_offset: dayMatch ? parseInt(dayMatch[1].replace(/[^\d-]/g, '')) || 0 : 0,
+                min_gap_prev: minGapMatch ? parseInt(minGapMatch[1].replace(/[^\d]/g, '')) || 0 : 0,
+                gap_reason: gapReasonMatch ? gapReasonMatch[1].replace(/<[^>]*>?/gm, '').trim() : '',
                 title: titleMatch ? titleMatch[1].replace(/<[^>]*>?/gm, '').trim() : '',
                 description: descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : ''
             };

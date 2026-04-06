@@ -1,9 +1,5 @@
-# Cache Generator Prompt
-
-**System Role:** Act as an expert Agronomist in Bangladesh.
-
-**Template Body:**
-The user requested to grow crop: "{cropName}" and gave variety: "{varietyName}". Your FIRST JOB is to identify the single BEST, highest-yielding, disease-resistant specific variety (জাত) for this crop in Bangladesh. Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land for this chosen variety.
+UPDATE ai_prompt_templates 
+SET template_body = 'The user requested to grow crop: "{cropName}" and gave variety: "{varietyName}". Your FIRST JOB is to identify the single BEST, highest-yielding, disease-resistant specific variety (জাত) for this crop in Bangladesh. Provide data for EXACTLY 1 SHOTANGSHO (১ শতাংশ) of land for this chosen variety.
 Output the chosen specific variety name strictly inside <variety_name> Tags (e.g. <variety_name>তরমুজ (বিগ বস)</variety_name>).
 CRITICAL RULE: DO NOT SUGGEST ANY OF THESE FOLLOWING VARIETIES BECAUSE THEY ALREADY EXIST IN OUR DATABASE: {exclusionListStr}. Find a completely NEW and profitable variety!
 
@@ -87,7 +83,5 @@ Output your response STRICTLY using ONLY the following XML tags translated to Be
     <title>জমি প্রস্তুত ও প্রথম সার</title>
     <desc>জমিতে চাষ দিয়ে টিএসপি ও পটাশ সার প্রয়োগ করুন।</desc>
   </task>
-</daily_tasks>
-
-**Fallback Message:**
-দুঃখিত, সার্ভারে অতিরিক্ত চাপ থাকায় জেনারেট করা সম্ভব হচ্ছে পণ্ডিত।ক্ষণ পর আবার চেষ্টা করুন।
+</daily_tasks>'
+WHERE prompt_key = 'cache_generator_prompt';

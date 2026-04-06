@@ -288,10 +288,22 @@ window.finalizeAndSave = async function () {
     }
 
     try { 
-        // Read custom date
+        // The user selects when the very first task starts (often negative offset)
         const dateInput = document.getElementById('selectedPlantingDate').value;
-        const plantingDate = dateInput || new Date().toISOString().split('T')[0];
-        pendingAICropData.planting_date = plantingDate;
+        const firstTaskDateStr = dateInput || new Date().toISOString().split('T')[0];
+        
+        // Find minimum offset
+        const tasks = pendingAICropData.daily_tasks || [];
+        let minOffset = 0;
+        if (tasks.length > 0) {
+            minOffset = Math.min(...tasks.map(t => parseInt(t.day_offset) || 0));
+        }
+        
+        // Calculate the actual planting date (day 0 anchor)
+        const actualPlantingDateObj = new Date(firstTaskDateStr);
+        actualPlantingDateObj.setDate(actualPlantingDateObj.getDate() - minOffset);
+        
+        pendingAICropData.planting_date = actualPlantingDateObj.toISOString().split('T')[0];
 
         const response = await fetch(`${API_URL}/api/crops`, {
             method: 'POST',

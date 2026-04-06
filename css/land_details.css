@@ -6,7 +6,8 @@
 }
 
 .land-details-container {
-    padding: 0 0 200px 0; /* Space for bottom nav */
+    padding: 0 0 200px 0;
+    /* Space for bottom nav */
 }
 
 /* Page Header Override (with Back Button) */
@@ -71,7 +72,8 @@
 /* Sections Container */
 .ld-sections {
     padding: 16px;
-    padding-bottom: 140px; /* Space for FAB and bottom nav */
+    padding-bottom: 140px;
+    /* Space for FAB and bottom nav */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -82,7 +84,6 @@
     background: white;
     border-radius: 20px;
     padding: 20px;
-    margin-bottom: 20px;
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(0, 0, 0, 0.03);
 }
@@ -367,7 +368,8 @@
 }
 
 .ld-tab-btn.active {
-    background: #059669; /* Brand Green */
+    background: #059669;
+    /* Brand Green */
     color: white;
     box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
 }
@@ -412,19 +414,30 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* -------------------------------------
    History Mode Overrides (Read-Only)
 -------------------------------------- */
 body.history-mode .ld-task-item input[type="checkbox"] {
-    display: none !important; /* Hide completion checkboxes */
+    display: none !important;
+    /* Hide completion checkboxes */
 }
+
 body.history-mode .ld-task-item label {
-    pointer-events: none; /* Prevent clicking labels */
+    pointer-events: none;
+    /* Prevent clicking labels */
 }
+
 body.history-mode #btnHarvest,
 body.history-mode #btnDisease,
 body.history-mode button[onclick*="customStepModal"],
@@ -438,11 +451,13 @@ body.history-mode button[onclick*="handleDeleteCrop"],
 body.history-mode #chatbotToggleBtn {
     display: none !important;
 }
+
 body.history-mode .resource-check-item input,
 body.history-mode .resource-check-item select {
     pointer-events: none;
     opacity: 0.8;
 }
+
 /* Note: #btnFinance and loss button are kept active by user request */
 body.history-mode .page-top-header h2::after {
     content: ' (অতীত রেকর্ড)';

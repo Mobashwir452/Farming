@@ -190,7 +190,7 @@ async function fetchFarmAndCropDetails() {
                 }
 
                 // Set Crop Profile
-                const cropNameEl = document.querySelector('.ld-crop-text h4');
+                const cropNameEl = document.getElementById('heroCropName');
                 const cropStatusEl = document.querySelector('.crop-status-display');
                 const plantingAgeContainer = document.querySelector('.crop-age-display');
 
@@ -216,40 +216,65 @@ async function fetchFarmAndCropDetails() {
                 if (initialCount === 0 || !activeCrop.planted_date) {
                     isPrePlant = true;
                 }
-                if (plantingAgeContainer) {
-                    let diffDaysVal = null;
-                    let remainingDaysVal = null;
-                    
-                    // Evaluate future planting date
-                    if (activeCrop.planted_date && !isPrePlant) {
-                        const historyMode = document.body.classList.contains('history-mode');
-                        const endDate = (historyMode && activeCrop.updated_at) ? new Date(activeCrop.updated_at) : new Date();
-                        const diffTime = endDate.getTime() - new Date(activeCrop.planted_date).getTime();
-                        if (diffTime < 0) {
-                            isPrePlant = true; // Future planting date
-                            remainingDaysVal = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
-                        } else {
-                            diffDaysVal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                        }
-                    }
-
-                    // Now that isPrePlant is fully evaluated, we can create the button HTML
-                    let btnHtml = '';
-                    if (isPrePlant && !document.body.classList.contains('history-mode')) {
-                        btnHtml = ` <button onclick="promptPlantCount()" style="margin-left: 8px; background: #059669; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(5,150,105,0.2);">রোপণ সম্পন্ন</button>`;
-                    }
-
-                    if (remainingDaysVal !== null) {
-                        plantingAgeContainer.innerHTML = `রোপণ বাকি: <strong>${remainingDaysVal} দিন</strong>` + btnHtml;
-                    } else if (diffDaysVal !== null) {
-                        plantingAgeContainer.innerHTML = `রোপণের বয়স: <strong>${diffDaysVal} দিন</strong>`;
-                    } else if (isPrePlant) {
-                        plantingAgeContainer.innerHTML = `চারা রোপণ বাকি` + btnHtml;
+                
+                let diffDaysVal = null;
+                let remainingDaysVal = null;
+                if (activeCrop.planted_date && !isPrePlant) {
+                    const historyMode = document.body.classList.contains('history-mode');
+                    const endDate = (historyMode && activeCrop.updated_at) ? new Date(activeCrop.updated_at) : new Date();
+                    const diffTime = endDate.getTime() - new Date(activeCrop.planted_date).getTime();
+                    if (diffTime < 0) {
+                        isPrePlant = true; // Future planting date
+                        remainingDaysVal = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
                     } else {
-                        plantingAgeContainer.innerHTML = `বয়স: <strong>অজ্ঞাত</strong>`;
+                        diffDaysVal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                     }
                 }
 
+                const pillContainer = document.getElementById('statusPillContainer');
+                if (pillContainer) {
+                    if (!activeCrop.planted_date && !document.body.classList.contains('history-mode')) {
+                        // strictly no planted_date -> Pre-Plant state
+                        pillContainer.innerHTML = `
+                            <div class="status-pill status-pre-plant" onclick="promptPlantCount()">
+                                <span>🌱 রোপণ সম্পন্ন করুন (Pre-plant)</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </div>
+                        `;
+                    } else if (document.body.classList.contains('history-mode')) {
+                        pillContainer.innerHTML = `
+                            <div class="status-pill status-harvested">
+                                <span>✅ রোপণ ও ফসল কর্তন সম্পন্ন</span>
+                            </div>
+                        `;
+                    } else {
+                        // If planted_date exists (even if in future), show the date with edit option
+                        const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+                        const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+                        
+                        let derivedPlantingDateStr = activeCrop.planted_date ? (activeCrop.planted_date.includes('T') ? activeCrop.planted_date.split('T')[0] : activeCrop.planted_date) : '';
+                        let plantingTaskId = null;
+                        
+                        try {
+                            const tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
+                            const pTask = tasks.find(t => parseInt(t.day_offset) === 0 || t.title.includes('রোপণ') || t.title.includes('বপন') || t.title.includes('বীজতলা'));
+                            if (pTask && pTask.due_date) {
+                                derivedPlantingDateStr = pTask.due_date;
+                                plantingTaskId = pTask.id;
+                            }
+                        } catch(e){}
+                        
+                        let plantedDateObj = derivedPlantingDateStr ? new Date(derivedPlantingDateStr) : '';
+                        let formattedDate = plantedDateObj ? `${toBngDigits(plantedDateObj.getDate())} ${EN_TO_BN_MONTHS[plantedDateObj.getMonth()]}, ${toBngDigits(plantedDateObj.getFullYear())}` : '-';
+                        
+                        pillContainer.innerHTML = `
+                            <div class="status-pill status-planted" onclick="${plantingTaskId ? `rescheduleTask('${plantingTaskId}')` : 'promptPlantCount()'}">
+                                <span>🌱 রোপণ: ${formattedDate}</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </div>
+                        `;
+                    }
+                }
                 if (cropStatusEl) {
                     if (document.body.classList.contains('history-mode')) {
                         cropStatusEl.innerHTML = `সফল অতীত ফসল`;
@@ -271,13 +296,33 @@ async function fetchFarmAndCropDetails() {
                         cropStatusEl.innerHTML = `${activeCrop.status}`;
                     }
                 }
-
-                // Update Hero Farm Area (Shotangsho)
-                const heroFarmAreaEl = document.getElementById('heroFarmArea');
-                if (heroFarmAreaEl && window.currentFarmArea) {
-                    heroFarmAreaEl.textContent = `${window.currentFarmArea} শতাংশ`;
+                // Populate Plant Count Row
+                const plantCountRow = document.getElementById('plantCountRow');
+                const plantCountDisplay = document.getElementById('plantCountDisplay');
+                if (plantCountRow && plantCountDisplay) {
+                    if (isPrePlant || initialCount === 0) {
+                        plantCountRow.style.display = 'none';
+                    } else {
+                        plantCountRow.style.display = 'flex';
+                        plantCountDisplay.textContent = `${initialCount.toLocaleString('bn-BD')} টি`;
+                    }
                 }
-
+                // Update Current Phase Span instead of Hero Farm Area
+                const phaseSpan = document.getElementById('currentPhaseSpan');
+                if (phaseSpan) {
+                    if (isPrePlant) {
+                        phaseSpan.textContent = "প্রাক-রোপণ (Pre-plant)";
+                    } else {
+                        let age = diffDaysVal !== null ? diffDaysVal : 0;
+                        if (age < 30) {
+                            phaseSpan.textContent = "চারা বৃদ্ধি পর্যায় (Vegetative)";
+                        } else if (age < 60) {
+                            phaseSpan.textContent = "বিকাশ ও ফুল পর্যায় (Flowering)";
+                        } else {
+                            phaseSpan.textContent = "পরিপক্বতা বা কর্তন (Harvest)";
+                        }
+                    }
+                }
                 // Smart Planting Flow Output
                 const plantCountContainer = document.getElementById('plantCountContainer');
                 if (plantCountContainer) {
@@ -788,16 +833,55 @@ window.addCustomTask = function () {
     }
 };
 
+window.currentTaskFilter = window.currentTaskFilter || 'pending';
+window.setTaskFilter = function(filterStr) {
+    window.currentTaskFilter = filterStr;
+    const chips = document.querySelectorAll('.filter-chip');
+    chips.forEach(chip => {
+        if(chip.getAttribute('data-filter') === filterStr) {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+    if(typeof activeCrop !== 'undefined' && activeCrop && activeCrop.tasks_state_json) {
+        renderTasksTab(activeCrop.tasks_state_json);
+    }
+};
+
 function renderTasksTab(tasksJsonStr) {
     const tlContainer = document.getElementById('render-tasks');
 
-    let tasks = [];
+    let allTasks = [];
     try {
-        tasks = JSON.parse(tasksJsonStr || '[]');
+        allTasks = JSON.parse(tasksJsonStr || '[]');
     } catch (e) { }
 
-    if (tasks.length === 0) {
+    if (allTasks.length === 0) {
         tlContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো কাজ পাওয়া যায়নি।</p>';
+        return;
+    }
+
+    const todayDate = new Date();
+    todayDate.setHours(0,0,0,0);
+
+    let tasks = allTasks.filter(task => {
+        const taskDateObj = new Date(task.due_date);
+        taskDateObj.setHours(0,0,0,0);
+        
+        let status = task.status || 'pending';
+        if (task.is_completed) status = 'completed';
+
+        if (window.currentTaskFilter === 'all') return true;
+        if (window.currentTaskFilter === 'completed') return status === 'completed';
+        if (window.currentTaskFilter === 'cancelled') return status === 'cancelled';
+        if (window.currentTaskFilter === 'missed') return status === 'pending' && taskDateObj < todayDate;
+        if (window.currentTaskFilter === 'pending') return status === 'pending' && taskDateObj >= todayDate;
+        return true;
+    });
+
+    if (tasks.length === 0) {
+        tlContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 40px 20px; font-weight: 500; font-size: 15px;">এই ফিল্টারে কোনো কাজ নেই।</p>';
         return;
     }
 
@@ -817,6 +901,70 @@ function renderTasksTab(tasksJsonStr) {
 
     // Helper to Bengali Digits
     const toBngDigits = (num) => String(num).split('').map(d => ({ '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }[d] || d)).join('');
+
+    // Smart Helper to scale quantities in description based on farm area
+    const currentArea = window.currentFarmArea || 1;
+    const scaleTextQuantities = (text) => {
+        if (!text || currentArea === 1) return text;
+        const bnToEn = (str) => str.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+        const enToBn = (str) => String(str).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+        
+        let modifiedText = text;
+        let bngArea = enToBn(currentArea);
+        
+        // Layer 1: Adapt "per decimal" phrases
+        modifiedText = modifiedText.replace(/১\s*শতাংশ\s*জমিতে/g, `পুরো জমিতে (${bngArea} শতাংশ)`);
+        modifiedText = modifiedText.replace(/১\s*শতাংশে/g, `পুরো জমিতে (${bngArea} শতাংশে)`);
+        modifiedText = modifiedText.replace(/এক\s*শতাংশ\s*জমিতে/g, `পুরো জমিতে (${bngArea} শতাংশ)`);
+        modifiedText = modifiedText.replace(/এক\s*শতাংশে/g, `পুরো জমিতে (${bngArea} শতাংশে)`);
+        modifiedText = modifiedText.replace(/প্রতি\s*শতাংশে/g, `পুরো জমিতে (${bngArea} শতাংশে)`);
+
+        // Layer 2: Scale numbers smartly based on text context
+        modifiedText = modifiedText.replace(/([\d০-৯\.\-]+)\s*(কেজি|গ্রাম|লিটার|মিলি|টি|বস্তা|টন)/g, (match, numStr, unit, offset, fullText) => {
+            // Find the sentence containing this match (boundaries: ।, ., \n, ;)
+            let startIdx = offset;
+            while (startIdx > 0 && !['।', '.', '\n', ';'].includes(fullText[startIdx])) startIdx--;
+            let endIdx = offset + match.length;
+            while (endIdx < fullText.length && !['।', '.', '\n', ';'].includes(fullText[endIdx])) endIdx++;
+            
+            const sentenceCtx = fullText.substring(startIdx, endIdx);
+            
+            // Protection 1: Context suggests ratio or per plant/pit inside the SAME sentence
+            const protectionWords = ['প্রতি', 'প্রতিটি', 'লিটারে', 'পানিতে', 'গর্তে', 'মাদায়', 'গাছে', 'চারাতে', '/লিটার', '/ লিটার'];
+            if (protectionWords.some(w => sentenceCtx.includes(w))) {
+                return match; 
+            }
+            
+            // Protection 2: It's an instruction about ploughing/times inside the SAME sentence
+            if (unit === 'টি' && (sentenceCtx.includes('চাষ') || sentenceCtx.includes('মই') || sentenceCtx.includes('বার'))) {
+                return match;
+            }
+
+            // Handle numeric ranges e.g. "১.৫-২ কেজি" or "২-৩"
+            if (numStr.includes('-')) {
+                 let parts = numStr.split('-');
+                 if (parts.length === 2 && parts[0] && parts[1]) {
+                     let p1 = parseFloat(bnToEn(parts[0]));
+                     let p2 = parseFloat(bnToEn(parts[1]));
+                     if(!isNaN(p1) && !isNaN(p2)) {
+                         let s1 = Math.round(p1 * currentArea * 100) / 100;
+                         let s2 = Math.round(p2 * currentArea * 100) / 100;
+                         return enToBn(s1) + "-" + enToBn(s2) + " " + unit;
+                     }
+                 }
+                 return match; 
+            }
+            
+            let enNum = parseFloat(bnToEn(numStr));
+            if (isNaN(enNum)) return match;
+
+            let scaledEnNum = enNum * currentArea;
+            scaledEnNum = Math.round(scaledEnNum * 100) / 100;
+            return enToBn(scaledEnNum) + " " + unit;
+        });
+        
+        return modifiedText;
+    };
 
     // Format Bengali Date
     const formatBengaliDate = (dateStr) => {
@@ -845,8 +993,8 @@ function renderTasksTab(tasksJsonStr) {
 
         let groupHtml = `
             <div class="date-group" style="margin-bottom: 24px;">
-                <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; padding: 0 16px;">${headerLabel}</h3>
-                <div class="tasks-section" style="padding: 0 16px; display: flex; flex-direction: column; gap: 12px;">
+                <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; padding: 0 12px;">${headerLabel}</h3>
+                <div class="tasks-section" style="padding: 0 12px; display: flex; flex-direction: column; gap: 12px;">
         `;
 
         dateTasks.forEach(task => {
@@ -860,6 +1008,9 @@ function renderTasksTab(tasksJsonStr) {
             } else if (task.status === 'cancelled') {
                 itemClass = 'warning';
                 dateLabel = `<span style="color: #EF4444;">✕ বাতিলকৃত</span>`;
+            } else if (task.is_skipped) {
+                itemClass = 'skipped';
+                dateLabel = `<span style="color: #D97706;">✕ স্কিপ করা হয়েছে</span>`;
             } else {
                 showActions = true;
                 if (task.due_date === todayStr) {
@@ -888,6 +1039,16 @@ function renderTasksTab(tasksJsonStr) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> বাতিল
                     </button>
                 </div>`;
+            } else if (task.status === 'cancelled') {
+                actionsHtml = `
+                <div class="task-item-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+                    <button class="btn-tl-action reactivate" onclick="reactivateTask('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed var(--border-color); background: transparent; border-radius: 8px; cursor: pointer; color: var(--text-main);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="16 1 21 5 16 9"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><polyline points="8 23 3 19 8 15"></polyline></svg> পরিবর্তন করুন
+                    </button>
+                    <button class="btn-tl-action delete-perm" onclick="deleteTaskPermanently('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed #EF4444; background: #FEF2F2; border-radius: 8px; cursor: pointer; color: #EF4444;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> মুছে ফেলুন
+                    </button>
+                </div>`;
             } else {
                 actionsHtml = `
                 <div class="task-item-actions" style="margin-top: 12px; display: flex; gap: 8px;">
@@ -898,12 +1059,16 @@ function renderTasksTab(tasksJsonStr) {
             }
 
             groupHtml += `
-                <div class="ld-task-item ${itemClass}" style="position: relative; padding-left: 0; display: block; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                <div class="ld-task-item ${itemClass}" style="position: relative; padding-left: 0; display: block; background: ${task.is_skipped ? '#FAFAFA' : '#fff'}; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); ${task.is_skipped ? 'opacity: 0.75;' : ''}">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--text-main);">${task.title}</h4>
-                        <span style="font-size: 11px; padding: 4px 8px; border-radius: 8px; background: ${itemClass === 'completed' ? '#ECFDF5' : (itemClass === 'active' ? '#EEF2FF' : (itemClass === 'warning' ? '#FEF2F2' : '#F8FAFC'))}; color: ${itemClass === 'completed' ? '#059669' : (itemClass === 'active' ? '#4F46E5' : (itemClass === 'warning' ? '#DC2626' : '#64748B'))}; font-weight: 600;">${dateLabel}</span>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--text-main); ${task.is_skipped ? 'text-decoration: line-through;' : ''}">${task.title}</h4>
+                        <span style="font-size: 11px; padding: 4px 8px; border-radius: 8px; background: ${itemClass === 'completed' ? '#ECFDF5' : (itemClass === 'active' ? '#EEF2FF' : (itemClass === 'warning' ? '#FEF2F2' : (itemClass === 'skipped' ? '#FFFBEB' : '#F8FAFC')))}; color: ${itemClass === 'completed' ? '#059669' : (itemClass === 'active' ? '#4F46E5' : (itemClass === 'warning' ? '#DC2626' : (itemClass === 'skipped' ? '#D97706' : '#64748B')))}; font-weight: 600;">${dateLabel}</span>
                     </div>
-                    ${task.description ? `<p style="margin: 0 0 12px 0; font-size: 13px; color: var(--text-muted); line-height: 1.4;">${task.description}</p>` : ''}
+                    ${task.description ? `<p style="margin: 0 0 ${task.is_skipped ? '8px' : '12px'} 0; font-size: 13px; color: var(--text-muted); line-height: 1.4;">${scaleTextQuantities(task.description)}</p>` : ''}
+                    ${task.is_skipped ? `<div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #C2410C; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <span>আপনি এই কাজটি এড়িয়ে গেছেন, যার ফলে কাঙ্ক্ষিত ফলন কিছুটা কমে যেতে পারে।</span>
+                    </div>` : ''}
                     ${actionsHtml}
                 </div>
             `;
@@ -918,13 +1083,57 @@ function renderTasksTab(tasksJsonStr) {
     }
 }
 
+window.currentResourceFilter = window.currentResourceFilter || 'pending';
+window.setResourceFilter = function(filterStr) {
+    window.currentResourceFilter = filterStr;
+    const chips = document.querySelectorAll('#resource-filter-chips .filter-chip');
+    chips.forEach(chip => {
+        if(chip.getAttribute('data-filter') === filterStr) {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+    if(typeof activeCrop !== 'undefined' && activeCrop && activeCrop.resources_state_json) {
+        renderResourcesTab(activeCrop.resources_state_json);
+    }
+};
+
 function renderResourcesTab(resJsonStr) {
     const resContainer = document.getElementById('render-resources');
 
-    let resources = [];
+    let allResources = [];
     try {
-        resources = JSON.parse(resJsonStr || '[]');
+        allResources = JSON.parse(resJsonStr || '[]');
     } catch (e) { }
+
+    let needsSave = false;
+    allResources.forEach((r, idx) => {
+        if (!r.id) {
+            r.id = 'res_' + idx + '_' + Math.random().toString(36).substr(2, 5);
+            needsSave = true;
+        }
+    });
+
+    if (needsSave) {
+        activeCrop.resources_state_json = JSON.stringify(allResources);
+        saveCropState();
+    }
+
+    let resources = allResources.filter(r => {
+        let isBought = r.status === 'bought';
+        if (window.currentResourceFilter === 'all') return true;
+        if (window.currentResourceFilter === 'bought') return isBought;
+        if (window.currentResourceFilter === 'pending') return !isBought;
+        return true;
+    });
+
+    resContainer.innerHTML = '';
+
+    if (resources.length === 0) {
+        resContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 40px 20px; font-weight: 500; font-size: 15px;">এই ফিল্টারে কোনো উপকরণ নেই।</p>';
+        return;
+    }
 
     const grouped = {
         'seed_or_sapling': { title: 'বীজ বা চারা', items: [] },
@@ -934,28 +1143,13 @@ function renderResourcesTab(resJsonStr) {
         'labor_and_other': { title: 'শ্রমিক ও অন্যান্য', items: [] }
     };
 
-    let needsSave = false;
-    resources.forEach((r, idx) => {
-        if (!r.id) {
-            r.id = 'res_' + idx + '_' + Math.random().toString(36).substr(2, 5);
-            needsSave = true;
-        }
+    resources.forEach(r => {
         const cat = r.category || 'labor_and_other';
         if (grouped[cat]) grouped[cat].items.push(r);
         else grouped['labor_and_other'].items.push(r);
     });
 
-    if (needsSave) {
-        activeCrop.resources_state_json = JSON.stringify(resources);
-        saveCropState();
-    }
-
-    resContainer.innerHTML = '';
-
-    if (resources.length === 0) {
-        resContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">কোনো রিসোর্স পাওয়া যায়নি।</p>';
-    } else {
-        for (const [key, group] of Object.entries(grouped)) {
+    for (const [key, group] of Object.entries(grouped)) {
             if (group.items.length > 0) {
                 resContainer.innerHTML += `
                 <div style="margin-top: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
@@ -999,12 +1193,25 @@ function renderResourcesTab(resJsonStr) {
                         </div>
                     `;
                 });
-            }
         }
     }
 
     // Bottom add button code removed, as feature migrated to header
 }
+
+window.currentFinanceFilter = window.currentFinanceFilter || 'all';
+window.setFinanceFilter = function(filterStr) {
+    window.currentFinanceFilter = filterStr;
+    const chips = document.querySelectorAll('#finance-filter-chips .filter-chip');
+    chips.forEach(chip => {
+        if(chip.getAttribute('data-filter') === filterStr) {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+    renderFinanceTab();
+};
 
 window.renderFinanceTab = async function() {
     const finContainer = document.getElementById('render-finance');
@@ -1042,50 +1249,48 @@ window.renderFinanceTab = async function() {
             revEl.parentElement.querySelector('.ld-info-label').textContent = 'নেট ব্যালেন্স';
         }
 
-        if (txs.length === 0) {
-            finContainer.innerHTML = `
-                <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 12px;">
-                        <div style="text-align: center; flex: 1; border-right: 1px solid var(--border-color);">
-                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 4px 0;">মোট আয়</p>
-                            <h3 style="font-size: 18px; color: #10B981; margin: 0; font-weight: 700;">৳ ০</h3>
-                        </div>
-                        <div style="text-align: center; flex: 1;">
-                            <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 4px 0;">মোট ব্যয়</p>
-                            <h3 style="font-size: 18px; color: #EF4444; margin: 0; font-weight: 700;">৳ ০</h3>
-                        </div>
-                    </div>
-                    <p style="text-align:center; color: var(--text-muted); font-size: 13px; margin: 0;">কোনো ট্রানজ্যাকশন পাওয়া যায়নি।</p>
-            `;
-            return;
-        }
+        let filteredTxs = txs.filter(t => {
+            if (window.currentFinanceFilter === 'all') return true;
+            if (window.currentFinanceFilter === 'income') return t.type === 'income';
+            if (window.currentFinanceFilter === 'expense') return t.type === 'expense';
+            return true;
+        });
 
-        let listHtml = txs.map(t => {
-            const isInc = t.type === 'income';
-            const iconColor = isInc ? '#10B981' : '#EF4444';
-            const iconBg = isInc ? '#D1FAE5' : '#FEE2E2';
-            const sign = isInc ? '+' : '-';
-            const dateStr = t.transaction_date ? new Date(t.transaction_date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' }) : 'অজানা';
-            
-            return `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-color);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; border-radius: 20px; background: ${iconBg}; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
-                            ${isInc ? 
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' : 
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>'}
+        let listHtml = '';
+        if (filteredTxs.length === 0) {
+            if (txs.length === 0) {
+                listHtml = '<p style="text-align:center; color: var(--text-muted); font-size: 13px; padding: 20px; margin: 0;">কোনো ট্রানজ্যাকশন পাওয়া যায়নি।</p>';
+            } else {
+                listHtml = '<p style="text-align:center; color: var(--text-muted); font-size: 13px; padding: 20px; margin: 0;">এই ফিল্টারে কোনো ট্রানজ্যাকশন নেই।</p>';
+            }
+        } else {
+            listHtml = filteredTxs.map(t => {
+                const isInc = t.type === 'income';
+                const iconColor = isInc ? '#10B981' : '#EF4444';
+                const iconBg = isInc ? '#D1FAE5' : '#FEE2E2';
+                const sign = isInc ? '+' : '-';
+                const dateStr = t.transaction_date ? new Date(t.transaction_date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' }) : 'অজানা';
+                
+                return `
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-color);">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 20px; background: ${iconBg}; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                                ${isInc ? 
+                                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' : 
+                                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>'}
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-main);">${escapeHtml(t.description || t.category || (isInc ? 'আয়' : 'ব্যয়'))}</h4>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">${dateStr}</p>
+                            </div>
                         </div>
                         <div>
-                            <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-main);">${escapeHtml(t.description || t.category || (isInc ? 'আয়' : 'ব্যয়'))}</h4>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">${dateStr}</p>
+                            <span style="font-weight: 700; font-size: 15px; color: ${iconColor};">${sign}৳${t.amount_bdt}</span>
                         </div>
                     </div>
-                    <div>
-                        <span style="font-weight: 700; font-size: 15px; color: ${iconColor};">${sign}৳${t.amount_bdt}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
 
         finContainer.innerHTML = `
             <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
@@ -1487,51 +1692,138 @@ window.renderGuidelineModal = async function () {
     }
 };
 
+window.pendingConfirmCallback = null;
+
+window.showConfirmModal = function(title, text, confirmText, confirmCallback, isDanger = true) {
+    document.getElementById('confirmActionTitle').textContent = title;
+    document.getElementById('confirmActionText').textContent = text;
+    document.getElementById('confirmActionBtn').textContent = confirmText;
+    
+    const iconContainer = document.getElementById('confirmActionIcon');
+    const actionBtn = document.getElementById('confirmActionBtn');
+    
+    if (isDanger) {
+        iconContainer.style.color = '#DC2626';
+        iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+        actionBtn.style.background = '#DC2626';
+        actionBtn.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.2)';
+    } else {
+        iconContainer.style.color = '#10B981';
+        iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9 12l2 2 4-4"></path></svg>`;
+        actionBtn.style.background = 'var(--primary)';
+        actionBtn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+    }
+
+    window.pendingConfirmCallback = confirmCallback;
+    
+    document.getElementById('confirmActionBtn').onclick = function() {
+        if (window.pendingConfirmCallback) window.pendingConfirmCallback();
+        window.closeConfirmModal();
+    };
+
+    const modal = document.getElementById('confirmActionModal');
+    modal.classList.add('active');
+    setTimeout(() => { modal.querySelector('.calendar-content').style.transform = 'scale(1)'; }, 10);
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeConfirmModal = function() {
+    const modal = document.getElementById('confirmActionModal');
+    modal.classList.remove('active');
+    modal.querySelector('.calendar-content').style.transform = 'scale(0.9)';
+    document.body.style.overflow = '';
+    window.pendingConfirmCallback = null;
+};
+
 window.markTaskDone = function (taskId, btnEl) {
     if (!activeCrop || !activeCrop.tasks_state_json) return;
-    try {
-        let tasks = JSON.parse(activeCrop.tasks_state_json);
-        const taskObj = tasks.find(t => t.id === taskId);
-        if (taskObj) {
-            taskObj.status = 'completed';
-            activeCrop.tasks_state_json = JSON.stringify(tasks);
-            saveCropState();
-            renderTasksTab(activeCrop.tasks_state_json);
-        }
-    } catch (e) {
-        console.error(e);
-    }
+    window.showConfirmModal(
+        "কাজ সম্পন্ন",
+        "আপনি কি এই কাজটি সফলভাবে শেষ করেছেন?",
+        "হ্যাঁ, সম্পন্ন করেছি",
+        function() {
+            try {
+                let tasks = JSON.parse(activeCrop.tasks_state_json);
+                const taskObj = tasks.find(t => t.id === taskId);
+                if (taskObj) {
+                    taskObj.status = 'completed';
+                    activeCrop.tasks_state_json = JSON.stringify(tasks);
+                    saveCropState();
+                    renderTasksTab(activeCrop.tasks_state_json);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        false // Not danger
+    );
 };
 
 window.cancelTask = function (taskId) {
-    if (!confirm('আপনি কি এই কাজটি বাতিল করতে চান?')) return;
     if (!activeCrop || !activeCrop.tasks_state_json) return;
-    try {
-        let tasks = JSON.parse(activeCrop.tasks_state_json);
-        const taskObj = tasks.find(t => t.id === taskId);
-        if (taskObj) {
-            taskObj.status = 'cancelled';
-            activeCrop.tasks_state_json = JSON.stringify(tasks);
-            saveCropState();
-            renderTasksTab(activeCrop.tasks_state_json);
-        }
-    } catch (e) { console.error(e); }
+    window.showConfirmModal(
+        "কাজ বাতিল",
+        "আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? বাতিল করলে এটি ক্যালেন্ডারে 'বাতিল' হিসেবে দেখানো হবে।",
+        "হ্যাঁ, বাতিল করুন",
+        function() {
+            try {
+                let tasks = JSON.parse(activeCrop.tasks_state_json);
+                const taskObj = tasks.find(t => t.id === taskId);
+                if (taskObj) {
+                    taskObj.status = 'cancelled';
+                    activeCrop.tasks_state_json = JSON.stringify(tasks);
+                    saveCropState();
+                    renderTasksTab(activeCrop.tasks_state_json);
+                }
+            } catch (e) { console.error(e); }
+        },
+        true // Is danger
+    );
 };
 
 window.reactivateTask = function (taskId) {
     if (!activeCrop || !activeCrop.tasks_state_json) return;
-    try {
-        let tasks = JSON.parse(activeCrop.tasks_state_json);
-        const taskObj = tasks.find(t => t.id === taskId);
-        if (taskObj) {
-            taskObj.status = 'pending';
-            activeCrop.tasks_state_json = JSON.stringify(tasks);
-            saveCropState();
-            renderTasksTab(activeCrop.tasks_state_json);
-        }
-    } catch (e) {
-        console.error(e);
-    }
+    window.showConfirmModal(
+        "পুনরায় সক্রিয়",
+        "আপনি কি বাতিল করা এই কাজটি পুনরায় সক্রিয় করতে চান?",
+        "হ্যাঁ, সক্রিয় করুন",
+        function() {
+            try {
+                let tasks = JSON.parse(activeCrop.tasks_state_json);
+                const taskObj = tasks.find(t => t.id === taskId);
+                if (taskObj) {
+                    taskObj.status = 'pending';
+                    activeCrop.tasks_state_json = JSON.stringify(tasks);
+                    saveCropState();
+                    renderTasksTab(activeCrop.tasks_state_json);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        false
+    );
+};
+
+window.deleteTaskPermanently = function (taskId) {
+    if (!activeCrop || !activeCrop.tasks_state_json) return;
+    window.showConfirmModal(
+        "একেবারে মুছে ফেলুন",
+        "আপনি কি এই কাজটি একেবারে মুছে ফেলতে চান? এটি আর কখনোই ক্যালেন্ডারে দেখা যাবে না বা ফিরিয়ে আনা যাবে না।",
+        "হ্যাঁ, পার্মানেন্ট ডিলিট করুন",
+        function() {
+            try {
+                let tasks = JSON.parse(activeCrop.tasks_state_json);
+                const filteredTasks = tasks.filter(t => t.id !== taskId);
+                activeCrop.tasks_state_json = JSON.stringify(filteredTasks);
+                saveCropState();
+                renderTasksTab(activeCrop.tasks_state_json);
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        true
+    );
 };
 
 window.currentRescheduleTaskId = null;
@@ -1582,6 +1874,10 @@ window.openDatePickerFor = function(targetId) {
         viewDate = targetEl.dataset.value;
     }
     
+    // Auto-select the initial viewDate as the default choice
+    const hiddenDateInput = document.getElementById('selectedPlantingDate');
+    if (hiddenDateInput) hiddenDateInput.value = viewDate;
+    
     renderDatePickerGrid(targetId, viewDate);
     
     const overlay = document.getElementById('datePickerOverlay');
@@ -1599,12 +1895,84 @@ window.confirmDateSelection = function () {
         try {
             let tasks = JSON.parse(activeCrop.tasks_state_json);
             const taskObj = tasks.find(t => t.id === window.currentRescheduleTaskId);
+            
             if (taskObj) {
-                taskObj.due_date = newDate;
-                tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-                activeCrop.tasks_state_json = JSON.stringify(tasks);
-                saveCropState();
-                renderTasksTab(activeCrop.tasks_state_json);
+                // Recover biological chain using original offsets
+                let bioChain = [...tasks].sort((a, b) => (a.day_offset || 0) - (b.day_offset || 0));
+                let bioIdx = bioChain.findIndex(t => t.id === taskObj.id);
+                
+                let gapViolationReason = null;
+                const newD = new Date(newDate);
+                newD.setHours(0,0,0,0);
+                
+                const toBngDigits = (num) => String(num).split('').map(d => ({ '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }[d] || d)).join('');
+                
+                // Biological Previous Dependency Check
+                if (bioIdx > 0) {
+                    let prevTask = bioChain[bioIdx - 1];
+                    let minGap = parseInt(taskObj.min_gap_prev) || 0;
+                    if (minGap > 0 && prevTask.due_date) {
+                        let prevDate = new Date(prevTask.due_date);
+                        prevDate.setHours(0,0,0,0);
+                        let diffDays = Math.floor((newD - prevDate) / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays < minGap) {
+                            let reason = taskObj.gap_reason ? taskObj.gap_reason : `আগের কাজ থেকে অন্তত ${toBngDigits(minGap)} দিন অপেক্ষা করতে হবে`;
+                            gapViolationReason = `আগের কাজ <b>"${prevTask.title}"</b> এর সাথে অন্তত <b style="color:#DC2626;">${toBngDigits(minGap)} দিনের</b> গ্যাপ থাকতে হবে। <br><br><b>কারণ:</b> ${reason}`;
+                        }
+                    }
+                }
+                
+                // Biological Next Dependency Check
+                if (bioIdx < bioChain.length - 1 && !gapViolationReason) {
+                    let nextTask = bioChain[bioIdx + 1];
+                    let nextMinGap = parseInt(nextTask.min_gap_prev) || 0;
+                    if (nextMinGap > 0 && nextTask.due_date) {
+                        let nextDate = new Date(nextTask.due_date);
+                        nextDate.setHours(0,0,0,0);
+                        let diffDays = Math.floor((nextDate - newD) / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays < nextMinGap) {
+                            let reason = nextTask.gap_reason ? nextTask.gap_reason : `পরবর্তী কাজের জন্য অন্তত ${toBngDigits(nextMinGap)} দিন অপেক্ষা করতে হবে`;
+                            gapViolationReason = `পরবর্তী কাজ <b>"${nextTask.title}"</b> এর সাথে অন্তত <b style="color:#DC2626;">${toBngDigits(nextMinGap)} দিনের</b> গ্যাপ থাকতে হবে। <br><br><b>কারণ:</b> ${reason}`;
+                        }
+                    }
+                }
+
+                if (gapViolationReason) {
+                    window.closeDatePicker();
+                    window.pendingRescheduleTaskState = {
+                        taskId: taskObj.id,
+                        newDate: newDate,
+                        oldDate: taskObj.due_date,
+                        tasks: tasks,
+                        bioChain: bioChain
+                    };
+                    document.getElementById('agronomicWarningText').innerHTML = gapViolationReason;
+                    
+                    const overlay = document.getElementById('agronomicWarningOverlay');
+                    const content = document.getElementById('agronomicWarningSheet');
+                    overlay.style.display = 'block';
+                    setTimeout(() => {
+                        overlay.style.opacity = '1';
+                        content.style.bottom = '0';
+                    }, 10);
+                    return;
+                }
+
+                window.showConfirmModal(
+                    "তারিখ পরিবর্তন নিশ্চিতকরণ",
+                    "আপনি কি নিশ্চিত যে এই নির্দিষ্ট কাজটি এই নতুন তারিখে পরিবর্তন করতে চান?",
+                    "হ্যাঁ, পরিবর্তন করুন",
+                    function() {
+                        taskObj.due_date = newDate;
+                        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                        activeCrop.tasks_state_json = JSON.stringify(tasks);
+                        saveCropState();
+                        renderTasksTab(activeCrop.tasks_state_json);
+                    },
+                    false
+                );
             }
         } catch (e) { console.error(e); }
     } else if (window.calendarTargetId) {
@@ -1619,6 +1987,67 @@ window.confirmDateSelection = function () {
         }
     }
     window.closeDatePicker();
+};
+
+window.closeAgronomicWarningSheet = function(e) {
+    if (e && e.target.id !== 'agronomicWarningOverlay' && !e.target.classList.contains('close-sheet')) return;
+    const overlay = document.getElementById('agronomicWarningOverlay');
+    const content = document.getElementById('agronomicWarningSheet');
+    if (!overlay) return;
+    
+    overlay.style.opacity = '0';
+    content.style.bottom = '-100%';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        window.pendingRescheduleTaskState = null;
+    }, 300);
+};
+
+window.executeTaskUpdate = function(mode) {
+    if (!window.pendingRescheduleTaskState) return;
+    try {
+        const { taskId, newDate, oldDate, tasks, bioChain } = window.pendingRescheduleTaskState;
+        const taskObj = tasks.find(t => t.id === taskId);
+        
+        if (!taskObj) return;
+
+        if (mode === 'override') {
+            // Just update this task, ignoring warnings
+            taskObj.due_date = newDate;
+        } else if (mode === 'cascade') {
+            // Update this task and shift all subsequent tasks by the same delta
+            const oldD = new Date(oldDate);
+            const newD = new Date(newDate);
+            oldD.setHours(0,0,0,0);
+            newD.setHours(0,0,0,0);
+            const shiftDays = Math.round((newD - oldD) / (1000 * 60 * 60 * 24));
+            
+            let bioIdx = bioChain.findIndex(t => t.id === taskId);
+            
+            for (let i = bioIdx; i < bioChain.length; i++) {
+                let currentTask = bioChain[i];
+                if (currentTask.due_date && currentTask.status !== 'completed' && currentTask.status !== 'cancelled' && !currentTask.is_skipped) {
+                    if (i === bioIdx) {
+                        currentTask.due_date = newDate;
+                    } else {
+                        let curD = new Date(currentTask.due_date);
+                        curD.setDate(curD.getDate() + shiftDays);
+                        currentTask.due_date = curD.toISOString().split('T')[0];
+                    }
+                }
+            }
+        }
+        
+        tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+        activeCrop.tasks_state_json = JSON.stringify(tasks);
+        saveCropState();
+        renderTasksTab(activeCrop.tasks_state_json);
+        showSystemMessageModal("আপডেট সফল হয়েছে!", "আপনার টাইমলাইন রিশিডিউল করা হয়েছে।", true);
+    } catch (e) {
+        console.error("Task update error:", e);
+        showSystemMessageModal("আপডেট ব্যর্থ", "আপডেট করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", false);
+    }
+    window.closeAgronomicWarningSheet();
 };
 
 window.currentCalendarViewDate = null;
@@ -1688,14 +2117,14 @@ window.renderDatePickerGrid = function(inputId, initialDateStr = null, resetView
         dayEl.addEventListener('click', () => {
             document.querySelectorAll('#calendarDays .cal-day').forEach(el => el.classList.remove('selected'));
             dayEl.classList.add('selected');
-            const targetInput = document.getElementById(inputId);
-            if (targetInput) targetInput.value = cellDateStr;
+            const hiddenDateInput = document.getElementById('selectedPlantingDate');
+            if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
         });
         
         if (selectedDateStr === cellDateStr) {
             dayEl.classList.add('selected');
-            const targetInput = document.getElementById(inputId);
-            if (targetInput) targetInput.value = cellDateStr;
+            const hiddenDateInput = document.getElementById('selectedPlantingDate');
+            if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
         }
         
         calendarDays.appendChild(dayEl);
@@ -1984,49 +2413,237 @@ window.sendChatMessage = async function() {
 // Add Plant Tracking & Loss Methods
 // ============================================
 
-window.promptPlantCount = async function() {
+window.promptPlantCount = function() { // Reused function name so HTML buttons don't break
     if (!activeCrop) return;
-    const count = prompt("জমিতে সর্বমোট রোপণকৃত বীজ/চারার সংখ্যা দিন (যেমন: ২৫০০):", activeCrop.initial_plant_count || "");
-    if (count === null || count.trim() === "") return;
-    const countInt = parseInt(count);
-    if (isNaN(countInt) || countInt < 0) return alert("দয়া করে শুধুমাত্র সঠিক সংখ্যা দিন!");
     
-    const wasPrePlant = (parseInt(activeCrop.initial_plant_count) || 0) === 0;
+    // Set default date to existing planting_date or today
+    const dateInputSpan = document.getElementById('newPlantingDateLabel');
+    const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+    const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
 
-    // Fast local state update
-    activeCrop.initial_plant_count = countInt;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const dateStr = activeCrop.planted_date ? (activeCrop.planted_date.includes('T') ? activeCrop.planted_date.split('T')[0] : activeCrop.planted_date) : todayStr;
+    const dVal = new Date(dateStr);
     
-    let updatePayload = { initial_plant_count: countInt };
+    dateInputSpan.dataset.value = dateStr;
+    dateInputSpan.textContent = `${toBngDigits(dVal.getDate())} ${EN_TO_BN_MONTHS[dVal.getMonth()]} ${toBngDigits(dVal.getFullYear())}`;
     
-    // If it was just planted for the first time, mark today as planted_date!
-    if (wasPrePlant) {
-        const today = new Date().toISOString().slice(0, 10);
-        updatePayload.planted_date = today;
-        activeCrop.planted_date = today;
+    // Set default initial count
+    const countInput = document.getElementById('newPlantCount');
+    countInput.value = activeCrop.initial_plant_count || '';
+    
+    // Auto-close crop action sheet if open
+    const sheet = document.getElementById('cropActionSheet');
+    if(sheet && sheet.classList.contains('active')) {
+        sheet.classList.remove('active');
     }
 
-    const btn = document.querySelector('.edit-plant-btn');
+    document.getElementById('plantingDateModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.pendingUpdatePayload = null;
+
+// Helpers for the new modals
+window.closeConflictSheet = function(e) {
+    if (e) e.stopPropagation();
+    document.getElementById('taskConflictOverlay').style.display = 'none';
+    const sheet = document.getElementById('taskConflictSheet');
+    sheet.style.bottom = '-100%';
+    setTimeout(() => { window.pendingUpdatePayload = null; }, 300);
+};
+
+window.showSystemMessageModal = function(title, text, isSuccess) {
+    const modal = document.getElementById('systemMessageModal');
+    document.getElementById('systemMessageTitle').textContent = title;
+    document.getElementById('systemMessageTitle').style.color = isSuccess ? 'var(--text-main)' : '#DC2626';
+    document.getElementById('systemMessageText').textContent = text;
+    
+    const iconContainer = document.getElementById('systemMessageIcon');
+    if (isSuccess) {
+        iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+    } else {
+        iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+    }
+    
+    modal.classList.add('active');
+    setTimeout(() => { modal.querySelector('.calendar-content').style.transform = 'scale(1)'; }, 10);
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeSystemMessageModal = function() {
+    const modal = document.getElementById('systemMessageModal');
+    modal.classList.remove('active');
+    modal.querySelector('.calendar-content').style.transform = 'scale(0.9)';
+    document.body.style.overflow = '';
+};
+
+window.savePlantingDate = function() {
+    if (!activeCrop) return;
+    const dateInputStr = document.getElementById('newPlantingDateLabel').dataset.value;
+    const countInput = document.getElementById('newPlantCount').value;
+    const shiftTasks = document.getElementById('shiftTasksCheckbox').checked;
+
+    if (!dateInputStr) return showSystemMessageModal("তারিখ পাওয়া যায়নি", "দয়া করে রোপণের তারিখ প্রদান করুন!", false);
+    
+    const countInt = parseInt(countInput) || 0;
+    
+    const updatePayload = { 
+        planted_date: dateInputStr,
+        initial_plant_count: countInt
+    };
+    
+    let conflictCount = 0;
+    let rawSimulatedTasks = [];
+
+    // Professional AI Sync Task Shifting & Simulation
+    if (shiftTasks && activeCrop.tasks_state_json) {
+        try {
+            let tasks = JSON.parse(activeCrop.tasks_state_json);
+            let pDate = new Date(dateInputStr);
+            let today = new Date();
+            today.setHours(0,0,0,0);
+
+            tasks.forEach(task => {
+                if(!task.is_completed && task.day_offset !== undefined) {
+                    let newDueDate = new Date(pDate);
+                    newDueDate.setDate(newDueDate.getDate() + task.day_offset);
+                    
+                    // Identify past tasks
+                    if (newDueDate < today) {
+                        conflictCount++;
+                        task._is_conflict = true;
+                    }
+                    
+                    const y = newDueDate.getFullYear();
+                    const m = String(newDueDate.getMonth() + 1).padStart(2, '0');
+                    const dStr = String(newDueDate.getDate()).padStart(2, '0');
+                    task.due_date = `${y}-${m}-${dStr}`;
+                }
+            });
+            
+            tasks.sort((a, b) => {
+                const dateA = a.due_date ? new Date(a.due_date) : 0;
+                const dateB = b.due_date ? new Date(b.due_date) : 0;
+                return dateA - dateB;
+            });
+            
+            rawSimulatedTasks = tasks;
+        } catch(e) {
+            console.error("AI Task Re-anchoring error", e);
+        }
+    }
+
+    if (conflictCount > 0) {
+        window.pendingUpdatePayload = { ...updatePayload, _rawTasks: rawSimulatedTasks };
+        document.getElementById('conflictCountText').textContent = conflictCount;
+        
+        const overlay = document.getElementById('taskConflictOverlay');
+        const sheet = document.getElementById('taskConflictSheet');
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            sheet.style.bottom = '0';
+        }, 10);
+    } else {
+        if (shiftTasks && rawSimulatedTasks.length > 0) {
+            updatePayload.tasks_state_json = JSON.stringify(rawSimulatedTasks);
+        }
+        window.executePlantingDateUpdate(null, updatePayload);
+    }
+};
+
+window.executePlantingDateUpdate = async function(action = null, payload = null) {
+    const basePayload = payload || window.pendingUpdatePayload;
+    if (!basePayload) return;
+
+    let finalPayload = { 
+        planted_date: basePayload.planted_date, 
+        initial_plant_count: basePayload.initial_plant_count 
+    };
+
+    // Advanced Agronomic Cascade Logic
+    if (basePayload._rawTasks) {
+        let tasks = basePayload._rawTasks;
+        let today = new Date();
+        today.setHours(0,0,0,0);
+
+        if (action === 'cascade') {
+            let lastValidDate = null;
+            tasks.forEach(task => {
+                if (task.is_completed) return;
+                
+                let thisDate = new Date(task.due_date);
+                let gap = parseInt(task.min_gap_prev) || 0;
+                
+                let minAllowedDate = new Date(today);
+                if (lastValidDate) {
+                    minAllowedDate = new Date(lastValidDate);
+                    minAllowedDate.setDate(minAllowedDate.getDate() + gap);
+                }
+                
+                if (task._is_conflict || thisDate < minAllowedDate) {
+                    thisDate = minAllowedDate > today ? minAllowedDate : today;
+                    
+                    const y = thisDate.getFullYear();
+                    const m = String(thisDate.getMonth() + 1).padStart(2, '0');
+                    const dStr = String(thisDate.getDate()).padStart(2, '0');
+                    task.due_date = `${y}-${m}-${dStr}`;
+                }
+                lastValidDate = thisDate;
+                delete task._is_conflict;
+            });
+        } else if (action === 'skip') {
+            tasks.forEach(task => {
+                if (task._is_conflict) {
+                    task.is_skipped = true;
+                }
+                delete task._is_conflict;
+            });
+        }
+        
+        finalPayload.tasks_state_json = JSON.stringify(tasks);
+    } else if (basePayload.tasks_state_json) {
+        finalPayload.tasks_state_json = basePayload.tasks_state_json;
+    }
+    
+    // Close conflict sheet if it was open
+    const sheet = document.getElementById('taskConflictSheet');
+    if (sheet && sheet.style.bottom === '0px') {
+        window.closeConflictSheet();
+    }
+    
+    const token = localStorage.getItem('farmer_jwt');
+    const btn = document.querySelector('#plantingDateModal button');
+    let oldBtnText = "আপডেট";
     if(btn) {
-        btn.style.opacity = '0.5';
+        oldBtnText = btn.textContent;
+        btn.textContent = 'হালনাগাদ হচ্ছে...';
         btn.disabled = true;
     }
-    
+
     try {
-        const token = localStorage.getItem('farmer_jwt');
         const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/state`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatePayload)
+            body: JSON.stringify(finalPayload)
         });
         if(!res.ok) throw new Error("API Note: Update Failed on backend.");
+        
+        // Success
+        document.getElementById('plantingDateModal').classList.remove('active');
+        document.body.style.overflow = '';
+        await fetchFarmAndCropDetails();
+        showSystemMessageModal("আপডেট সফল হয়েছে!", "আপনার কাজগুলোর টাইমলাইন রিশিডিউল করা হয়েছে।", true);
     } catch(e) {
         console.warn("API Note:", e.message);
-    }
-    
-    await fetchFarmAndCropDetails();
-    if(btn) {
-        btn.style.opacity = '1';
-        btn.disabled = false;
+        showSystemMessageModal("আপডেট ব্যর্থ", "আপডেট করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", false);
+    } finally {
+        if(btn) {
+            btn.textContent = oldBtnText;
+            btn.disabled = false;
+        }
+        window.pendingUpdatePayload = null;
     }
 };
 
@@ -2247,6 +2864,106 @@ window.submitDeleteCrop = async function() {
     } catch(e) {
         alert("Error: " + e.message);
         btn.innerText = oldText;
+        btn.disabled = false;
+    }
+};
+
+// ==========================================
+// 3D Map & Tracking Handlers
+// ==========================================
+
+window.handle3DMapClick = async function() {
+    const btn = document.getElementById('btn3DMap');
+    if(!btn) return;
+    
+    const token = localStorage.getItem('farmer_jwt');
+    const cropId = activeCrop ? activeCrop.id : getCropIdFromURL();
+    
+    if(!cropId) {
+        return showToast('Tr', 'কোনো প্রজেক্ট সিলেক্ট করা নেই।');
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> লোড হচ্ছে...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_URL}/api/crops/${cropId}/plants`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.beds && data.beds.length > 0) {
+            // Beds exist, redirect to 3D mapping page directly
+            window.location.href = `plant_tracker.html?crop_id=${cropId}`;
+        } else {
+            // No beds yet, open Wizard
+            document.getElementById('mapWizardModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Tr', 'ম্যাপ ডাটা ফেচ করতে সমস্যা হচ্ছে।');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+window.generate3DMapGrid = async function() {
+    const numBeds = document.getElementById('wizardNumBeds').value;
+    const bedLength = document.getElementById('wizardBedLength').value;
+    const bedWidth = document.getElementById('wizardBedWidth').value;
+    const rowsPerBed = document.getElementById('wizardRowsPerBed').value;
+    const plantSpacing = document.getElementById('wizardPlantSpacing').value;
+
+    if(!numBeds || !bedLength || !bedWidth || !rowsPerBed || !plantSpacing) {
+        return showToast('Tr', 'দয়া করে সবগুলো ফিল্ড পূরণ করুন');
+    }
+
+    const btn = document.getElementById('btnGenerateMap');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> তৈরি হচ্ছে...';
+    btn.disabled = true;
+
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const cropId = activeCrop ? activeCrop.id : getCropIdFromURL();
+        
+        const payload = {
+            numBeds: parseInt(numBeds),
+            bedLength: parseFloat(bedLength),
+            bedWidth: parseFloat(bedWidth),
+            rowsPerBed: parseInt(rowsPerBed),
+            plantSpacing: parseFloat(plantSpacing)
+        };
+
+        const res = await fetch(`${API_URL}/api/crops/${cropId}/plants/generate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            document.getElementById('mapWizardModal').classList.remove('active');
+            document.body.style.overflow = '';
+            showToast('Tr', 'সাফল্যজনকভাবে ম্যাপ তৈরি হয়েছে!');
+            // Redirect to 3D page
+            setTimeout(() => {
+                window.location.href = `plant_tracker.html?crop_id=${cropId}`;
+            }, 600);
+        } else {
+            showToast('Tr', data.error || 'ম্যাপ তৈরি করতে ব্যর্থ হয়েছে');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Tr', 'সার্ভার এরর');
+    } finally {
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }
 };

@@ -1,0 +1,394 @@
+/* css/plant_tracker.css */
+:root {
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-main: #0f172a;
+    --text-dim: #64748b;
+    --healthy-color: #10b981;
+    --healthy-bg: #d1fae5;
+    --sick-color: #ef4444;
+    --sick-bg: #fee2e2;
+    --primary: #059669;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', 'Hind Siliguri', sans-serif;
+    color: var(--text-main);
+}
+
+.wrapper {
+    padding: 0 16px;
+}
+
+/* Header Override */
+.page-top-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+    justify-content: space-between;
+    width: 100%;
+}
+.back-btn {
+    background: #F1F5F9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.back-btn:active {
+    background: #E2E8F0;
+}
+
+/* Replaced old Header & Filter Pill styles with Tabs */
+.tracker-tabs-container {
+    padding: 0 16px;
+    margin: 16px 0;
+}
+.ld-tabs {
+    display: flex;
+    gap: 8px;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 12px;
+}
+.ld-tab {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.ld-tab.active {
+    background: #FFFFFF;
+    color: var(--text-main);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* FAB Settings */
+.fab-settings {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #047857);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 99;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.fab-settings:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+}
+
+
+
+/* Beds & Grids */
+.tracker-main {
+    padding-bottom: 100px;
+}
+.bed-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.bed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    cursor: pointer;
+    background: var(--card-bg);
+}
+.bed-header h2 {
+    font-size: 16px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.bed-stats {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+.bed-content {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px dashed var(--border-color);
+    margin-top: -1px; /* overlap border */
+}
+.bed-card.open .bed-content {
+    display: block;
+}
+.bed-card.open .bed-header {
+    background: #f8fafc;
+}
+
+.plant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.plant-chip {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: transform 0.1s;
+}
+.plant-chip:active { transform: scale(0.95); }
+
+.plant-chip.healthy {
+    background: var(--healthy-bg);
+    color: var(--healthy-color);
+}
+.plant-chip.sick {
+    background: var(--sick-bg);
+    color: var(--sick-color);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+.plant-chip.sick::after {
+    content: '!';
+    position: absolute;
+    top: -4px; right: -4px;
+    background: var(--sick-color);
+    color: white;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Batch Mode Styles */
+.batch-mode .plant-chip {
+    border: 2px solid var(--border-color);
+}
+.batch-mode .plant-chip.selected {
+    border-color: var(--primary);
+}
+.batch-mode .plant-chip.selected::before {
+    content: '✓';
+    position: absolute;
+    bottom: -4px; right: -4px;
+    background: var(--primary);
+    color: white;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+}
+
+.batch-action-bar {
+    position: fixed;
+    bottom: -100%;
+    left: 0; width: 100%;
+    background: white;
+    padding: 16px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+}
+.batch-action-bar.visible { bottom: 0; }
+.batch-actions { display: flex; gap: 8px; }
+.selected-count { font-weight: bold; font-size: 14px; }
+
+/* Bottom Sheet */
+.bottom-sheet-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+}
+.bottom-sheet-overlay.active {
+    opacity: 1; pointer-events: auto;
+}
+.bottom-sheet {
+    position: absolute;
+    bottom: -100%; left: 0; width: 100%;
+    background: var(--bg-color);
+    border-radius: 24px 24px 0 0;
+    padding: 20px;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.bottom-sheet-overlay.active .bottom-sheet {
+    bottom: 0;
+}
+.sheet-handle {
+    width: 40px; height: 5px;
+    background: #cbd5e1;
+    border-radius: 3px;
+    margin: 0 auto 20px;
+}
+.sheet-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+.sheet-header h2 { margin: 0; font-size: 20px; }
+
+.status-toggles { display: flex; gap: 10px; margin-bottom: 20px; }
+.status-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color);
+}
+.healthy-btn { background: white; color: var(--healthy-color); }
+.sick-btn { background: white; color: var(--sick-color); }
+
+.smart-agronomy-form {
+    background: white; padding: 16px; border-radius: 12px; margin-bottom: 20px;
+}
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+.input-group input, .input-group select {
+    width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;
+}
+.w-full { width: 100%; }
+.btn-primary { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+.sheet-close-btn { width: 100%; padding: 14px; background: transparent; border: none; color: var(--text-dim); font-weight: 600; margin-top: 20px; }
+
+.ai-score-ring { width: 60px; height: 60px; border-radius: 50%; box-shadow: inset 0 0 0 6px var(--healthy-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); }
+
+.action-btn-sm { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; color: white; cursor: pointer;}
+.action-btn-sm.success { background: var(--healthy-color); }
+.action-btn-sm.danger { background: var(--sick-color); }
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active {
+    opacity: 1; pointer-events: auto;
+}
+.modal-content {
+    position: relative;
+    background: var(--bg-color);
+    width: 90%;
+    max-width: 400px;
+    border-radius: 16px;
+    padding: 24px;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.bed-editor-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+.bed-editor-row button {
+    background: #f1f5f9;
+    border: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    color: var(--text-main);
+    cursor: pointer;
+}
+.bed-editor-row .del-btn { background: #fee2e2; color: #ef4444; }
+
+/* Image Upload & Checkboxes */
+.image-upload-wrapper {
+    display: flex; gap:10px; align-items:center; margin-bottom: 12px;
+}
+.image-preview {
+    width: 60px; height: 60px; border-radius: 8px; background: #e2e8f0;
+    object-fit: cover; display: none;
+}
+.upload-btn {
+    padding: 8px 16px; border: 1px dashed var(--primary);
+    background: #f0fdf4; color: var(--primary); border-radius: 8px;
+    cursor: pointer; font-weight: 500; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+}
+.care-checkboxes {
+    display: flex; gap: 15px; margin-bottom: 15px;
+}
+.toggle-chip {
+    padding: 8px 12px; background: white; border: 1px solid var(--border-color);
+    border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer;
+    color: var(--text-dim); transition: 0.2s;
+    user-select: none;
+}
+.toggle-chip.active {
+    background: var(--primary);
+    color: white; border-color: var(--primary);
+}

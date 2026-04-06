@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plant Tracker - AgriTech</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/plant_tracker.css">
+    <script type="module">
+        import { registerComponents } from './js/components.js';
+        registerComponents();
+    </script>
+</head>
+<body>
+
+    <!-- Top Navigation Header -->
+    <div class="page-top-header">
+        <!-- Left: Back & Title -->
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+            <button class="back-btn" onclick="window.history.back()" aria-label="Go Back" style="flex-shrink: 0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <div style="min-width: 0;">
+                <h2 id="headerCropName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; font-size: 16px; margin: 0; font-weight: 700; color: var(--text-dark);">লোড হচ্ছে...</h2>
+                <span id="headerFarmName" style="display: block; font-size: 11px; font-weight: 500; color: #64748B; margin-top: 2px;">লোড হচ্ছে...</span>
+            </div>
+        </div>
+        
+        <!-- Right: Batch Action Toggle -->
+        <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+            <button id="batchSelectBtn" onclick="toggleBatchMode()" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F8FAFC; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>সিলেক্ট</span>
+            </button>
+        </div>
+    </div>
+
+    <main class="wrapper ld-sections" style="padding-top: 16px;">
+
+
+    <!-- Grid Setup Modal -->
+    <div id="gridSetupModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeGridSetupModal()">&times;</span>
+            <h2 style="margin-top:0;">ম্যাপ লেআউট এডিটর</h2>
+            <p class="text-dim" style="font-size:13px;">বেড এবং গাছের সংখ্যা কাস্টমাইজ করুন।</p>
+            
+            <div id="gridSetupBedList" style="margin-top: 15px; max-height: 50vh; overflow-y: auto;">
+                <!-- JS will generate bed editors here -->
+            </div>
+            
+            <button class="action-btn-sm success w-full" style="margin-top:10px; padding:12px; border-radius:8px;" onclick="addNewBedToGrid()">+ নতুন বেড যুক্ত করুন</button>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="sheet-close-btn" style="flex:1; border:1px solid #ccc; background:#f8fafc; margin:0;" onclick="closeGridSetupModal()">বাতিল</button>
+                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; font-weight:bold;" onclick="saveGridSetupChanges()">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Filters -->
+    <div class="tracker-tabs-container">
+        <div class="ld-tabs" style="margin-bottom: 0;">
+            <button class="ld-tab active" data-filter="all">সব গাছ (<span id="countAll">0</span>)</button>
+            <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
+            <button class="ld-tab" style="color:#EF4444;" data-filter="S">সমস্যা (<span id="countSick">0</span>)</button>
+        </div>
+    </div>
+
+    <!-- Main Content: Beds > Plants -->
+    <main class="tracker-main wrapper" id="trackerMain">
+        <!-- JS will inject dynamic bed cards here -->
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>গাছের গ্রিড তৈরি করা হচ্ছে...</p>
+        </div>
+    </main>
+
+    <!-- Bottom Action Bar (Visible only in Batch Mode) -->
+    <div id="batchActionBar" class="batch-action-bar">
+        <div class="selected-count">
+            <span id="selectedCountValue">0</span> টি সিলেক্টেড
+        </div>
+        <div class="batch-actions">
+            <button class="action-btn-sm danger" onclick="markSelectedAreaStatus('S')">অসুস্থ মার্ক</button>
+            <button class="action-btn-sm success" onclick="markSelectedAreaStatus('H')">সুস্থ মার্ক</button>
+            <button class="action-btn-sm" style="background:var(--primary);" onclick="openBatchUpdateModal()">ডিটেইল আপডেট</button>
+        </div>
+    </div>
+
+    <!-- Batch Detail Update Modal -->
+    <div id="batchUpdateModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBatchUpdateModal()">&times;</span>
+            <h2 style="margin-top:0;">ব্যাচ আপডেট</h2>
+            <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
+            
+            <div class="form-grid-2">
+                <div class="input-group">
+                    <label>পাতার সংখ্যা</label>
+                    <input type="number" id="batchLeaves" placeholder="উদা: ১৫">
+                </div>
+                <div class="input-group">
+                    <label>ফলের সংখ্যা</label>
+                    <input type="number" id="batchFruits" placeholder="উদা: ৫">
+                </div>
+            </div>
+
+            <div class="care-checkboxes">
+                <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া হয়েছে</div>
+                <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ স্প্রে করা হয়েছে</div>
+            </div>
+
+            <div class="input-group">
+                <label>নোট / লক্ষণ</label>
+                <textarea id="batchNote" rows="2" placeholder="সাধারণ নোট লিখুন..." style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="sheet-close-btn" style="flex:1; border:1px solid #ccc; background:#f8fafc; margin:0;" onclick="closeBatchUpdateModal()">বাতিল</button>
+                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; font-weight:bold;" onclick="saveBatchUpdateDetails()">আপডেট করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet for Plant Profile -->
+    <div id="plantBottomSheet" class="bottom-sheet-overlay">
+        <div class="bottom-sheet" style="padding-bottom: 80px; max-height: 95vh; overflow-y: auto;">
+            <div class="sheet-header" style="margin-top: 15px;">
+                <div>
+                    <h2 id="bsPlantTitle">গাছ: T1</h2>
+                    <p id="bsPlantLocation" class="text-sm text-dim">Bed 1</p>
+                </div>
+                <div class="ai-score-ring" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;">
+                    <button onclick="closeBottomSheet()" style="border:none; background:transparent; font-size:24px; color:#64748b; cursor:pointer; line-height: 1;">&times;</button>
+                </div>
+            </div>
+
+            <!-- Quick Status Toggles -->
+            <div class="status-toggles">
+                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="updatePlantStateSingle('H')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    সুস্থ
+                </button>
+                <button id="btnSetSick" class="status-btn sick-btn" onclick="updatePlantStateSingle('S')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    অসুস্থ
+                </button>
+            </div>
+
+            <!-- Bottom Sheet Tabs -->
+            <div class="ld-tabs" style="margin-top: 15px; margin-bottom: 15px;">
+                <button class="ld-tab active" onclick="switchBsTab('form', this)">নতুন আপডেট</button>
+                <button class="ld-tab" onclick="switchBsTab('history', this)">হিস্ট্রি</button>
+            </div>
+
+            <!-- Agronomy Smart Update Form -->
+            <div id="bsTabForm" class="smart-agronomy-form" style="min-height: 480px;">
+                <!-- Image Upload (R2) -->
+                <div class="image-upload-wrapper">
+                    <input type="file" id="bsImageInput" accept="image/*" style="display:none;" onchange="previewPlantImage(this)">
+                    <button class="upload-btn" id="bsUploadBtn" onclick="document.getElementById('bsImageInput').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        ছবি সংযুক্ত করুন
+                    </button>
+                    <img id="bsImagePreview" class="image-preview" src="" alt="preview">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <label>উচ্চতা (ইঞ্চি)</label>
+                        <input type="number" id="bsHeight" placeholder="উদা: ২৪">
+                    </div>
+                    <div class="input-group">
+                        <label>পাতার সংখ্যা</label>
+                        <input type="number" id="bsLeaves" placeholder="উদা: ১৫">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>ফলের সংখ্যা</label>
+                    <input type="number" id="bsFruits" placeholder="উদা: ৫">
+                </div>
+
+                <div class="care-checkboxes">
+                    <div class="toggle-chip" id="bsFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া হয়েছে</div>
+                    <div class="toggle-chip" id="bsPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ স্প্রে করা হয়েছে</div>
+                </div>
+
+                <div class="input-group">
+                    <label>লক্ষণ বা নোট</label>
+                    <textarea id="bsNote" rows="3" placeholder="রোগের লক্ষণ বা অন্যান্য নোট..." style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                </div>
+                
+                <button id="bsSaveBtn" class="btn-primary w-full" style="margin-top: 10px;" onclick="savePlantDetails()">
+                    আপডেট সেভ করুন
+                </button>
+            </div>
+
+            <!-- Timeline -->
+            <div id="bsTabHistory" class="plant-timeline" style="display:none; min-height: 480px;">
+                <div id="bsTimelineContainer">
+                    <div class="timeline-empty">এখনো কোনো ডাটা আপডেট করা হয়নি।</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullImageModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
+        <button onclick="document.getElementById('fullImageModal').style.display='none'" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; font-size: 32px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10000000; line-height: 1;">&times;</button>
+        <img id="fullImageView" src="" style="max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain;">
+    </div>
+
+    <!-- Floating Action Button for Settings -->
+    <button class="fab-settings" onclick="openGridSetupModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </button>
+
+    <!-- Navigation Bar for Mobile -->
+    <app-bottom-nav></app-bottom-nav>
+
+    <!-- Application Script -->
+    <script src="js/plant_tracker.js"></script>
+</body>
+</html>
