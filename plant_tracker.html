@@ -50,18 +50,18 @@
     <div id="gridSetupModal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeGridSetupModal()">&times;</span>
-            <h2 style="margin-top:0;">ম্যাপ লেআউট এডিটর</h2>
-            <p class="text-dim" style="font-size:13px;">বেড এবং গাছের সংখ্যা কাস্টমাইজ করুন।</p>
+            <h2 style="margin-top:0; font-size: 20px; font-weight: 700; color: #1E293B;">ম্যাপ লেআউট এডিটর</h2>
+            <p class="text-dim" style="font-size:14px; margin-bottom: 20px;">বেড এবং গাছের সংখ্যা কাস্টমাইজ করুন।</p>
             
-            <div id="gridSetupBedList" style="margin-top: 15px; max-height: 50vh; overflow-y: auto;">
+            <div id="gridSetupBedList" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
                 <!-- JS will generate bed editors here -->
             </div>
             
-            <button class="action-btn-sm success w-full" style="margin-top:10px; padding:12px; border-radius:8px;" onclick="addNewBedToGrid()">+ নতুন বেড যুক্ত করুন</button>
+            <button class="action-btn-sm success w-full" style="margin-top:10px; padding:12px; border-radius:12px; font-weight: 600;" onclick="addNewBedToGrid()">+ নতুন বেড যুক্ত করুন</button>
             
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="sheet-close-btn" style="flex:1; border:1px solid #ccc; background:#f8fafc; margin:0;" onclick="closeGridSetupModal()">বাতিল</button>
-                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; font-weight:bold;" onclick="saveGridSetupChanges()">সেভ করুন</button>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+                <button class="sheet-close-btn" style="flex:1; background:#F1F5F9; color:#475569; border:none; margin:0; border-radius: 12px; font-weight:600;" onclick="closeGridSetupModal()">বাতিল করুন</button>
+                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; border-radius: 12px; font-weight:600;" onclick="window.saveGridSetupChanges()">সেভ করুন</button>
             </div>
         </div>
     </div>
@@ -71,7 +71,8 @@
         <div class="ld-tabs" style="margin-bottom: 0;">
             <button class="ld-tab active" data-filter="all">সব গাছ (<span id="countAll">0</span>)</button>
             <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
-            <button class="ld-tab" style="color:#EF4444;" data-filter="S">সমস্যা (<span id="countSick">0</span>)</button>
+            <button class="ld-tab" style="color:#eab308;" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
+            <button class="ld-tab" style="color:#ef4444;" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
         </div>
     </div>
 
@@ -135,24 +136,40 @@
     <div id="plantBottomSheet" class="bottom-sheet-overlay">
         <div class="bottom-sheet" style="padding-bottom: 80px; max-height: 95vh; overflow-y: auto;">
             <div class="sheet-header" style="margin-top: 15px;">
-                <div>
-                    <h2 id="bsPlantTitle">গাছ: T1</h2>
-                    <p id="bsPlantLocation" class="text-sm text-dim">Bed 1</p>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div class="plant-avatar-wrapper" style="position: relative; display: inline-block;">
+                        <img id="bsAvatarPreview" src="https://placehold.co/100x100?text=Plant" alt="Plant Avatar" onclick="openFullScreenImage(this.src)" style="cursor: zoom-in; display: block;">
+                        
+                        <!-- Upload Camera Icon at bottom right -->
+                        <button onclick="document.getElementById('bsImageInput').click()" style="position: absolute; bottom: -2px; right: -2px; background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </button>
+                        
+                        <button id="bsAvatarRemove" onclick="removePlantAvatar(event)" style="position: absolute; top: -5px; right: -5px; display:none;" title="ছবি মুছে দিন">&times;</button>
+                        <input type="file" id="bsImageInput" accept="image/*" style="display:none;" onchange="previewPlantAvatar(this)">
+                    </div>
+                    <div>
+                        <h2 id="bsPlantTitle" style="margin: 0; font-size: 20px;">গাছ: T1</h2>
+                        <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
+                    </div>
                 </div>
                 <div class="ai-score-ring" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;">
                     <button onclick="closeBottomSheet()" style="border:none; background:transparent; font-size:24px; color:#64748b; cursor:pointer; line-height: 1;">&times;</button>
                 </div>
             </div>
 
-            <!-- Quick Status Toggles -->
-            <div class="status-toggles">
-                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="updatePlantStateSingle('H')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <div class="status-toggles" style="display:flex; gap:8px;">
+                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="updatePlantStateSingle('H')" style="flex:1;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     সুস্থ
                 </button>
-                <button id="btnSetSick" class="status-btn sick-btn" onclick="updatePlantStateSingle('S')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <button id="btnSetSick" class="status-btn sick-btn" onclick="updatePlantStateSingle('S')" style="flex:1;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     অসুস্থ
+                </button>
+                <button id="btnSetCritical" class="status-btn critical-btn" onclick="updatePlantStateSingle('C')" style="flex:1;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    বিপজ্জনক
                 </button>
             </div>
 
@@ -164,15 +181,7 @@
 
             <!-- Agronomy Smart Update Form -->
             <div id="bsTabForm" class="smart-agronomy-form" style="min-height: 480px;">
-                <!-- Image Upload (R2) -->
-                <div class="image-upload-wrapper">
-                    <input type="file" id="bsImageInput" accept="image/*" style="display:none;" onchange="previewPlantImage(this)">
-                    <button class="upload-btn" id="bsUploadBtn" onclick="document.getElementById('bsImageInput').click()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                        ছবি সংযুক্ত করুন
-                    </button>
-                    <img id="bsImagePreview" class="image-preview" src="" alt="preview">
-                </div>
+
 
                 <div class="form-grid-2">
                     <div class="input-group">
@@ -212,6 +221,21 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Global Confirmation Modal -->
+    <div class="center-modal" id="confirmActionModal" style="z-index: 99999;">
+        <div class="center-modal-content" style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
+            <div style="width: 48px; height: 48px; background: #FEF2F2; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #EF4444;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h3 id="confirmActionTitle" style="font-size: 18px; margin-bottom: 8px; font-weight: 700; color: #1E293B;">নিশ্চিত করুন</h3>
+            <p id="confirmActionText" style="color: #64748B; font-size: 14.5px; line-height: 1.5; margin-bottom: 24px;">আপনি কি এই কাজটি করতে চান?</p>
+            <div style="display: flex; gap: 12px; flex-direction: column;">
+                <button id="confirmActionBtn" class="btn-primary" style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">হ্যাঁ, নিশ্চিত</button>
+                <button onclick="window.closeConfirmModal()" style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল করুন</button>
+            </div>
         </div>
     </div>
 

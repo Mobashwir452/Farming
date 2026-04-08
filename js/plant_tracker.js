@@ -9,6 +9,7 @@ let currentFilter = 'all';
 let isBatchMode = false;
 let selectedPlants = new Set(); // Stores objects like {bedId, plantId, pIndex, bIndex}
 let currentlyEditingPlant = null; // Stores {bedId, node, bIndex, pIndex}
+let expandedBedIndexes = new Set([0]); // Memory for open beds across rerenders
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -71,13 +72,14 @@ function renderBeds() {
     const main = document.getElementById('trackerMain');
     main.innerHTML = '';
     
-    let totalAll = 0, totalHealthy = 0, totalSick = 0;
+    let totalAll = 0, totalHealthy = 0, totalSick = 0, totalCritical = 0;
 
     farmData.forEach((bed, bIndex) => {
         const nodes = bed.plants_nodes_json || [];
         
         let bedHealthy = 0;
         let bedSick = 0;
+        let bedCritical = 0;
 
         // Create Grid container for chips
         const gridDiv = document.createElement('div');
@@ -86,15 +88,21 @@ function renderBeds() {
         nodes.forEach((node, pIndex) => {
             const state = node.state || 'H';
             totalAll++;
-            if(state === 'S') { totalSick++; bedSick++; }
+            if (state === 'C') { totalCritical++; bedCritical++; }
+            else if (state === 'S') { totalSick++; bedSick++; }
             else { totalHealthy++; bedHealthy++; }
 
             // Filter logic
             if (currentFilter === 'H' && state !== 'H') return;
             if (currentFilter === 'S' && state !== 'S') return;
+            if (currentFilter === 'C' && state !== 'C') return;
 
             const chip = document.createElement('div');
-            chip.className = `plant-chip ${state === 'S' ? 'sick' : 'healthy'}`;
+            let stateClass = 'healthy';
+            if (state === 'S') stateClass = 'sick';
+            if (state === 'C') stateClass = 'critical';
+
+            chip.className = `plant-chip ${stateClass}`;
             chip.innerText = node.id.split('-')[1]; // Show T1, T2 etc.
             
             // Reapply selection state if stored
@@ -114,16 +122,16 @@ function renderBeds() {
             if(isBatchMode) bedCard.classList.add('batch-mode');
 
             bedCard.innerHTML = `
-                <div class="bed-header" onclick="toggleAccordion(this)">
+                <div class="bed-header" onclick="toggleAccordion(this, ${bIndex})">
                     <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> বেড ${bIndex + 1}</h2>
-                    <div class="bed-stats">মোট: ${nodes.length} | সুস্থ: ${bedHealthy} | সমস্যা: ${bedSick}</div>
+                    <div class="bed-stats">সুস্থ: ${bedHealthy} | অসুস্থ: ${bedSick} | বিপজ: ${bedCritical}</div>
                 </div>
                 <div class="bed-content"></div>
             `;
             bedCard.querySelector('.bed-content').appendChild(gridDiv);
             
-            // Open first bed by default
-            if(bIndex === 0) bedCard.classList.add('open');
+            // Reapply accordion state
+            if(expandedBedIndexes.has(bIndex)) bedCard.classList.add('open');
 
             main.appendChild(bedCard);
         }
@@ -137,19 +145,22 @@ function renderBeds() {
     document.getElementById('countAll').innerText = totalAll;
     document.getElementById('countHealthy').innerText = totalHealthy;
     document.getElementById('countSick').innerText = totalSick;
+    if (document.getElementById('countCritical')) document.getElementById('countCritical').innerText = totalCritical;
 }
 
 // ========================
 // Accordion Logic
 // ========================
-window.toggleAccordion = function(headerElement) {
+window.toggleAccordion = function(headerElement, index) {
     const card = headerElement.parentElement;
-    // If opening, close all others first
     if (!card.classList.contains('open')) {
         document.querySelectorAll('.bed-card').forEach(c => c.classList.remove('open'));
         card.classList.add('open');
+        expandedBedIndexes.clear();
+        expandedBedIndexes.add(index);
     } else {
         card.classList.remove('open');
+        expandedBedIndexes.delete(index);
     }
 };
 
@@ -274,7 +285,14 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     document.getElementById('bsPlantTitle').innerText = `গাছ: ${node.id}`;
     document.getElementById('bsPlantLocation').innerText = `বেড ${bIndex + 1}`;
     
-    // Logic for health ring removed.
+    // Active toggles state
+    const state = node.state || 'H';
+    document.getElementById('btnSetHealthy').classList.remove('active');
+    document.getElementById('btnSetSick').classList.remove('active');
+    document.getElementById('btnSetCritical').classList.remove('active');
+    if(state === 'H') document.getElementById('btnSetHealthy').classList.add('active');
+    else if(state === 'S') document.getElementById('btnSetSick').classList.add('active');
+    else if(state === 'C') document.getElementById('btnSetCritical').classList.add('active');
 
     // Prepare inputs
     document.getElementById('bsHeight').value = node.height || '';
@@ -288,12 +306,28 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     if(node.is_fertilized) fChip.classList.add('active'); else fChip.classList.remove('active');
     if(node.is_pesticide) pChip.classList.add('active'); else pChip.classList.remove('active');
     
-    // Reset image
+    // Reset image / load latest image
     document.getElementById('bsImageInput').value = '';
-    const imgPreview = document.getElementById('bsImagePreview');
-    imgPreview.style.display = 'none';
-    imgPreview.src = '';
+    const imgPreview = document.getElementById('bsAvatarPreview');
+    const rmvBtn = document.getElementById('bsAvatarRemove');
     imgPreview.dataset.base64 = '';
+    
+    // Find latest image_url from logs
+    let latestImage = 'https://placehold.co/100x100?text=Plant';
+    if(node.logs && node.logs.length > 0) {
+        for(let i = node.logs.length - 1; i >= 0; i--) {
+            if(node.logs[i].image_url) {
+                latestImage = node.logs[i].image_url;
+                break;
+            }
+        }
+    }
+    imgPreview.src = latestImage;
+    if(latestImage !== 'https://placehold.co/100x100?text=Plant') {
+        rmvBtn.style.display = 'flex';
+    } else {
+        rmvBtn.style.display = 'none';
+    }
 
     populateTimeline(node.logs);
 
@@ -347,100 +381,154 @@ async function updatePlantStateSingle(status) {
     });
 }
 
-// File input preview and base64 compression
-window.previewPlantImage = function(input) {
+// Canvas Image Compression
+async function compressImageWebP(dataUrl, quality = 0.8, maxWidth = 1024) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/webp', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+}
+
+// Avatar upload and preview
+window.previewPlantAvatar = function(input) {
     const file = input.files[0];
     if(file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('bsImagePreview');
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-            preview.dataset.base64 = e.target.result;
+        reader.onload = async function(e) {
+            const preview = document.getElementById('bsAvatarPreview');
+            const compressedBase64 = await compressImageWebP(e.target.result, 0.8, 1024);
+            preview.src = compressedBase64;
+            preview.dataset.base64 = compressedBase64;
+            document.getElementById('bsAvatarRemove').style.display = 'flex';
+            
+            // Auto Update Avatar to backend logic can be added here, currently handled during "savePlantDetails"
         };
         reader.readAsDataURL(file);
     }
 };
 
+window.removePlantAvatar = function(event) {
+    event.stopPropagation();
+    const preview = document.getElementById('bsAvatarPreview');
+    preview.src = 'https://placehold.co/100x100?text=Plant';
+    preview.dataset.base64 = '';
+    document.getElementById('bsImageInput').value = '';
+    document.getElementById('bsAvatarRemove').style.display = 'none';
+};
+
 async function uploadImageToR2(base64Data, filename) {
-    // If backend doesn't have an exact route, this creates a mock URL or uses the scan route
-    const token = localStorage.getItem('farmer_jwt');
     try {
         const res = await fetch(`${API_BASE_URL}/api/crops/${cropId}/upload-image`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('farmer_jwt')}` },
             body: JSON.stringify({ imageBase64: base64Data, filename: filename })
         });
         const data = await res.json();
         if(data.success && data.url) return data.url;
     } catch(e) {}
-    // Fallback dummy R2 URL
+    // Fallback static URL or mock
     return `https://pub-mock-cloud.r2.dev/plants/${cropId}/${filename}.jpg`;
 }
 
 // Full Agronomy Details Save for a single plant
-async function savePlantDetails() {
+window.savePlantDetails = function(event) {
+    const btn = event ? event.target : document.getElementById('bsSaveBtn');
+    showConfirmModal('আপডেট নিশ্চিত করুন', 'আপনি কি গাছের এই তথ্যগুলো সেভ করতে চান?', () => executeSavePlantDetails(btn));
+};
+
+async function executeSavePlantDetails(btn) {
     if(!currentlyEditingPlant) return;
     const {bed, node, bIndex, pIndex} = currentlyEditingPlant;
-    const btn = event.target;
     const originalBtnHTML = btn.innerHTML;
     btn.innerHTML = 'সেভ হচ্ছে...';
+    btn.disabled = true;
 
-    node.height = document.getElementById('bsHeight').value;
-    node.fruits = document.getElementById('bsFruits').value;
-    node.leaf_count = document.getElementById('bsLeaves').value;
-    
-    const noteText = document.getElementById('bsNote').value;
-    node.disease = noteText;
-    
-    node.is_fertilized = document.getElementById('bsFertilizerChip').classList.contains('active');
-    node.is_pesticide = document.getElementById('bsPesticideChip').classList.contains('active');
+    try {
+        node.height = document.getElementById('bsHeight').value;
+        node.fruits = document.getElementById('bsFruits').value;
+        node.leaf_count = document.getElementById('bsLeaves').value;
+        
+        const noteText = document.getElementById('bsNote').value;
+        node.disease = noteText;
+        
+        node.is_fertilized = document.getElementById('bsFertilizerChip').classList.contains('active');
+        node.is_pesticide = document.getElementById('bsPesticideChip').classList.contains('active');
 
-    if(noteText && noteText.trim() !== "") {
-        node.state = 'S';
-    }
+        if (document.getElementById('btnSetCritical').classList.contains('active')) node.state = 'C';
+        else if (document.getElementById('btnSetSick').classList.contains('active')) node.state = 'S';
+        else if (document.getElementById('btnSetHealthy').classList.contains('active')) node.state = 'H';
 
-    // Handle Image Upload
-    let imageUrl = '';
-    const preview = document.getElementById('bsImagePreview');
-    if (preview.dataset.base64) {
-        const timestamp = new Date().getTime();
-        const fname = `b${bIndex}_t${pIndex}_${timestamp}`;
-        imageUrl = await uploadImageToR2(preview.dataset.base64, fname);
-    }
+        // Handle Image Upload
+        let imageUrl = '';
+        const preview = document.getElementById('bsAvatarPreview');
+        if (preview.dataset.base64 && preview.dataset.base64 !== '') {
+            const timestamp = new Date().getTime();
+            const fname = `b${bIndex}_t${pIndex}_${timestamp}`;
+            imageUrl = await uploadImageToR2(preview.dataset.base64, fname);
+        } else if (preview.src.includes('placehold.co')) {
+            imageUrl = ''; // User deleted image
+        } else {
+            imageUrl = preview.src; // Unchanged image
+        }
 
-    // Add entry to logs
-    if(!node.logs) node.logs = [];
-    node.logs.push({
-        date: new Date().toLocaleDateString('bn-BD'),
-        height: node.height,
-        fruits: node.fruits,
-        leaves: node.leaf_count,
-        note: noteText || 'Status Updated',
-        is_fertilized: node.is_fertilized,
-        is_pesticide: node.is_pesticide,
-        image_url: imageUrl
-    });
+        // Add entry to logs
+        if(!node.logs) node.logs = [];
+        node.logs.push({
+            date: new Date().toLocaleDateString('bn-BD'),
+            height: node.height,
+            fruits: node.fruits,
+            leaves: node.leaf_count,
+            note: noteText || 'Status Updated',
+            is_fertilized: node.is_fertilized,
+            is_pesticide: node.is_pesticide,
+            image_url: imageUrl
+        });
 
-    farmData[bIndex].plants_nodes_json[pIndex] = node;
+        farmData[bIndex].plants_nodes_json[pIndex] = node;
 
-    const token = localStorage.getItem('farmer_jwt');
-    const resp = await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
-        method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
-    });
+        const token = localStorage.getItem('farmer_jwt');
+        const resp = await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
+        });
 
-    if (resp.ok) {
+        if (resp.ok) {
+            btn.innerHTML = 'আপডেট সেভ করুন';
+            btn.disabled = false;
+            closeBottomSheet();
+            renderBeds();
+            if (typeof showToast === 'function') showToast('সফলভাবে ডাটা সেভ হয়েছে!');
+        } else {
+            btn.innerHTML = 'আপডেট সেভ করুন';
+            btn.disabled = false;
+            if (typeof showToast === 'function') showToast('ডাটা সেভ হতে সমস্যা হয়েছে!');
+            else alert('Data save failed');
+        }
+    } catch (err) {
+        console.error('Error saving details:', err);
         btn.innerHTML = 'আপডেট সেভ করুন';
-        closeBottomSheet();
-        renderBeds();
-    } else {
-        alert('Data save failed');
-        btn.innerHTML = 'আপডেট সেভ করুন';
+        btn.disabled = false;
+        if (typeof showToast === 'function') showToast('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।');
+        else alert('Network error while saving');
     }
 }
 
@@ -484,10 +572,12 @@ function populateTimeline(logs) {
     container.innerHTML = html;
 }
 
-window.deletePlantLog = async function(logIndex) {
+window.deletePlantLog = function(logIndex) {
     if(!currentlyEditingPlant) return;
-    if(!confirm('আপনি কি এই আপডেটটি মুছে ফেলতে চান?')) return;
-    
+    showConfirmModal('হিস্ট্রি মুছুন', 'আপনি কি এই গাছের আপডেটটি মুছে ফেলতে চান?', () => executeDeletePlantLog(logIndex));
+};
+
+async function executeDeletePlantLog(logIndex) {
     let {bed, node, bIndex, pIndex} = currentlyEditingPlant;
     node.logs.splice(logIndex, 1);
     
@@ -507,7 +597,7 @@ window.deletePlantLog = async function(logIndex) {
         console.error("Failed to delete log", e);
         alert('কোথাও সমস্যা হচ্ছে, আবার চেষ্টা করুন।');
     }
-};
+}
 
 window.openFullScreenImage = function(src) {
     const modal = document.getElementById('fullImageModal');
@@ -586,14 +676,18 @@ window.addNewBedToGrid = function() {
 };
 
 window.removeBedFromGrid = function(bIndex) {
-    if(confirm('এই বেড এবং এর ভেতরের সব গাছের ডাটা ও ছবি ডিলিট হয়ে যাবে। নিশ্চিত?')) {
+    showConfirmModal('বেড মুছুন', 'এই বেড এবং এর ভেতরের সব গাছের ডাটা ও ছবি ডিলিট হয়ে যাবে। নিশ্চিত?', () => {
         farmData.splice(bIndex, 1);
         openGridSetupModal(); 
-    }
+    });
 };
 
-window.saveGridSetupChanges = async function() {
-    const btn = event.target;
+window.saveGridSetupChanges = function(event) {
+    const btn = event ? event.target : document.querySelector('.sheet-close-btn');
+    showConfirmModal('লেআউট সেভ করুন', 'ম্যাপ লেআউটের নতুন সেটআপ সেভ করতে চান?', () => executeGridSetupChanges(btn));
+};
+
+async function executeGridSetupChanges(btn) {
     btn.innerHTML = 'সেভিং...';
     try {
         const token = localStorage.getItem('farmer_jwt');
@@ -695,3 +789,28 @@ window.saveBatchUpdateDetails = async function() {
     if(!allSuccess) alert('কিছু ডাটা সেভ হতে সমস্যা হয়েছে।');
     else toggleBatchMode(); 
 };
+
+// ========================
+// Global Confirmation Modal Logic
+// ========================
+let currentConfirmCallback = null;
+
+window.showConfirmModal = function(title, text, callback) {
+    document.getElementById('confirmActionTitle').innerText = title || 'নিশ্চিত করুন';
+    document.getElementById('confirmActionText').innerText = text || 'আপনি কি এই কাজটি করতে চান?';
+    currentConfirmCallback = callback;
+    document.getElementById('confirmActionModal').classList.add('active');
+};
+
+window.closeConfirmModal = function() {
+    document.getElementById('confirmActionModal').classList.remove('active');
+    currentConfirmCallback = null;
+};
+
+document.getElementById('confirmActionBtn').addEventListener('click', function() {
+    const cb = currentConfirmCallback;
+    closeConfirmModal();
+    if(cb) {
+        cb();
+    }
+});
