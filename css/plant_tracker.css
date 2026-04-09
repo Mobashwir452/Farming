@@ -24,17 +24,23 @@ body {
     padding: 0 8px;
 }
 
+.sticky-top-group {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
 /* Header Override */
 .page-top-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 20px;
-    background: white;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px 10px 20px;
+    background: transparent;
+    position: relative;
+    border-bottom: none;
     justify-content: space-between;
     width: 100%;
 }
@@ -48,8 +54,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-main);
     cursor: pointer;
+    color: var(--text-main);
     transition: background 0.2s;
 }
 
@@ -59,68 +65,53 @@ body {
 
 /* Replaced old Header & Filter Pill styles with Tabs */
 .tracker-tabs-container {
-    padding: 0 16px;
-    margin: 16px 0;
+    padding: 0;
+    /* Full width */
+    margin-top: 15px;
+
 }
 
 .ld-tabs {
     display: flex;
-    gap: 8px;
-    background: #F1F5F9;
-    padding: 4px;
-    border-radius: 12px;
+    gap: 6px;
+    background: #F8FAFC;
+    /* Different color from Top Bar */
+    padding: 16px 16px 12px 12px;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .ld-tab {
     flex: 1;
-    padding: 8px 0;
+    padding: 10px 0;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-dim);
     border: none;
     background: transparent;
+    /* Transparent to blend with the tabs bar */
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
 }
 
 .ld-tab.active {
-    background: #FFFFFF;
-    color: var(--text-main);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--primary) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+    transform: translateY(-2px);
 }
 
-/* FAB Settings */
-.fab-settings {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), #047857);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 99;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.fab-settings:active {
-    transform: scale(0.95);
-    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
-}
+/* Removed old FAB Settings as it is moved to top bar */
 
 
 
 /* Beds & Grids */
 .tracker-main {
     padding-bottom: 100px;
+    padding-top: 10px;
 }
 
 .bed-card {
@@ -173,45 +164,102 @@ body {
 
 .plant-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 16px 8px;
+    /* Extra row gap for text */
     margin-top: 16px;
+    align-items: start;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .plant-chip {
-    aspect-ratio: 1;
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+}
+
+.avatar-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    border: 3px solid transparent;
+    background-color: #f1f5f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    position: relative;
-    border: 2px solid transparent;
-    transition: transform 0.1s;
+    color: var(--text-dim);
+    font-size: 20px;
 }
 
 .plant-chip:active {
     transform: scale(0.95);
 }
 
-.plant-chip.healthy {
-    background: var(--healthy-bg);
+.chip-id {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1;
+    text-align: center;
+}
+
+.chip-variety {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.1;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+/* Status Colors on the Ring */
+.plant-chip.healthy .avatar-ring {
+    border-color: var(--healthy-color);
+    background-color: var(--healthy-bg);
     color: var(--healthy-color);
 }
 
-.plant-chip.sick {
-    background: var(--sick-bg);
+.plant-chip.sick .avatar-ring {
+    border-color: var(--sick-color);
+    background-color: var(--sick-bg);
     color: var(--sick-color);
-    box-shadow: 0 0 10px rgba(217, 119, 6, 0.2);
 }
 
-.plant-chip.sick::after {
+.plant-chip.critical .avatar-ring {
+    border-color: var(--critical-color);
+    background-color: var(--critical-bg);
+    color: var(--critical-color);
+}
+
+/* Empty State / Photo Needed */
+.avatar-ring.empty-state {
+    border-style: dashed;
+    border-width: 2.5px;
+}
+
+.plant-chip.sick .avatar-ring::after {
     content: '!';
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -2px;
+    right: -2px;
     background: var(--sick-color);
     color: white;
     width: 18px;
@@ -221,19 +269,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid white;
+    font-weight: bold;
 }
 
-.plant-chip.critical {
-    background: var(--critical-bg);
-    color: var(--critical-color);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
-}
-
-.plant-chip.critical::after {
+.plant-chip.critical .avatar-ring::after {
     content: '✖';
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -2px;
+    right: -2px;
     background: var(--critical-color);
     color: white;
     width: 18px;
@@ -244,32 +288,35 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid white;
 }
 
 /* Batch Mode Styles */
-.batch-mode .plant-chip {
-    border: 2px solid var(--border-color);
+.batch-mode .avatar-ring {
+    border-color: var(--border-color);
 }
 
-.batch-mode .plant-chip.selected {
+.batch-mode .plant-chip.selected .avatar-ring {
     border-color: var(--primary);
+    border-width: 4px;
 }
 
-.batch-mode .plant-chip.selected::before {
+.batch-mode .plant-chip.selected .avatar-ring::before {
     content: '✓';
     position: absolute;
-    bottom: -4px;
-    right: -4px;
+    bottom: -2px;
+    right: -2px;
     background: var(--primary);
     color: white;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
+    border: 2px solid white;
 }
 
 .batch-action-bar {
@@ -608,23 +655,64 @@ body {
 }
 
 /* Status Toggles */
-.status-toggles { display: flex; gap: 8px; margin-bottom: 20px; }
-.status-btn {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color);
-    transition: all 0.2s; font-size: 14px;
+.status-toggles {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
 }
-.healthy-btn { background: white; color: var(--healthy-color); border-color: rgba(16,185,129,0.3); }
-.sick-btn { background: white; color: var(--sick-color); border-color: rgba(217,119,6,0.3); }
-.critical-btn { background: white; color: var(--critical-color); border-color: rgba(239,68,68,0.3); }
+
+.status-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.healthy-btn {
+    background: white;
+    color: var(--healthy-color);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.sick-btn {
+    background: white;
+    color: var(--sick-color);
+    border-color: rgba(217, 119, 6, 0.3);
+}
+
+.critical-btn {
+    background: white;
+    color: var(--critical-color);
+    border-color: rgba(239, 68, 68, 0.3);
+}
 
 .status-btn.active {
     outline: 2px solid;
     background: #f8fafc;
 }
-.healthy-btn.active { outline-color: var(--healthy-color); background: var(--healthy-bg); }
-.sick-btn.active { outline-color: var(--sick-color); background: var(--sick-bg); }
-.critical-btn.active { outline-color: var(--critical-color); background: var(--critical-bg); }
+
+.healthy-btn.active {
+    outline-color: var(--healthy-color);
+    background: var(--healthy-bg);
+}
+
+.sick-btn.active {
+    outline-color: var(--sick-color);
+    background: var(--sick-bg);
+}
+
+.critical-btn.active {
+    outline-color: var(--critical-color);
+    background: var(--critical-bg);
+}
 
 /* Avatar Styles */
 .plant-avatar-wrapper {
@@ -634,6 +722,7 @@ body {
     border-radius: 50%;
     overflow: visible;
 }
+
 .plant-avatar-wrapper img {
     width: 100%;
     height: 100%;
@@ -641,10 +730,11 @@ body {
     object-fit: cover;
     border: 2px solid #E2E8F0;
 }
+
 .avatar-upload-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -653,9 +743,11 @@ body {
     transition: opacity 0.2s;
     cursor: pointer;
 }
+
 .plant-avatar-wrapper:hover .avatar-upload-overlay {
     opacity: 1;
 }
+
 #bsAvatarRemove {
     position: absolute;
     top: -4px;
@@ -671,7 +763,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Confirm Action Modal Centered Overlay */

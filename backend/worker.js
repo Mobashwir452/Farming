@@ -24,6 +24,7 @@ import { checkOverdueTasks } from './services/taskChecker.js';
 import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
 import { cleanOldCropScanImages } from './services/r2_cleaner.js';
 import { resetMonthlyLimits } from './services/limitResetter.js';
+import { compressUncompressedImages, findOrphanImages, deleteOrphanImages } from './routes/admin_dbtools.js';
 
 
 const router = Router();
@@ -46,6 +47,9 @@ router.post('/api/admin/crops/:id/generate-rag', withAuth(['admin']), generateMi
 router.get('/api/admin/settings', withAuth(['admin']), getAdminSettings);
 router.post('/api/admin/settings', withAuth(['admin']), saveAdminSettings);
 router.get('/api/admin/test/weather-sync', withAuth(['admin']), testWeatherSync);
+router.post('/api/admin/dbtools/compress-images', withAuth(['admin']), compressUncompressedImages);
+router.get('/api/admin/dbtools/find-orphans', withAuth(['admin']), findOrphanImages);
+router.post('/api/admin/dbtools/delete-orphans', withAuth(['admin']), deleteOrphanImages);
 
 // Admin Users & Subscriptions
 router.get('/api/admin/users', withAuth(['admin']), getUsers);

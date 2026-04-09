@@ -128,11 +128,11 @@ async function fetchFarmAndCropDetails() {
             const btnDisease = document.getElementById('btnDisease');
             if (btnDisease) {
                 btnDisease.onclick = () => {
-                   if(window.activeCrop && window.activeCrop.id) {
-                       window.location.href = `crop_doctor.html?farm_id=${currentFarmId}&crop_id=${window.activeCrop.id}`;
-                   } else {
-                       window.location.href = `crop_doctor.html?farm_id=${currentFarmId}`;
-                   }
+                    if (window.activeCrop && window.activeCrop.id) {
+                        window.location.href = `crop_doctor.html?farm_id=${currentFarmId}&crop_id=${window.activeCrop.id}`;
+                    } else {
+                        window.location.href = `crop_doctor.html?farm_id=${currentFarmId}`;
+                    }
                 };
             }
 
@@ -153,7 +153,7 @@ async function fetchFarmAndCropDetails() {
                         const resources = JSON.parse(c.resources_state_json || '[]');
                         resources.forEach(r => dynamicCost += parseFloat(r.estimated_cost_bdt) || parseFloat(r.cost) || 0);
                         if (resources.length === 0) dynamicCost = parseFloat(c.expected_cost_bdt) || 0;
-                    } catch(e) {
+                    } catch (e) {
                         dynamicCost = parseFloat(c.expected_cost_bdt) || 0;
                     }
                     totalFarmProfit += (rev - dynamicCost);
@@ -197,12 +197,12 @@ async function fetchFarmAndCropDetails() {
                 if (cropNameEl) {
                     let displayName = activeCrop.crop_name;
                     if (displayName && displayName.includes('(')) {
-                         const match = displayName.match(/\(([^()]+)\)/g);
-                         if (match && match.length > 0) {
-                             let vName = match[match.length - 1].replace(/[()]/g, '').trim();
-                             let baseCName = displayName.split('(')[0].trim();
-                             if (vName && baseCName) displayName = `${baseCName} (${vName})`;
-                         }
+                        const match = displayName.match(/\(([^()]+)\)/g);
+                        if (match && match.length > 0) {
+                            let vName = match[match.length - 1].replace(/[()]/g, '').trim();
+                            let baseCName = displayName.split('(')[0].trim();
+                            if (vName && baseCName) displayName = `${baseCName} (${vName})`;
+                        }
                     }
                     cropNameEl.textContent = displayName;
                 }
@@ -211,12 +211,12 @@ async function fetchFarmAndCropDetails() {
 
                 // Dynamically evaluate age and pre-plant state
                 let isPrePlant = false;
-                
+
                 // If the initial count is exactly 0 or no planted date, we can consider it pre-plant!
                 if (initialCount === 0 || !activeCrop.planted_date) {
                     isPrePlant = true;
                 }
-                
+
                 let diffDaysVal = null;
                 let remainingDaysVal = null;
                 if (activeCrop.planted_date && !isPrePlant) {
@@ -251,10 +251,10 @@ async function fetchFarmAndCropDetails() {
                         // If planted_date exists (even if in future), show the date with edit option
                         const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
                         const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
-                        
+
                         let derivedPlantingDateStr = activeCrop.planted_date ? (activeCrop.planted_date.includes('T') ? activeCrop.planted_date.split('T')[0] : activeCrop.planted_date) : '';
                         let plantingTaskId = null;
-                        
+
                         try {
                             const tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
                             const pTask = tasks.find(t => parseInt(t.day_offset) === 0 || t.title.includes('রোপণ') || t.title.includes('বপন') || t.title.includes('বীজতলা'));
@@ -262,11 +262,11 @@ async function fetchFarmAndCropDetails() {
                                 derivedPlantingDateStr = pTask.due_date;
                                 plantingTaskId = pTask.id;
                             }
-                        } catch(e){}
-                        
+                        } catch (e) { }
+
                         let plantedDateObj = derivedPlantingDateStr ? new Date(derivedPlantingDateStr) : '';
                         let formattedDate = plantedDateObj ? `${toBngDigits(plantedDateObj.getDate())} ${EN_TO_BN_MONTHS[plantedDateObj.getMonth()]}, ${toBngDigits(plantedDateObj.getFullYear())}` : '-';
-                        
+
                         pillContainer.innerHTML = `
                             <div class="status-pill status-planted" onclick="${plantingTaskId ? `rescheduleTask('${plantingTaskId}')` : 'promptPlantCount()'}">
                                 <span>🌱 রোপণ: ${formattedDate}</span>
@@ -283,13 +283,21 @@ async function fetchFarmAndCropDetails() {
                         let nextTaskTitle = 'চারা রোপণ বাকি';
                         try {
                             let tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
-                            tasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled');
-                            if (tasks.length > 0) {
-                                tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-                                nextTaskTitle = tasks[0].title || nextTaskTitle;
+                            const todayStr = new Date().toISOString().split('T')[0];
+                            let upcomingTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled' && t.due_date >= todayStr);
+
+                            if (upcomingTasks.length > 0) {
+                                upcomingTasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                                nextTaskTitle = upcomingTasks[0].title || nextTaskTitle;
+                            } else {
+                                let anyPending = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled');
+                                if (anyPending.length > 0) {
+                                    anyPending.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                                    nextTaskTitle = anyPending[0].title || nextTaskTitle;
+                                }
                             }
-                        } catch(e){}
-                        
+                        } catch (e) { }
+
                         cropStatusEl.innerHTML = `পরবর্তী ধাপ: ${nextTaskTitle}`;
                         cropStatusEl.style.color = '#D97706'; // Amber color for pending
                     } else {
@@ -337,14 +345,14 @@ async function fetchFarmAndCropDetails() {
                 try {
                     const losses = JSON.parse(activeCrop.loss_events_json || '[]');
                     losses.forEach(l => lossCount += (parseInt(l.amount) || 0));
-                } catch(e) {}
-                
+                } catch (e) { }
+
                 const currentCount = Math.max(0, initialCount - lossCount);
-                
+
                 const currentPlantSpan = document.getElementById('currentPlantSpan');
                 const initialPlantSpan = document.getElementById('initialPlantSpan');
                 const plantLossSpan = document.getElementById('plantLossSpan');
-                
+
                 if (currentPlantSpan) currentPlantSpan.textContent = `${currentCount}`;
                 if (initialPlantSpan) initialPlantSpan.textContent = `${initialCount}`;
                 if (plantLossSpan) plantLossSpan.textContent = `${lossCount} টি নষ্ট`;
@@ -372,7 +380,7 @@ async function fetchFarmAndCropDetails() {
                         const activeRes = JSON.parse(activeCrop.resources_state_json || '[]');
                         activeRes.forEach(r => currentActiveCost += parseFloat(r.estimated_cost_bdt) || parseFloat(r.cost) || 0);
                         if (activeRes.length === 0) currentActiveCost = parseFloat(activeCrop.expected_cost_bdt) || 0;
-                    } catch(e) {
+                    } catch (e) {
                         currentActiveCost = parseFloat(activeCrop.expected_cost_bdt) || 0;
                     }
                 }
@@ -387,7 +395,7 @@ async function fetchFarmAndCropDetails() {
                 renderGuidelineModal();
                 renderResourcesTab(activeCrop.resources_state_json);
                 renderFinanceTab();
-                
+
                 // Output Notes List
                 renderCropNotes(activeCrop.notes_json);
 
@@ -398,7 +406,7 @@ async function fetchFarmAndCropDetails() {
                 const cropNameEl = document.querySelector('.ld-crop-text h4');
                 const cropStatusEl = document.querySelector('.ld-crop-text p:nth-child(3) span');
                 const plantingAgeEl = document.querySelector('.ld-crop-text p strong');
-                
+
                 if (cropNameEl) cropNameEl.textContent = "খালি জমি";
                 if (cropStatusEl) cropStatusEl.textContent = "বর্তমানে কোনো ফসল নেই";
                 if (plantingAgeEl && plantingAgeEl.parentElement) plantingAgeEl.parentElement.innerHTML = "--";
@@ -427,7 +435,7 @@ async function fetchFarmAndCropDetails() {
 
                 const currentCostEl = document.getElementById('current-cost-display');
                 if (currentCostEl) currentCostEl.textContent = '৳ 0';
-                
+
                 const currentRevEl = document.getElementById('current-rev-display');
                 if (currentRevEl) currentRevEl.textContent = '৳ 0';
 
@@ -482,14 +490,14 @@ async function fetchCropScansForLand() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        
+
         const scanContainer = document.getElementById('cropScansContainer');
         const listEl = document.getElementById('scansList');
 
         if (data.success && data.scans && data.scans.length > 0) {
             scanContainer.style.display = 'block';
             listEl.innerHTML = '';
-            
+
             data.scans.forEach(scan => {
                 let imgSrc = scan.image_url;
                 if (imgSrc && imgSrc.startsWith('crop-scans/')) {
@@ -500,7 +508,7 @@ async function fetchCropScansForLand() {
 
                 const badgeColor = scan.confidence_score > 60 ? 'var(--success)' : 'var(--danger)';
                 const scanDate = new Date(scan.created_at).toLocaleDateString('bn-BD');
-                
+
                 const card = document.createElement('div');
                 card.style.cssText = 'min-width: 140px; width: 140px; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border-color); flex-shrink: 0;';
                 card.innerHTML = `
@@ -518,19 +526,19 @@ async function fetchCropScansForLand() {
         } else {
             scanContainer.style.display = 'none';
         }
-    } catch(e) { console.error("Could not fetch scans", e); }
+    } catch (e) { console.error("Could not fetch scans", e); }
 }
 
-window.renderCropNotes = function(notesJsonString) {
+window.renderCropNotes = function (notesJsonString) {
     const listEl = document.getElementById('notesList');
     const container = document.getElementById('cropNotesContainer');
-    if(!listEl || !container) return;
-    
+    if (!listEl || !container) return;
+
     listEl.innerHTML = '';
-    
+
     try {
         const notes = JSON.parse(notesJsonString || '[]');
-        if(notes.length === 0) {
+        if (notes.length === 0) {
             container.style.display = 'none';
         } else {
             container.style.display = 'block';
@@ -541,9 +549,9 @@ window.renderCropNotes = function(notesJsonString) {
                 item.style.border = '1px solid var(--border-color)';
                 item.style.borderRadius = '8px';
                 item.style.marginBottom = '8px';
-                
+
                 const timeStr = note.date ? new Date(note.date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short' }) : 'অজ্ঞাত দিন';
-                
+
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${escapeHtml(timeStr)}</span>
@@ -561,54 +569,54 @@ window.renderCropNotes = function(notesJsonString) {
                 listEl.appendChild(item);
             });
         }
-    } catch(e) { console.error("Could not parse notes", e); }
+    } catch (e) { console.error("Could not parse notes", e); }
 }
 
-window.editCropNote = function(index) {
-    if(!window.activeCrop || !window.activeCrop.notes_json) return;
+window.editCropNote = function (index) {
+    if (!window.activeCrop || !window.activeCrop.notes_json) return;
     try {
         let notes = JSON.parse(window.activeCrop.notes_json);
         const oldText = notes[index].note || notes[index].text;
         const newText = prompt("নোট আপডেট করুন:", oldText);
-        if(newText !== null && newText.trim() !== "") {
+        if (newText !== null && newText.trim() !== "") {
             notes[index].text = newText.trim();
             delete notes[index].note; // Normalize field mapping
             window.activeCrop.notes_json = JSON.stringify(notes);
             saveCropState();
             window.renderCropNotes(window.activeCrop.notes_json);
         }
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
 };
 
-window.deleteCropNote = function(index) {
-    if(!window.activeCrop || !window.activeCrop.notes_json) return;
-    if(!confirm("আপনি কি নিশ্চিতভাবে এই নোটটি মুছে ফেলতে চান?")) return;
+window.deleteCropNote = function (index) {
+    if (!window.activeCrop || !window.activeCrop.notes_json) return;
+    if (!confirm("আপনি কি নিশ্চিতভাবে এই নোটটি মুছে ফেলতে চান?")) return;
     try {
         let notes = JSON.parse(window.activeCrop.notes_json);
         notes.splice(index, 1);
         window.activeCrop.notes_json = JSON.stringify(notes);
         saveCropState();
         window.renderCropNotes(window.activeCrop.notes_json);
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
 };
 
 window.toggleResourceCheck = async function (id, el) {
     const parent = el.closest('.resource-check-item');
     const isChecked = el.checked;
-    
+
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         const idx = resArr.findIndex(r => r.id === id);
         if (idx === -1) return;
 
         const res = resArr[idx];
-        
+
         if (isChecked) {
             // Optimistic UI
             parent.classList.add('bought');
             parent.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.readOnly = true);
             const delBtn = parent.querySelector('button[title="বাতিল করুন"]');
-            if(delBtn) delBtn.style.display = 'none';
+            if (delBtn) delBtn.style.display = 'none';
 
             let cost = res.estimated_cost_bdt || 0;
             if (cost <= 0) {
@@ -617,20 +625,20 @@ window.toggleResourceCheck = async function (id, el) {
                     el.checked = false; // Revert
                     parent.classList.remove('bought');
                     parent.querySelectorAll('input.res-name-input, input.res-amount-input, input.res-cost-input').forEach(input => input.readOnly = false);
-                    if(delBtn) delBtn.style.display = 'block';
+                    if (delBtn) delBtn.style.display = 'block';
                     return;
                 }
                 cost = parseFloat(userCost) || 0;
                 res.estimated_cost_bdt = cost;
                 const costInput = parent.querySelector('.res-cost-input');
-                if(costInput) costInput.value = cost;
+                if (costInput) costInput.value = cost;
             } else {
                 const confirmRes = confirm(`"${res.name || 'রিসোর্স'}" এর খরচ ৳${cost} হিসেবে ডাটাবেসে সেভ হবে। আপনি কি নিশ্চিত?`);
-                if(!confirmRes) {
+                if (!confirmRes) {
                     el.checked = false;
                     parent.classList.remove('bought');
                     parent.querySelectorAll('input.res-name-input, input.res-amount-input, input.res-cost-input').forEach(input => input.readOnly = false);
-                    if(delBtn) delBtn.style.display = 'block';
+                    if (delBtn) delBtn.style.display = 'block';
                     return;
                 }
             }
@@ -660,13 +668,13 @@ window.toggleResourceCheck = async function (id, el) {
                 el.checked = false;
                 parent.classList.remove('bought');
                 parent.querySelectorAll('input.res-name-input, input.res-amount-input, input.res-cost-input').forEach(input => input.readOnly = false);
-                if(delBtn) delBtn.style.display = 'block';
+                if (delBtn) delBtn.style.display = 'block';
                 res.status = 'pending';
                 return;
             }
         } else {
             // UN-CHECK (Delete transaction)
-            if(!confirm("আপনি কি নিশ্চিত যে এই খরচটি বাতিল করে পুনরায় এডিট করতে চান?")) {
+            if (!confirm("আপনি কি নিশ্চিত যে এই খরচটি বাতিল করে পুনরায় এডিট করতে চান?")) {
                 el.checked = true;
                 return;
             }
@@ -674,7 +682,7 @@ window.toggleResourceCheck = async function (id, el) {
             parent.classList.remove('bought');
             parent.querySelectorAll('input.res-name-input, input.res-amount-input, input.res-cost-input').forEach(input => input.readOnly = false);
             const delBtn = parent.querySelector('button[title="বাতিল করুন"]');
-            if(delBtn) delBtn.style.display = 'block';
+            if (delBtn) delBtn.style.display = 'block';
             res.status = 'pending';
 
             if (res.transaction_id) {
@@ -689,8 +697,8 @@ window.toggleResourceCheck = async function (id, el) {
 
         activeCrop.resources_state_json = JSON.stringify(resArr);
         saveCropState();
-        renderFinanceTab(); 
-        
+        renderFinanceTab();
+
         // Re-render to ensure pristine bindings
         renderResourcesTab(activeCrop.resources_state_json);
     } catch (e) {
@@ -699,7 +707,7 @@ window.toggleResourceCheck = async function (id, el) {
     }
 };
 
-window.updateResourceData = function(id, field, value) {
+window.updateResourceData = function (id, field, value) {
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         const idx = resArr.findIndex(r => r.id === id);
@@ -708,10 +716,10 @@ window.updateResourceData = function(id, field, value) {
             activeCrop.resources_state_json = JSON.stringify(resArr);
             saveCropState();
         }
-    } catch(e) {}
+    } catch (e) { }
 };
 
-window.updateResourceCategory = function(id, value) {
+window.updateResourceCategory = function (id, value) {
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         const idx = resArr.findIndex(r => r.id === id);
@@ -721,21 +729,21 @@ window.updateResourceCategory = function(id, value) {
             saveCropState();
             renderResourcesTab(activeCrop.resources_state_json);
         }
-    } catch(e) {}
+    } catch (e) { }
 };
 
-window.deleteLocalResource = function(id) {
-    if(!confirm("এই রিসোর্সটি কি মুছে ফেলতে চান?")) return;
+window.deleteLocalResource = function (id) {
+    if (!confirm("এই রিসোর্সটি কি মুছে ফেলতে চান?")) return;
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         resArr = resArr.filter(r => r.id !== id);
         activeCrop.resources_state_json = JSON.stringify(resArr);
         saveCropState();
         renderResourcesTab(activeCrop.resources_state_json);
-    } catch(e) {}
+    } catch (e) { }
 };
 
-window.addCustomResourceRow = function() {
+window.addCustomResourceRow = function () {
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         resArr.push({
@@ -749,7 +757,7 @@ window.addCustomResourceRow = function() {
         activeCrop.resources_state_json = JSON.stringify(resArr);
         saveCropState();
         renderResourcesTab(activeCrop.resources_state_json);
-    } catch(e) {}
+    } catch (e) { }
 };
 
 window.markTaskDone = function (taskId, btnEl) {
@@ -834,17 +842,17 @@ window.addCustomTask = function () {
 };
 
 window.currentTaskFilter = window.currentTaskFilter || 'pending';
-window.setTaskFilter = function(filterStr) {
+window.setTaskFilter = function (filterStr) {
     window.currentTaskFilter = filterStr;
     const chips = document.querySelectorAll('.filter-chip');
     chips.forEach(chip => {
-        if(chip.getAttribute('data-filter') === filterStr) {
+        if (chip.getAttribute('data-filter') === filterStr) {
             chip.classList.add('active');
         } else {
             chip.classList.remove('active');
         }
     });
-    if(typeof activeCrop !== 'undefined' && activeCrop && activeCrop.tasks_state_json) {
+    if (typeof activeCrop !== 'undefined' && activeCrop && activeCrop.tasks_state_json) {
         renderTasksTab(activeCrop.tasks_state_json);
     }
 };
@@ -863,12 +871,71 @@ function renderTasksTab(tasksJsonStr) {
     }
 
     const todayDate = new Date();
-    todayDate.setHours(0,0,0,0);
+    todayDate.setHours(0, 0, 0, 0);
+
+    let counts = { pending: 0, missed: 0, completed: 0, cancelled: 0, all: allTasks.length };
+
+    allTasks.forEach(task => {
+        const taskDateObj = new Date(task.due_date);
+        taskDateObj.setHours(0, 0, 0, 0);
+        let status = task.status || 'pending';
+        if (task.is_completed) status = 'completed';
+
+        if (status === 'completed') counts.completed++;
+        else if (status === 'cancelled') counts.cancelled++;
+        else if (status === 'pending') {
+            if (taskDateObj < todayDate) counts.missed++;
+            else counts.pending++;
+        }
+    });
+
+    const updateBadge = (filter, count) => {
+        const chip = document.querySelector(`.filter-chip[data-filter="${filter}"]`);
+        if (chip) {
+            const badge = chip.querySelector('.cnt-badge');
+            if (badge) {
+                badge.textContent = String(count).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+                badge.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
+        }
+    };
+    updateBadge('pending', counts.pending);
+    updateBadge('missed', counts.missed);
+    updateBadge('completed', counts.completed);
+    updateBadge('cancelled', counts.cancelled);
+    updateBadge('all', counts.all);
+
+    let smartAlertHtml = '';
+    if (counts.missed > 0) {
+        // Find biological chain
+        let bioChain = [...allTasks].sort((a, b) => (parseInt(a.day_offset) || 0) - (parseInt(b.day_offset) || 0));
+        let firstMissed = bioChain.find(t => {
+            let s = t.status || 'pending';
+            if (t.is_completed) s = 'completed';
+            const td = new Date(t.due_date);
+            td.setHours(0, 0, 0, 0);
+            return s === 'pending' && td < todayDate;
+        });
+
+        if (firstMissed) {
+            smartAlertHtml = `
+            <div style="background: #FEF2F2; border: 1px solid #FECDD3; padding: 12px; margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
+                <div style="color: #DC2626; margin-top: 2px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 4px 0; color: #9F1239; font-size: 14px; font-weight: 700;">সতর্কতা: "${firstMissed.title}" মিস হয়েছে!</h4>
+                    <p style="margin: 0; color: #BE185D; font-size: 12px; line-height: 1.5;">অবিলম্বে মিস হওয়া কাজটি <b>সম্পন্ন</b> করুন অথবা বাতিল করুন!</p>
+                </div>
+            </div>
+            `;
+        }
+    }
 
     let tasks = allTasks.filter(task => {
         const taskDateObj = new Date(task.due_date);
-        taskDateObj.setHours(0,0,0,0);
-        
+        taskDateObj.setHours(0, 0, 0, 0);
+
         let status = task.status || 'pending';
         if (task.is_completed) status = 'completed';
 
@@ -881,7 +948,7 @@ function renderTasksTab(tasksJsonStr) {
     });
 
     if (tasks.length === 0) {
-        tlContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 40px 20px; font-weight: 500; font-size: 15px;">এই ফিল্টারে কোনো কাজ নেই।</p>';
+        tlContainer.innerHTML = smartAlertHtml + '<p style="text-align:center; color: var(--text-muted); padding: 40px 20px; font-weight: 500; font-size: 15px;">এই ফিল্টারে কোনো কাজ নেই।</p>';
         return;
     }
 
@@ -896,7 +963,7 @@ function renderTasksTab(tasksJsonStr) {
         groupedTasks[dateStr].push(task);
     });
 
-    tlContainer.innerHTML = '';
+    tlContainer.innerHTML = smartAlertHtml;
     const todayStr = new Date().toISOString().split('T')[0];
 
     // Helper to Bengali Digits
@@ -908,10 +975,10 @@ function renderTasksTab(tasksJsonStr) {
         if (!text || currentArea === 1) return text;
         const bnToEn = (str) => str.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
         const enToBn = (str) => String(str).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
-        
+
         let modifiedText = text;
         let bngArea = enToBn(currentArea);
-        
+
         // Layer 1: Adapt "per decimal" phrases
         modifiedText = modifiedText.replace(/১\s*শতাংশ\s*জমিতে/g, `পুরো জমিতে (${bngArea} শতাংশ)`);
         modifiedText = modifiedText.replace(/১\s*শতাংশে/g, `পুরো জমিতে (${bngArea} শতাংশে)`);
@@ -926,15 +993,15 @@ function renderTasksTab(tasksJsonStr) {
             while (startIdx > 0 && !['।', '.', '\n', ';'].includes(fullText[startIdx])) startIdx--;
             let endIdx = offset + match.length;
             while (endIdx < fullText.length && !['।', '.', '\n', ';'].includes(fullText[endIdx])) endIdx++;
-            
+
             const sentenceCtx = fullText.substring(startIdx, endIdx);
-            
+
             // Protection 1: Context suggests ratio or per plant/pit inside the SAME sentence
             const protectionWords = ['প্রতি', 'প্রতিটি', 'লিটারে', 'পানিতে', 'গর্তে', 'মাদায়', 'গাছে', 'চারাতে', '/লিটার', '/ লিটার'];
             if (protectionWords.some(w => sentenceCtx.includes(w))) {
-                return match; 
+                return match;
             }
-            
+
             // Protection 2: It's an instruction about ploughing/times inside the SAME sentence
             if (unit === 'টি' && (sentenceCtx.includes('চাষ') || sentenceCtx.includes('মই') || sentenceCtx.includes('বার'))) {
                 return match;
@@ -942,19 +1009,19 @@ function renderTasksTab(tasksJsonStr) {
 
             // Handle numeric ranges e.g. "১.৫-২ কেজি" or "২-৩"
             if (numStr.includes('-')) {
-                 let parts = numStr.split('-');
-                 if (parts.length === 2 && parts[0] && parts[1]) {
-                     let p1 = parseFloat(bnToEn(parts[0]));
-                     let p2 = parseFloat(bnToEn(parts[1]));
-                     if(!isNaN(p1) && !isNaN(p2)) {
-                         let s1 = Math.round(p1 * currentArea * 100) / 100;
-                         let s2 = Math.round(p2 * currentArea * 100) / 100;
-                         return enToBn(s1) + "-" + enToBn(s2) + " " + unit;
-                     }
-                 }
-                 return match; 
+                let parts = numStr.split('-');
+                if (parts.length === 2 && parts[0] && parts[1]) {
+                    let p1 = parseFloat(bnToEn(parts[0]));
+                    let p2 = parseFloat(bnToEn(parts[1]));
+                    if (!isNaN(p1) && !isNaN(p2)) {
+                        let s1 = Math.round(p1 * currentArea * 100) / 100;
+                        let s2 = Math.round(p2 * currentArea * 100) / 100;
+                        return enToBn(s1) + "-" + enToBn(s2) + " " + unit;
+                    }
+                }
+                return match;
             }
-            
+
             let enNum = parseFloat(bnToEn(numStr));
             if (isNaN(enNum)) return match;
 
@@ -962,7 +1029,7 @@ function renderTasksTab(tasksJsonStr) {
             scaledEnNum = Math.round(scaledEnNum * 100) / 100;
             return enToBn(scaledEnNum) + " " + unit;
         });
-        
+
         return modifiedText;
     };
 
@@ -1084,17 +1151,17 @@ function renderTasksTab(tasksJsonStr) {
 }
 
 window.currentResourceFilter = window.currentResourceFilter || 'pending';
-window.setResourceFilter = function(filterStr) {
+window.setResourceFilter = function (filterStr) {
     window.currentResourceFilter = filterStr;
     const chips = document.querySelectorAll('#resource-filter-chips .filter-chip');
     chips.forEach(chip => {
-        if(chip.getAttribute('data-filter') === filterStr) {
+        if (chip.getAttribute('data-filter') === filterStr) {
             chip.classList.add('active');
         } else {
             chip.classList.remove('active');
         }
     });
-    if(typeof activeCrop !== 'undefined' && activeCrop && activeCrop.resources_state_json) {
+    if (typeof activeCrop !== 'undefined' && activeCrop && activeCrop.resources_state_json) {
         renderResourcesTab(activeCrop.resources_state_json);
     }
 };
@@ -1150,17 +1217,17 @@ function renderResourcesTab(resJsonStr) {
     });
 
     for (const [key, group] of Object.entries(grouped)) {
-            if (group.items.length > 0) {
-                resContainer.innerHTML += `
+        if (group.items.length > 0) {
+            resContainer.innerHTML += `
                 <div style="margin-top: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                     <h4 style="font-size: 14px; font-weight: 700; color: var(--primary-dark); margin: 0; background: var(--primary-light); padding: 4px 10px; border-radius: 12px;">${group.title}</h4>
                     <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
                 </div>`;
 
-                group.items.forEach((res) => {
-                    const isBought = res.status === 'bought';
-                    const cat = res.category || 'labor_and_other';
-                    resContainer.innerHTML += `
+            group.items.forEach((res) => {
+                const isBought = res.status === 'bought';
+                const cat = res.category || 'labor_and_other';
+                resContainer.innerHTML += `
                         <div class="resource-check-item ${isBought ? 'bought' : ''}" style="margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; background: ${isBought ? '#F8FAFC' : 'white'};" data-id="${res.id}">
                             <div style="display: flex; align-items: flex-start; gap: 12px;">
                                 <input type="checkbox" class="res-checkbox" onchange="toggleResourceCheck('${res.id}', this)" ${isBought ? 'checked' : ''} style="margin-top: 4px; transform: scale(1.2);">
@@ -1192,7 +1259,7 @@ function renderResourcesTab(resJsonStr) {
                             </div>
                         </div>
                     `;
-                });
+            });
         }
     }
 
@@ -1200,11 +1267,11 @@ function renderResourcesTab(resJsonStr) {
 }
 
 window.currentFinanceFilter = window.currentFinanceFilter || 'all';
-window.setFinanceFilter = function(filterStr) {
+window.setFinanceFilter = function (filterStr) {
     window.currentFinanceFilter = filterStr;
     const chips = document.querySelectorAll('#finance-filter-chips .filter-chip');
     chips.forEach(chip => {
-        if(chip.getAttribute('data-filter') === filterStr) {
+        if (chip.getAttribute('data-filter') === filterStr) {
             chip.classList.add('active');
         } else {
             chip.classList.remove('active');
@@ -1213,17 +1280,17 @@ window.setFinanceFilter = function(filterStr) {
     renderFinanceTab();
 };
 
-window.renderFinanceTab = async function() {
+window.renderFinanceTab = async function () {
     const finContainer = document.getElementById('render-finance');
     finContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">ডাটা লোড হচ্ছে...</p>';
-    
+
     try {
         const token = localStorage.getItem('farmer_jwt');
         const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/transactions`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        
+
         let txs = [];
         if (data.success) {
             txs = data.transactions || [];
@@ -1270,14 +1337,14 @@ window.renderFinanceTab = async function() {
                 const iconBg = isInc ? '#D1FAE5' : '#FEE2E2';
                 const sign = isInc ? '+' : '-';
                 const dateStr = t.transaction_date ? new Date(t.transaction_date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' }) : 'অজানা';
-                
+
                 return `
                     <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-color);">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 40px; height: 40px; border-radius: 20px; background: ${iconBg}; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
-                                ${isInc ? 
-                                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' : 
-                                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>'}
+                                ${isInc ?
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' :
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>'}
                             </div>
                             <div>
                                 <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-main);">${escapeHtml(t.description || t.category || (isInc ? 'আয়' : 'ব্যয়'))}</h4>
@@ -1311,25 +1378,25 @@ window.renderFinanceTab = async function() {
                 ${listHtml}
             </div>
         `;
-    } catch(e) {
+    } catch (e) {
         console.error("Failed to load transactions", e);
         finContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">ডাটা লোড করতে সমস্যা হয়েছে।</p>';
     }
 };
 
-window.saveManualTransaction = async function() {
+window.saveManualTransaction = async function () {
     const modal = document.getElementById('addTransactionModal');
     const type = modal.querySelector('input[name="tr_type"][value="income"]').checked ? 'income' : 'expense';
     const amountVal = parseFloat(modal.querySelector('input[type="number"]').value) || 0;
     const descVal = modal.querySelector('input[type="text"]').value.trim();
 
-    if(amountVal <= 0) {
+    if (amountVal <= 0) {
         alert("দয়া করে সঠিক টাকার পরিমাণ লিখুন।");
         return;
     }
 
     const btn = document.getElementById('saveTransaction');
-    if(btn) btn.disabled = true;
+    if (btn) btn.disabled = true;
 
     try {
         const token = localStorage.getItem('farmer_jwt');
@@ -1346,24 +1413,24 @@ window.saveManualTransaction = async function() {
             body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if(data.success) {
+        if (data.success) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
-            
+
             // clear inputs
             modal.querySelector('input[type="number"]').value = '';
             modal.querySelector('input[type="text"]').value = '';
-            
+
             // Refresh dashboard
             renderFinanceTab();
         } else {
             alert('Error: ' + data.error);
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         alert("সার্ভার এরর।");
     } finally {
-        if(btn) btn.disabled = false;
+        if (btn) btn.disabled = false;
     }
 };
 
@@ -1555,22 +1622,22 @@ window.renderGuidelineModal = async function () {
             const area = window.currentFarmArea || 1;
             const yieldPerShotangsho = parseFloat(masterCache.base_yield_kg) || 0;
             const pricePerKg = parseFloat(masterCache.crop_market_price_bdt) || 0;
-            
+
             const totalYield = Math.round(yieldPerShotangsho * area);
             const totalRevenue = Math.round(totalYield * pricePerKg);
 
             let resources = [];
-            try { resources = JSON.parse(masterCache.resources_json || '[]'); } catch(e){}
+            try { resources = JSON.parse(masterCache.resources_json || '[]'); } catch (e) { }
 
             const translateUnit = str => {
                 if (!str || str === '-') return '-';
                 return str.replace(/kg/gi, 'কেজি')
-                          .replace(/gm/gi, 'গ্রাম')
-                          .replace(/litters|litter/gi, 'লিটার')
-                          .replace(/l|L/g, 'লিটার')
-                          .replace(/ml/gi, 'মিলি')
-                          .replace(/pcs/gi, 'টি')
-                          .replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+                    .replace(/gm/gi, 'গ্রাম')
+                    .replace(/litters|litter/gi, 'লিটার')
+                    .replace(/l|L/g, 'লিটার')
+                    .replace(/ml/gi, 'মিলি')
+                    .replace(/pcs/gi, 'টি')
+                    .replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
             };
 
             const grouped = {
@@ -1585,18 +1652,18 @@ window.renderGuidelineModal = async function () {
             resources.forEach(r => {
                 const scaledCost = Math.round((parseFloat(r.estimated_cost_bdt) || 0) * area);
                 totalExpectedCost += scaledCost;
-                
+
                 const cat = r.category || 'labor_and_other';
-                let rScaled = {...r, estimated_cost_bdt: scaledCost};
-                
+                let rScaled = { ...r, estimated_cost_bdt: scaledCost };
+
                 let amtStr = (r.amount || '-').toString();
                 let amtNumStr = amtStr.replace(/[^\d\.]/g, '');
-                if(amtNumStr && amtNumStr.trim() !== '') {
-                   let scaledAmt = (parseFloat(amtNumStr) * area);
-                   scaledAmt = scaledAmt % 1 !== 0 ? scaledAmt.toFixed(2) : scaledAmt;
-                   rScaled.amountScale = amtStr.replace(amtNumStr, scaledAmt);
+                if (amtNumStr && amtNumStr.trim() !== '') {
+                    let scaledAmt = (parseFloat(amtNumStr) * area);
+                    scaledAmt = scaledAmt % 1 !== 0 ? scaledAmt.toFixed(2) : scaledAmt;
+                    rScaled.amountScale = amtStr.replace(amtNumStr, scaledAmt);
                 } else {
-                   rScaled.amountScale = amtStr;
+                    rScaled.amountScale = amtStr;
                 }
 
                 if (grouped[cat]) grouped[cat].items.push(rScaled);
@@ -1659,7 +1726,7 @@ window.renderGuidelineModal = async function () {
                             </thead>
                             <tbody>
                     `;
-                    
+
                     group.items.forEach(r => {
                         const amountBn = translateUnit(r.amountScale);
                         const costBn = bnStr(r.estimated_cost_bdt);
@@ -1671,7 +1738,7 @@ window.renderGuidelineModal = async function () {
                                 </tr>
                         `;
                     });
-                    
+
                     html += `
                             </tbody>
                         </table>
@@ -1694,14 +1761,14 @@ window.renderGuidelineModal = async function () {
 
 window.pendingConfirmCallback = null;
 
-window.showConfirmModal = function(title, text, confirmText, confirmCallback, isDanger = true) {
+window.showConfirmModal = function (title, text, confirmText, confirmCallback, isDanger = true) {
     document.getElementById('confirmActionTitle').textContent = title;
     document.getElementById('confirmActionText').textContent = text;
     document.getElementById('confirmActionBtn').textContent = confirmText;
-    
+
     const iconContainer = document.getElementById('confirmActionIcon');
     const actionBtn = document.getElementById('confirmActionBtn');
-    
+
     if (isDanger) {
         iconContainer.style.color = '#DC2626';
         iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
@@ -1715,8 +1782,8 @@ window.showConfirmModal = function(title, text, confirmText, confirmCallback, is
     }
 
     window.pendingConfirmCallback = confirmCallback;
-    
-    document.getElementById('confirmActionBtn').onclick = function() {
+
+    document.getElementById('confirmActionBtn').onclick = function () {
         if (window.pendingConfirmCallback) window.pendingConfirmCallback();
         window.closeConfirmModal();
     };
@@ -1727,7 +1794,7 @@ window.showConfirmModal = function(title, text, confirmText, confirmCallback, is
     document.body.style.overflow = 'hidden';
 };
 
-window.closeConfirmModal = function() {
+window.closeConfirmModal = function () {
     const modal = document.getElementById('confirmActionModal');
     modal.classList.remove('active');
     modal.querySelector('.calendar-content').style.transform = 'scale(0.9)';
@@ -1741,7 +1808,7 @@ window.markTaskDone = function (taskId, btnEl) {
         "কাজ সম্পন্ন",
         "আপনি কি এই কাজটি সফলভাবে শেষ করেছেন?",
         "হ্যাঁ, সম্পন্ন করেছি",
-        function() {
+        function () {
             try {
                 let tasks = JSON.parse(activeCrop.tasks_state_json);
                 const taskObj = tasks.find(t => t.id === taskId);
@@ -1765,7 +1832,7 @@ window.cancelTask = function (taskId) {
         "কাজ বাতিল",
         "আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? বাতিল করলে এটি ক্যালেন্ডারে 'বাতিল' হিসেবে দেখানো হবে।",
         "হ্যাঁ, বাতিল করুন",
-        function() {
+        function () {
             try {
                 let tasks = JSON.parse(activeCrop.tasks_state_json);
                 const taskObj = tasks.find(t => t.id === taskId);
@@ -1787,7 +1854,7 @@ window.reactivateTask = function (taskId) {
         "পুনরায় সক্রিয়",
         "আপনি কি বাতিল করা এই কাজটি পুনরায় সক্রিয় করতে চান?",
         "হ্যাঁ, সক্রিয় করুন",
-        function() {
+        function () {
             try {
                 let tasks = JSON.parse(activeCrop.tasks_state_json);
                 const taskObj = tasks.find(t => t.id === taskId);
@@ -1811,7 +1878,7 @@ window.deleteTaskPermanently = function (taskId) {
         "একেবারে মুছে ফেলুন",
         "আপনি কি এই কাজটি একেবারে মুছে ফেলতে চান? এটি আর কখনোই ক্যালেন্ডারে দেখা যাবে না বা ফিরিয়ে আনা যাবে না।",
         "হ্যাঁ, পার্মানেন্ট ডিলিট করুন",
-        function() {
+        function () {
             try {
                 let tasks = JSON.parse(activeCrop.tasks_state_json);
                 const filteredTasks = tasks.filter(t => t.id !== taskId);
@@ -1837,11 +1904,11 @@ window.rescheduleTask = function (taskId) {
         if (taskObj && taskObj.due_date) {
             oldDate = taskObj.due_date;
         }
-    } catch(e){}
+    } catch (e) { }
     document.getElementById('selectedPlantingDate').value = oldDate;
-    
+
     renderDatePickerGrid('selectedPlantingDate', oldDate);
-    
+
     const overlay = document.getElementById('datePickerOverlay');
     const content = document.getElementById('datePickerContent');
     overlay.style.display = 'block';
@@ -1863,7 +1930,7 @@ window.closeDatePicker = function (e) {
     }, 300);
 };
 
-window.openDatePickerFor = function(targetId) {
+window.openDatePickerFor = function (targetId) {
     if (document.activeElement) document.activeElement.blur();
     window.currentRescheduleTaskId = null;
     window.calendarTargetId = targetId;
@@ -1873,13 +1940,13 @@ window.openDatePickerFor = function(targetId) {
     if (targetEl && targetEl.dataset.value) {
         viewDate = targetEl.dataset.value;
     }
-    
+
     // Auto-select the initial viewDate as the default choice
     const hiddenDateInput = document.getElementById('selectedPlantingDate');
     if (hiddenDateInput) hiddenDateInput.value = viewDate;
-    
+
     renderDatePickerGrid(targetId, viewDate);
-    
+
     const overlay = document.getElementById('datePickerOverlay');
     const content = document.getElementById('datePickerContent');
     overlay.style.display = 'block';
@@ -1895,43 +1962,43 @@ window.confirmDateSelection = function () {
         try {
             let tasks = JSON.parse(activeCrop.tasks_state_json);
             const taskObj = tasks.find(t => t.id === window.currentRescheduleTaskId);
-            
+
             if (taskObj) {
                 // Recover biological chain using original offsets
                 let bioChain = [...tasks].sort((a, b) => (a.day_offset || 0) - (b.day_offset || 0));
                 let bioIdx = bioChain.findIndex(t => t.id === taskObj.id);
-                
+
                 let gapViolationReason = null;
                 const newD = new Date(newDate);
-                newD.setHours(0,0,0,0);
-                
+                newD.setHours(0, 0, 0, 0);
+
                 const toBngDigits = (num) => String(num).split('').map(d => ({ '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }[d] || d)).join('');
-                
+
                 // Biological Previous Dependency Check
                 if (bioIdx > 0) {
                     let prevTask = bioChain[bioIdx - 1];
                     let minGap = parseInt(taskObj.min_gap_prev) || 0;
                     if (minGap > 0 && prevTask.due_date) {
                         let prevDate = new Date(prevTask.due_date);
-                        prevDate.setHours(0,0,0,0);
+                        prevDate.setHours(0, 0, 0, 0);
                         let diffDays = Math.floor((newD - prevDate) / (1000 * 60 * 60 * 24));
-                        
+
                         if (diffDays < minGap) {
                             let reason = taskObj.gap_reason ? taskObj.gap_reason : `আগের কাজ থেকে অন্তত ${toBngDigits(minGap)} দিন অপেক্ষা করতে হবে`;
                             gapViolationReason = `আগের কাজ <b>"${prevTask.title}"</b> এর সাথে অন্তত <b style="color:#DC2626;">${toBngDigits(minGap)} দিনের</b> গ্যাপ থাকতে হবে। <br><br><b>কারণ:</b> ${reason}`;
                         }
                     }
                 }
-                
+
                 // Biological Next Dependency Check
                 if (bioIdx < bioChain.length - 1 && !gapViolationReason) {
                     let nextTask = bioChain[bioIdx + 1];
                     let nextMinGap = parseInt(nextTask.min_gap_prev) || 0;
                     if (nextMinGap > 0 && nextTask.due_date) {
                         let nextDate = new Date(nextTask.due_date);
-                        nextDate.setHours(0,0,0,0);
+                        nextDate.setHours(0, 0, 0, 0);
                         let diffDays = Math.floor((nextDate - newD) / (1000 * 60 * 60 * 24));
-                        
+
                         if (diffDays < nextMinGap) {
                             let reason = nextTask.gap_reason ? nextTask.gap_reason : `পরবর্তী কাজের জন্য অন্তত ${toBngDigits(nextMinGap)} দিন অপেক্ষা করতে হবে`;
                             gapViolationReason = `পরবর্তী কাজ <b>"${nextTask.title}"</b> এর সাথে অন্তত <b style="color:#DC2626;">${toBngDigits(nextMinGap)} দিনের</b> গ্যাপ থাকতে হবে। <br><br><b>কারণ:</b> ${reason}`;
@@ -1949,7 +2016,7 @@ window.confirmDateSelection = function () {
                         bioChain: bioChain
                     };
                     document.getElementById('agronomicWarningText').innerHTML = gapViolationReason;
-                    
+
                     const overlay = document.getElementById('agronomicWarningOverlay');
                     const content = document.getElementById('agronomicWarningSheet');
                     overlay.style.display = 'block';
@@ -1964,7 +2031,7 @@ window.confirmDateSelection = function () {
                     "তারিখ পরিবর্তন নিশ্চিতকরণ",
                     "আপনি কি নিশ্চিত যে এই নির্দিষ্ট কাজটি এই নতুন তারিখে পরিবর্তন করতে চান?",
                     "হ্যাঁ, পরিবর্তন করুন",
-                    function() {
+                    function () {
                         taskObj.due_date = newDate;
                         tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
                         activeCrop.tasks_state_json = JSON.stringify(tasks);
@@ -1989,12 +2056,12 @@ window.confirmDateSelection = function () {
     window.closeDatePicker();
 };
 
-window.closeAgronomicWarningSheet = function(e) {
+window.closeAgronomicWarningSheet = function (e) {
     if (e && e.target.id !== 'agronomicWarningOverlay' && !e.target.classList.contains('close-sheet')) return;
     const overlay = document.getElementById('agronomicWarningOverlay');
     const content = document.getElementById('agronomicWarningSheet');
     if (!overlay) return;
-    
+
     overlay.style.opacity = '0';
     content.style.bottom = '-100%';
     setTimeout(() => {
@@ -2003,12 +2070,12 @@ window.closeAgronomicWarningSheet = function(e) {
     }, 300);
 };
 
-window.executeTaskUpdate = function(mode) {
+window.executeTaskUpdate = function (mode) {
     if (!window.pendingRescheduleTaskState) return;
     try {
         const { taskId, newDate, oldDate, tasks, bioChain } = window.pendingRescheduleTaskState;
         const taskObj = tasks.find(t => t.id === taskId);
-        
+
         if (!taskObj) return;
 
         if (mode === 'override') {
@@ -2018,12 +2085,12 @@ window.executeTaskUpdate = function(mode) {
             // Update this task and shift all subsequent tasks by the same delta
             const oldD = new Date(oldDate);
             const newD = new Date(newDate);
-            oldD.setHours(0,0,0,0);
-            newD.setHours(0,0,0,0);
+            oldD.setHours(0, 0, 0, 0);
+            newD.setHours(0, 0, 0, 0);
             const shiftDays = Math.round((newD - oldD) / (1000 * 60 * 60 * 24));
-            
+
             let bioIdx = bioChain.findIndex(t => t.id === taskId);
-            
+
             for (let i = bioIdx; i < bioChain.length; i++) {
                 let currentTask = bioChain[i];
                 if (currentTask.due_date && currentTask.status !== 'completed' && currentTask.status !== 'cancelled' && !currentTask.is_skipped) {
@@ -2037,7 +2104,7 @@ window.executeTaskUpdate = function(mode) {
                 }
             }
         }
-        
+
         tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
         activeCrop.tasks_state_json = JSON.stringify(tasks);
         saveCropState();
@@ -2053,9 +2120,9 @@ window.executeTaskUpdate = function(mode) {
 window.currentCalendarViewDate = null;
 window.currentCalendarInputId = null;
 
-window.renderDatePickerGrid = function(inputId, initialDateStr = null, resetView = true) {
+window.renderDatePickerGrid = function (inputId, initialDateStr = null, resetView = true) {
     window.currentCalendarInputId = inputId;
-    
+
     if (resetView) {
         if (initialDateStr) {
             const parsed = new Date(initialDateStr);
@@ -2075,44 +2142,44 @@ window.renderDatePickerGrid = function(inputId, initialDateStr = null, resetView
     const monthLabel = document.getElementById('calendarMonthLabel');
     if (!calendarDays || !monthLabel) return;
     calendarDays.innerHTML = '';
-    
+
     const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
     const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
-    
+
     const realToday = new Date();
     let selectedDateStr = document.getElementById(inputId)?.value || initialDateStr;
-    
+
     const currentMonth = window.currentCalendarViewDate.getMonth();
     const currentYear = window.currentCalendarViewDate.getFullYear();
-    
+
     monthLabel.textContent = `${EN_TO_BN_MONTHS[currentMonth]} ${toBngDigits(currentYear)}`;
-    
+
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    
+
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyDiv = document.createElement('div');
         calendarDays.appendChild(emptyDiv);
     }
-    
+
     for (let i = 1; i <= daysInMonth; i++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'cal-day';
         dayEl.textContent = toBngDigits(i);
-        
+
         const thisCellDate = new Date(currentYear, currentMonth, i);
-        thisCellDate.setHours(0,0,0,0);
+        thisCellDate.setHours(0, 0, 0, 0);
         const realTodayCopy = new Date(realToday);
-        realTodayCopy.setHours(0,0,0,0);
-        
+        realTodayCopy.setHours(0, 0, 0, 0);
+
         const monthStr = String(currentMonth + 1).padStart(2, '0');
         const dayStr = String(i).padStart(2, '0');
         const cellDateStr = `${currentYear}-${monthStr}-${dayStr}`;
-        
+
         if (thisCellDate < realTodayCopy) {
             dayEl.classList.add('past');
         }
-        
+
         // Allow clicking on any date, past or future
         dayEl.addEventListener('click', () => {
             document.querySelectorAll('#calendarDays .cal-day').forEach(el => el.classList.remove('selected'));
@@ -2120,27 +2187,27 @@ window.renderDatePickerGrid = function(inputId, initialDateStr = null, resetView
             const hiddenDateInput = document.getElementById('selectedPlantingDate');
             if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
         });
-        
+
         if (selectedDateStr === cellDateStr) {
             dayEl.classList.add('selected');
             const hiddenDateInput = document.getElementById('selectedPlantingDate');
             if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
         }
-        
+
         calendarDays.appendChild(dayEl);
     }
 };
 
-window.changeCalendarMonth = function(offset) {
+window.changeCalendarMonth = function (offset) {
     if (!window.currentCalendarViewDate) return;
     window.currentCalendarViewDate.setMonth(window.currentCalendarViewDate.getMonth() + offset);
     window.renderDatePickerGrid(window.currentCalendarInputId, null, false);
 };
 
-window.saveNewCustomTask = function() {
+window.saveNewCustomTask = function () {
     const title = document.getElementById('customTaskTitle').value.trim();
     const desc = document.getElementById('customTaskDesc').value.trim();
-    if(!title) {
+    if (!title) {
         alert('দয়া করে কাজের নামটি লিখুন।');
         return;
     }
@@ -2169,22 +2236,22 @@ window.saveNewCustomTask = function() {
         document.getElementById('customTaskDesc').value = '';
         document.getElementById('customStepModal').classList.remove('active');
         document.body.style.overflow = '';
-    } catch(e) {
+    } catch (e) {
         console.error(e);
     }
 };
 
-window.saveNewResourceFromModal = function() {
+window.saveNewResourceFromModal = function () {
     const cat = document.getElementById('newResourceCategory').value;
     const name = document.getElementById('newResourceName').value.trim();
     const amount = document.getElementById('newResourceAmount').value.trim();
     const cost = parseFloat(document.getElementById('newResourceCost').value) || 0;
-    
-    if(!name) {
+
+    if (!name) {
         alert("দয়া করে রিসোর্সের নাম লিখুন।");
         return;
     }
-    
+
     try {
         let resources = JSON.parse(activeCrop.resources_state_json || '[]');
         resources.push({
@@ -2195,29 +2262,29 @@ window.saveNewResourceFromModal = function() {
             estimated_cost_bdt: cost,
             status: 'pending' // Default new resources are not bought
         });
-        
+
         activeCrop.resources_state_json = JSON.stringify(resources);
         saveCropState();
         renderResourcesTab(activeCrop.resources_state_json);
-        
+
         // Clear & close
         document.getElementById('newResourceName').value = '';
         document.getElementById('newResourceAmount').value = '';
         document.getElementById('newResourceCost').value = '';
         document.getElementById('addResourceModal').classList.remove('active');
         document.body.style.overflow = '';
-        
-    } catch(e) {
+
+    } catch (e) {
         console.error(e);
         alert('রিসোর্স সেভ করতে সমস্যা হয়েছে।');
     }
 };
 
 // --- Farming AI Chatbot (RAG) Integration ---
-window.toggleChatbot = function() {
+window.toggleChatbot = function () {
     const w = document.getElementById('cropChatbotContainer');
     const badge = document.getElementById('chatbotToggleBtn');
-    
+
     // Create backdrop overlay lazily
     let backdrop = document.getElementById('chatbotBackdropOverlay');
     if (!backdrop) {
@@ -2227,7 +2294,7 @@ window.toggleChatbot = function() {
         backdrop.onclick = window.toggleChatbot;
         document.body.appendChild(backdrop);
     }
-    
+
     // Check if bottom sheet is hidden
     if (w.style.transform === 'translateY(100%)' || w.style.transform === '') {
         // Open
@@ -2235,16 +2302,16 @@ window.toggleChatbot = function() {
         backdrop.style.visibility = 'visible';
         backdrop.style.opacity = '1';
         document.body.style.overflow = 'hidden';
-        
+
         if (badge) badge.style.transform = 'scale(0)';
-        
+
         // Restore History or Add initial greeting
         const msgs = document.getElementById('chatMessages');
         if (msgs && !msgs.hasAttribute('data-history-loaded')) {
             msgs.setAttribute('data-history-loaded', 'true');
             const activeFarmId = new URLSearchParams(window.location.search).get('id') || 'unknown';
             const cName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : 'আপনার ফসল';
-            
+
             // Build the initial dynamic greeting
             let html = `<div style="margin-bottom: 12px; text-align: left;">
                 <div style="background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
@@ -2258,7 +2325,7 @@ window.toggleChatbot = function() {
             const sessionDataStr = localStorage.getItem(sessionKey);
             let sessionData = null;
             if (sessionDataStr) {
-                try { sessionData = JSON.parse(sessionDataStr); } catch(e){}
+                try { sessionData = JSON.parse(sessionDataStr); } catch (e) { }
             }
 
             if (sessionData && sessionData.history && sessionData.history.length > 0) {
@@ -2280,7 +2347,7 @@ window.toggleChatbot = function() {
                     }
                 });
             }
-            
+
             msgs.innerHTML = html;
             setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 100);
         }
@@ -2290,31 +2357,31 @@ window.toggleChatbot = function() {
         backdrop.style.opacity = '0';
         setTimeout(() => backdrop.style.visibility = 'hidden', 300);
         document.body.style.overflow = '';
-        
+
         if (badge) badge.style.transform = 'scale(1)';
     }
 };
 
-window.sendChatMessage = async function() {
+window.sendChatMessage = async function () {
     const input = document.getElementById('chatInput');
     const msg = input.value.trim();
     if (!msg) return;
-    
+
     document.getElementById('sendChatBtn').disabled = true;
     input.disabled = true;
-    
+
     const msgsContainer = document.getElementById('chatMessages');
-    
+
     // Append User Message
     msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: right;">
         <div style="background: #10b981; color: white; padding: 10px 14px; border-radius: 12px; border-bottom-right-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5; text-align: left;">
             ${msg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
         </div>
     </div>`;
-    
+
     input.value = '';
     msgsContainer.scrollTop = msgsContainer.scrollHeight;
-    
+
     // Loading indicator
     const loadingId = 'loading-' + Date.now();
     msgsContainer.innerHTML += `<div id="${loadingId}" style="margin-bottom: 12px; text-align: left;">
@@ -2323,25 +2390,25 @@ window.sendChatMessage = async function() {
         </div>
     </div>`;
     msgsContainer.scrollTop = msgsContainer.scrollHeight;
-    
+
     try {
         const cropName = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.crop_name : localStorage.getItem('agritech_active_crop_name');
         const activeFarmId = new URLSearchParams(window.location.search).get('id') || 'unknown';
         const activeCropId = (typeof activeCrop !== 'undefined' && activeCrop) ? activeCrop.id : null;
         const cropSuffix = activeCropId ? `_crop_${activeCropId}` : '';
         const sessionKey = `agritech_chat_${activeFarmId}${cropSuffix}`;
-        
+
         // Load session history
         let sessionData = { sessionId: null, history: [] };
         const storedStr = localStorage.getItem(sessionKey);
         if (storedStr) {
-            try { sessionData = JSON.parse(storedStr); } catch(e){}
+            try { sessionData = JSON.parse(storedStr); } catch (e) { }
         }
 
         const farmerProfileStr = localStorage.getItem('farmer_profile');
         const farmerProfile = farmerProfileStr ? JSON.parse(farmerProfileStr) : {};
         const userId = farmerProfile.id || 'anonymous';
-        
+
         const res = await fetch('https://agritech-backend.mobashwir9.workers.dev/api/public/crop-chat', {
             method: 'POST',
             headers: {
@@ -2358,11 +2425,11 @@ window.sendChatMessage = async function() {
                 history: sessionData.history
             })
         });
-        
+
         const data = await res.json();
         const loadingEl = document.getElementById(loadingId);
         if (loadingEl) loadingEl.remove();
-        
+
         if (data.success) {
             const formattedNodes = typeof marked !== 'undefined' ? marked.parse(data.answer) : data.answer.replace(/\n/g, '<br>');
             msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
@@ -2370,17 +2437,17 @@ window.sendChatMessage = async function() {
                     ${formattedNodes}
                 </div>
             </div>`;
-            
+
             // Save updated session to local storage
             sessionData.sessionId = data.sessionId || sessionData.sessionId;
             sessionData.history.push({ role: 'user', content: msg });
             sessionData.history.push({ role: 'assistant', content: data.answer });
             localStorage.setItem(sessionKey, JSON.stringify(sessionData));
-            
+
         } else {
             console.error(data.error);
             if (data && data.error && (data.error.toLowerCase().includes('payment required') || data.error.toLowerCase().includes('limit exceeded'))) {
-                if(window.showPaywallModal) {
+                if (window.showPaywallModal) {
                     window.toggleChatbot(); // Close chat interface
                     setTimeout(() => window.showPaywallModal('এআই চ্যাট অ্যাসিস্ট্যান্ট'), 350);
                 } else alert(data.error);
@@ -2402,7 +2469,7 @@ window.sendChatMessage = async function() {
             </div>
         </div>`;
     }
-    
+
     document.getElementById('sendChatBtn').disabled = false;
     input.disabled = false;
     input.focus();
@@ -2413,9 +2480,9 @@ window.sendChatMessage = async function() {
 // Add Plant Tracking & Loss Methods
 // ============================================
 
-window.promptPlantCount = function() { // Reused function name so HTML buttons don't break
+window.promptPlantCount = function () { // Reused function name so HTML buttons don't break
     if (!activeCrop) return;
-    
+
     // Set default date to existing planting_date or today
     const dateInputSpan = document.getElementById('newPlantingDateLabel');
     const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
@@ -2424,17 +2491,17 @@ window.promptPlantCount = function() { // Reused function name so HTML buttons d
     const todayStr = new Date().toISOString().slice(0, 10);
     const dateStr = activeCrop.planted_date ? (activeCrop.planted_date.includes('T') ? activeCrop.planted_date.split('T')[0] : activeCrop.planted_date) : todayStr;
     const dVal = new Date(dateStr);
-    
+
     dateInputSpan.dataset.value = dateStr;
     dateInputSpan.textContent = `${toBngDigits(dVal.getDate())} ${EN_TO_BN_MONTHS[dVal.getMonth()]} ${toBngDigits(dVal.getFullYear())}`;
-    
+
     // Set default initial count
     const countInput = document.getElementById('newPlantCount');
     countInput.value = activeCrop.initial_plant_count || '';
-    
+
     // Auto-close crop action sheet if open
     const sheet = document.getElementById('cropActionSheet');
-    if(sheet && sheet.classList.contains('active')) {
+    if (sheet && sheet.classList.contains('active')) {
         sheet.classList.remove('active');
     }
 
@@ -2445,7 +2512,7 @@ window.promptPlantCount = function() { // Reused function name so HTML buttons d
 window.pendingUpdatePayload = null;
 
 // Helpers for the new modals
-window.closeConflictSheet = function(e) {
+window.closeConflictSheet = function (e) {
     if (e) e.stopPropagation();
     document.getElementById('taskConflictOverlay').style.display = 'none';
     const sheet = document.getElementById('taskConflictSheet');
@@ -2453,46 +2520,46 @@ window.closeConflictSheet = function(e) {
     setTimeout(() => { window.pendingUpdatePayload = null; }, 300);
 };
 
-window.showSystemMessageModal = function(title, text, isSuccess) {
+window.showSystemMessageModal = function (title, text, isSuccess) {
     const modal = document.getElementById('systemMessageModal');
     document.getElementById('systemMessageTitle').textContent = title;
     document.getElementById('systemMessageTitle').style.color = isSuccess ? 'var(--text-main)' : '#DC2626';
     document.getElementById('systemMessageText').textContent = text;
-    
+
     const iconContainer = document.getElementById('systemMessageIcon');
     if (isSuccess) {
         iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
     } else {
         iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
     }
-    
+
     modal.classList.add('active');
     setTimeout(() => { modal.querySelector('.calendar-content').style.transform = 'scale(1)'; }, 10);
     document.body.style.overflow = 'hidden';
 };
 
-window.closeSystemMessageModal = function() {
+window.closeSystemMessageModal = function () {
     const modal = document.getElementById('systemMessageModal');
     modal.classList.remove('active');
     modal.querySelector('.calendar-content').style.transform = 'scale(0.9)';
     document.body.style.overflow = '';
 };
 
-window.savePlantingDate = function() {
+window.savePlantingDate = function () {
     if (!activeCrop) return;
     const dateInputStr = document.getElementById('newPlantingDateLabel').dataset.value;
     const countInput = document.getElementById('newPlantCount').value;
     const shiftTasks = document.getElementById('shiftTasksCheckbox').checked;
 
     if (!dateInputStr) return showSystemMessageModal("তারিখ পাওয়া যায়নি", "দয়া করে রোপণের তারিখ প্রদান করুন!", false);
-    
+
     const countInt = parseInt(countInput) || 0;
-    
-    const updatePayload = { 
+
+    const updatePayload = {
         planted_date: dateInputStr,
         initial_plant_count: countInt
     };
-    
+
     let conflictCount = 0;
     let rawSimulatedTasks = [];
 
@@ -2502,34 +2569,34 @@ window.savePlantingDate = function() {
             let tasks = JSON.parse(activeCrop.tasks_state_json);
             let pDate = new Date(dateInputStr);
             let today = new Date();
-            today.setHours(0,0,0,0);
+            today.setHours(0, 0, 0, 0);
 
             tasks.forEach(task => {
-                if(!task.is_completed && task.day_offset !== undefined) {
+                if (!task.is_completed && task.day_offset !== undefined) {
                     let newDueDate = new Date(pDate);
                     newDueDate.setDate(newDueDate.getDate() + task.day_offset);
-                    
+
                     // Identify past tasks
                     if (newDueDate < today) {
                         conflictCount++;
                         task._is_conflict = true;
                     }
-                    
+
                     const y = newDueDate.getFullYear();
                     const m = String(newDueDate.getMonth() + 1).padStart(2, '0');
                     const dStr = String(newDueDate.getDate()).padStart(2, '0');
                     task.due_date = `${y}-${m}-${dStr}`;
                 }
             });
-            
+
             tasks.sort((a, b) => {
                 const dateA = a.due_date ? new Date(a.due_date) : 0;
                 const dateB = b.due_date ? new Date(b.due_date) : 0;
                 return dateA - dateB;
             });
-            
+
             rawSimulatedTasks = tasks;
-        } catch(e) {
+        } catch (e) {
             console.error("AI Task Re-anchoring error", e);
         }
     }
@@ -2537,7 +2604,7 @@ window.savePlantingDate = function() {
     if (conflictCount > 0) {
         window.pendingUpdatePayload = { ...updatePayload, _rawTasks: rawSimulatedTasks };
         document.getElementById('conflictCountText').textContent = conflictCount;
-        
+
         const overlay = document.getElementById('taskConflictOverlay');
         const sheet = document.getElementById('taskConflictSheet');
         overlay.style.display = 'block';
@@ -2553,38 +2620,38 @@ window.savePlantingDate = function() {
     }
 };
 
-window.executePlantingDateUpdate = async function(action = null, payload = null) {
+window.executePlantingDateUpdate = async function (action = null, payload = null) {
     const basePayload = payload || window.pendingUpdatePayload;
     if (!basePayload) return;
 
-    let finalPayload = { 
-        planted_date: basePayload.planted_date, 
-        initial_plant_count: basePayload.initial_plant_count 
+    let finalPayload = {
+        planted_date: basePayload.planted_date,
+        initial_plant_count: basePayload.initial_plant_count
     };
 
     // Advanced Agronomic Cascade Logic
     if (basePayload._rawTasks) {
         let tasks = basePayload._rawTasks;
         let today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
 
         if (action === 'cascade') {
             let lastValidDate = null;
             tasks.forEach(task => {
                 if (task.is_completed) return;
-                
+
                 let thisDate = new Date(task.due_date);
                 let gap = parseInt(task.min_gap_prev) || 0;
-                
+
                 let minAllowedDate = new Date(today);
                 if (lastValidDate) {
                     minAllowedDate = new Date(lastValidDate);
                     minAllowedDate.setDate(minAllowedDate.getDate() + gap);
                 }
-                
+
                 if (task._is_conflict || thisDate < minAllowedDate) {
                     thisDate = minAllowedDate > today ? minAllowedDate : today;
-                    
+
                     const y = thisDate.getFullYear();
                     const m = String(thisDate.getMonth() + 1).padStart(2, '0');
                     const dStr = String(thisDate.getDate()).padStart(2, '0');
@@ -2601,22 +2668,22 @@ window.executePlantingDateUpdate = async function(action = null, payload = null)
                 delete task._is_conflict;
             });
         }
-        
+
         finalPayload.tasks_state_json = JSON.stringify(tasks);
     } else if (basePayload.tasks_state_json) {
         finalPayload.tasks_state_json = basePayload.tasks_state_json;
     }
-    
+
     // Close conflict sheet if it was open
     const sheet = document.getElementById('taskConflictSheet');
     if (sheet && sheet.style.bottom === '0px') {
         window.closeConflictSheet();
     }
-    
+
     const token = localStorage.getItem('farmer_jwt');
     const btn = document.querySelector('#plantingDateModal button');
     let oldBtnText = "আপডেট";
-    if(btn) {
+    if (btn) {
         oldBtnText = btn.textContent;
         btn.textContent = 'হালনাগাদ হচ্ছে...';
         btn.disabled = true;
@@ -2628,18 +2695,18 @@ window.executePlantingDateUpdate = async function(action = null, payload = null)
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(finalPayload)
         });
-        if(!res.ok) throw new Error("API Note: Update Failed on backend.");
-        
+        if (!res.ok) throw new Error("API Note: Update Failed on backend.");
+
         // Success
         document.getElementById('plantingDateModal').classList.remove('active');
         document.body.style.overflow = '';
         await fetchFarmAndCropDetails();
         showSystemMessageModal("আপডেট সফল হয়েছে!", "আপনার কাজগুলোর টাইমলাইন রিশিডিউল করা হয়েছে।", true);
-    } catch(e) {
+    } catch (e) {
         console.warn("API Note:", e.message);
         showSystemMessageModal("আপডেট ব্যর্থ", "আপডেট করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", false);
     } finally {
-        if(btn) {
+        if (btn) {
             btn.textContent = oldBtnText;
             btn.disabled = false;
         }
@@ -2647,7 +2714,7 @@ window.executePlantingDateUpdate = async function(action = null, payload = null)
     }
 };
 
-window.saveLossEvent = async function() {
+window.saveLossEvent = async function () {
     if (!activeCrop) return;
     const dateInputStr = document.getElementById('lossStepDate').innerText || document.getElementById('lossStepDate').textContent;
     const amountInput = document.getElementById('lossAmountInput').value;
@@ -2664,7 +2731,7 @@ window.saveLossEvent = async function() {
     let currentLosses = [];
     try {
         currentLosses = JSON.parse(activeCrop.loss_events_json || '[]');
-    } catch(e) {}
+    } catch (e) { }
 
     currentLosses.push({
         date: dateInputStr,
@@ -2688,47 +2755,47 @@ window.saveLossEvent = async function() {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ loss_events_json: newLossJson })
         });
-        
-        if(!res.ok) throw new Error("API PATCH Error");
-        
-    } catch(e) {
+
+        if (!res.ok) throw new Error("API PATCH Error");
+
+    } catch (e) {
         console.warn("API Note:", e.message);
     }
 
     document.getElementById('lossModal').classList.remove('active');
-    document.body.style.overflow='';
-    
+    document.body.style.overflow = '';
+
     // Clear fields
     document.getElementById('lossAmountInput').value = '';
     document.getElementById('lossReasonInput').value = '';
-    
+
     await fetchFarmAndCropDetails();
-    
+
     btn.disabled = false;
     btn.textContent = oldText;
 };
 
 // ----- HARVEST MODAL & ACTIONS -----
-window.handleMarkCropCompleted = function() {
+window.handleMarkCropCompleted = function () {
     closeCropActionModals();
     document.getElementById('harvestModal').classList.add('active');
-    document.body.style.overflow='hidden';
-    
+    document.body.style.overflow = 'hidden';
+
     // Set dynamic plant count
     const plantP = document.getElementById('harvestPlantCount');
-    if(activeCrop && plantP) {
+    if (activeCrop && plantP) {
         plantP.textContent = (activeCrop.initial_plant_count || 0) + ' টি';
     }
 };
 
-window.toggleHarvestInputs = function() {
+window.toggleHarvestInputs = function () {
     const isFailed = document.getElementById('isCropFailedCheck').checked;
     document.getElementById('harvestAmountInput').disabled = isFailed;
     document.getElementById('harvestUnitSelect').disabled = isFailed;
     document.getElementById('harvestPortionInput').disabled = isFailed;
-    
+
     // Automatically force the final flag if it's failed
-    if(isFailed) {
+    if (isFailed) {
         document.getElementById('isFinalHarvestCheck').checked = true;
         document.getElementById('isFinalHarvestCheck').disabled = true;
     } else {
@@ -2736,98 +2803,98 @@ window.toggleHarvestInputs = function() {
     }
 };
 
-window.toggleFailedCheckbox = function() {
+window.toggleFailedCheckbox = function () {
     const isFinal = document.getElementById('isFinalHarvestCheck').checked;
-    if(!isFinal) {
+    if (!isFinal) {
         document.getElementById('isCropFailedCheck').checked = false;
         toggleHarvestInputs();
     }
 };
 
-window.submitHarvestEntry = async function() {
-    if(!activeCrop) return;
-    
+window.submitHarvestEntry = async function () {
+    if (!activeCrop) return;
+
     const isFailed = document.getElementById('isCropFailedCheck').checked;
     const isFinal = document.getElementById('isFinalHarvestCheck').checked;
-    
+
     let yieldKg = 0;
     let note = '';
-    
-    if(!isFailed) {
+
+    if (!isFailed) {
         let amount = parseFloat(document.getElementById('harvestAmountInput').value) || 0;
         const unit = document.getElementById('harvestUnitSelect').value;
-        if(unit === 'mon') amount = amount * 40;
-        if(unit === 'ton') amount = amount * 1000;
+        if (unit === 'mon') amount = amount * 40;
+        if (unit === 'ton') amount = amount * 1000;
         yieldKg = amount;
-        
+
         note = document.getElementById('harvestPortionInput').value.trim();
-        if(note) note = `অংশ: ${note}`;
-        
-        if (yieldKg <= 0 && isFinal===false) {
+        if (note) note = `অংশ: ${note}`;
+
+        if (yieldKg <= 0 && isFinal === false) {
             alert('দয়াকরে একটি সঠিক পরিমাণ দিন।');
             return;
         }
     } else {
         note = 'ফসল নষ্ট/মারা গেছে';
     }
-    
+
     // Ensure final is true when failed
     const willComplete = isFinal || isFailed;
     const statusText = isFailed ? 'Failed' : (willComplete ? 'Harvested' : 'Healthy');
-    
+
     const btn = document.getElementById('saveHarvest');
     const oldHtml = btn.innerHTML;
     btn.innerHTML = 'লোড হচ্ছে...';
     btn.disabled = true;
-    
+
     try {
         const token = localStorage.getItem('farmer_jwt');
-        
+
         // If it's a final state, we trigger the /complete endpoint
         // Otherwise just update state?
         // Let's reuse /complete endpoint even for partial harvest, as it appends yield and notes!
         // But if it's NOT final, we just keep status = Healthy
-        
+
         const payload = {
             status: statusText,
             yield_amount_kg: yieldKg,
             harvest_notes: note
         };
-        
+
         const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/complete`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
-        if(!res.ok) throw new Error('API Error');
+
+        if (!res.ok) throw new Error('API Error');
         alert(willComplete ? 'ফসল বন্ধ করে হিস্ট্রিতে সেভ করা হয়েছে!' : 'কর্তন আপডেট হয়েছে।');
-        
+
         document.getElementById('harvestModal').classList.remove('active');
-        document.body.style.overflow='';
-        
+        document.body.style.overflow = '';
+
         await fetchFarmAndCropDetails();
-    } catch(e) {
+    } catch (e) {
         alert("Failed: " + e.message);
     }
-    
+
     btn.disabled = false;
     btn.innerHTML = oldHtml;
 };
 
-window.handleDeleteCrop = function() {
+window.handleDeleteCrop = function () {
     closeCropActionModals();
-    if(!activeCrop) return;
-    
+    if (!activeCrop) return;
+
     document.getElementById('deleteCropModal').classList.add('active');
-    document.body.style.overflow='hidden';
-    
+    document.body.style.overflow = 'hidden';
+
     // Check if planted
     const planted = activeCrop.planted_date ? new Date(activeCrop.planted_date).getTime() : 0;
     const now = Date.now();
     const isPlanted = planted > 0 && planted <= now;
-    
-    if(isPlanted) {
+
+    if (isPlanted) {
         document.getElementById('deletePrePlantWarning').style.display = 'none';
         document.getElementById('deletePostPlantWarning').style.display = 'block';
     } else {
@@ -2836,32 +2903,32 @@ window.handleDeleteCrop = function() {
     }
 };
 
-window.submitDeleteCrop = async function() {
-    if(!activeCrop) return;
-    
+window.submitDeleteCrop = async function () {
+    if (!activeCrop) return;
+
     // Optional: Could grab the reason from document.getElementById('deleteReasonSelect').value
     // But since it's a hard delete on backend, we just proceed.
-    
+
     const btn = document.getElementById('confirmDeleteCropBtn');
     const oldText = btn.innerText;
     btn.innerText = 'মুছে ফেলা হচ্ছে...';
     btn.disabled = true;
-    
+
     try {
         const token = localStorage.getItem('farmer_jwt');
         const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if(!res.ok) throw new Error('Failed to delete');
-        
+        if (!res.ok) throw new Error('Failed to delete');
+
         alert('ফসল সম্পূর্ণরূপে মুছে ফেলা হয়েছে।');
         localStorage.removeItem('agritech_active_crop_name');
-        
+
         document.getElementById('deleteCropModal').classList.remove('active');
-        document.body.style.overflow='';
+        document.body.style.overflow = '';
         window.location.href = 'khamar.html';
-    } catch(e) {
+    } catch (e) {
         alert("Error: " + e.message);
         btn.innerText = oldText;
         btn.disabled = false;
@@ -2872,14 +2939,14 @@ window.submitDeleteCrop = async function() {
 // 3D Map & Tracking Handlers
 // ==========================================
 
-window.handle3DMapClick = async function() {
+window.handle3DMapClick = async function () {
     const btn = document.getElementById('btn3DMap');
-    if(!btn) return;
-    
+    if (!btn) return;
+
     const token = localStorage.getItem('farmer_jwt');
     const cropId = activeCrop ? activeCrop.id : getCropIdFromURL();
-    
-    if(!cropId) {
+
+    if (!cropId) {
         return showToast('Tr', 'কোনো প্রজেক্ট সিলেক্ট করা নেই।');
     }
 
@@ -2892,7 +2959,7 @@ window.handle3DMapClick = async function() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        
+
         if (data.success && data.beds && data.beds.length > 0) {
             // Beds exist, redirect to 3D mapping page directly
             window.location.href = `plant_tracker.html?crop_id=${cropId}`;
@@ -2910,14 +2977,14 @@ window.handle3DMapClick = async function() {
     }
 };
 
-window.generate3DMapGrid = async function() {
+window.generate3DMapGrid = async function () {
     const numBeds = document.getElementById('wizardNumBeds').value;
     const bedLength = document.getElementById('wizardBedLength').value;
     const bedWidth = document.getElementById('wizardBedWidth').value;
     const rowsPerBed = document.getElementById('wizardRowsPerBed').value;
     const plantSpacing = document.getElementById('wizardPlantSpacing').value;
 
-    if(!numBeds || !bedLength || !bedWidth || !rowsPerBed || !plantSpacing) {
+    if (!numBeds || !bedLength || !bedWidth || !rowsPerBed || !plantSpacing) {
         return showToast('Tr', 'দয়া করে সবগুলো ফিল্ড পূরণ করুন');
     }
 
@@ -2929,7 +2996,7 @@ window.generate3DMapGrid = async function() {
     try {
         const token = localStorage.getItem('farmer_jwt');
         const cropId = activeCrop ? activeCrop.id : getCropIdFromURL();
-        
+
         const payload = {
             numBeds: parseInt(numBeds),
             bedLength: parseFloat(bedLength),
@@ -2947,7 +3014,7 @@ window.generate3DMapGrid = async function() {
             body: JSON.stringify(payload)
         });
         const data = await res.json();
-        
+
         if (data.success) {
             document.getElementById('mapWizardModal').classList.remove('active');
             document.body.style.overflow = '';

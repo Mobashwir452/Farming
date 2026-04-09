@@ -10,6 +10,8 @@ let isBatchMode = false;
 let selectedPlants = new Set(); // Stores objects like {bedId, plantId, pIndex, bIndex}
 let currentlyEditingPlant = null; // Stores {bedId, node, bIndex, pIndex}
 let expandedBedIndexes = new Set([0]); // Memory for open beds across rerenders
+let longPressTimer = null;
+let isLongPressTriggered = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -103,7 +105,45 @@ function renderBeds() {
             if (state === 'C') stateClass = 'critical';
 
             chip.className = `plant-chip ${stateClass}`;
-            chip.innerText = node.id.split('-')[1]; // Show T1, T2 etc.
+            chip.title = node.variety ? `${node.id}\nজাত: ${node.variety}` : node.id;
+            
+            let latestImgUrl = null;
+            if(node.logs && node.logs.length > 0) {
+                for (let i = node.logs.length - 1; i >= 0; i--) {
+                    if (node.logs[i].hasOwnProperty('image_url')) {
+                        if (node.logs[i].image_url && node.logs[i].image_url !== '') {
+                            latestImgUrl = node.logs[i].image_url;
+                        } else {
+                            latestImgUrl = null; // explicitly deleted
+                        }
+                        break;
+                    }
+                }
+            }
+
+            let bgStyle = '';
+            let emptyIcon = '';
+            let emptyClass = '';
+
+            if (latestImgUrl) {
+                bgStyle = `background-image:url('${latestImgUrl}')`;
+            } else {
+                emptyClass = 'empty-state';
+                emptyIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
+            }
+
+            let innerContent = `
+                <div class="avatar-ring ${emptyClass}" style="${bgStyle}">
+                    ${emptyIcon}
+                </div>
+                <div class="chip-id">${node.id.split('-')[1]}</div>
+            `;
+            
+            if (node.variety) {
+                innerContent += `<div class="chip-variety">${node.variety}</div>`;
+            }
+
+            chip.innerHTML = innerContent;
             
             // Reapply selection state if stored
             const plantKey = `${bIndex}-${pIndex}`;
@@ -111,7 +151,51 @@ function renderBeds() {
                 chip.classList.add('selected');
             }
 
-            chip.addEventListener('click', () => handleChipClick(bed, node, bIndex, pIndex, chip));
+            chip.addEventListener('contextmenu', (e) => {
+                e.preventDefault(); // Prevent right-click/long-press menu on mobile
+            });
+
+            const clearLongPress = () => {
+                if (longPressTimer) clearTimeout(longPressTimer);
+            };
+
+            chip.addEventListener('pointerdown', (e) => {
+                isLongPressTriggered = false;
+                longPressTimer = setTimeout(() => {
+                    isLongPressTriggered = true;
+                    if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) {
+                        try { navigator.vibrate(50); } catch(e){} // Haptic feedback if available
+                    }
+
+                    // Auto select this plant immediately if not selected (before toggling mode)
+                    const key = `${bIndex}-${pIndex}`;
+                    const isSelected = Array.from(selectedPlants).some(p => `${p.bIndex}-${p.pIndex}` === key);
+                    if (!isSelected) {
+                        selectedPlants.add({ bed, node, bIndex, pIndex });
+                    }
+
+                    if (!isBatchMode) {
+                        toggleBatchMode();
+                        updateSelectedCountUI();
+                    } else {
+                        chip.classList.add('selected');
+                        updateSelectedCountUI();
+                    }
+                }, 600); // 600ms hold triggers batch mode
+            });
+
+            chip.addEventListener('pointerup', clearLongPress);
+            chip.addEventListener('pointerleave', clearLongPress);
+            chip.addEventListener('pointercancel', clearLongPress);
+
+            chip.addEventListener('click', (e) => {
+                // Ignore standard click if long press just activated
+                if (isLongPressTriggered) {
+                    e.preventDefault();
+                    return;
+                }
+                handleChipClick(bed, node, bIndex, pIndex, chip);
+            });
             gridDiv.appendChild(chip);
         });
 
@@ -121,9 +205,17 @@ function renderBeds() {
             bedCard.className = 'bed-card';
             if(isBatchMode) bedCard.classList.add('batch-mode');
 
+            const displayBedName = bed.bed_name ? bed.bed_name : `বেড ${bIndex + 1}`;
+
             bedCard.innerHTML = `
                 <div class="bed-header" onclick="toggleAccordion(this, ${bIndex})">
-                    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> বেড ${bIndex + 1}</h2>
+                    <h2 style="display:flex; align-items:center; gap:6px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> 
+                        <span class="bed-title-text">${displayBedName}</span>
+                        <button onclick="renameBed(event, ${bIndex})" style="background:transparent; border:none; padding:4px; color:#94a3b8; cursor:pointer;" title="নাম পরিবর্তন করুন">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                    </h2>
                     <div class="bed-stats">সুস্থ: ${bedHealthy} | অসুস্থ: ${bedSick} | বিপজ: ${bedCritical}</div>
                 </div>
                 <div class="bed-content"></div>
@@ -149,7 +241,7 @@ function renderBeds() {
 }
 
 // ========================
-// Accordion Logic
+// Accordion & Rename Logic
 // ========================
 window.toggleAccordion = function(headerElement, index) {
     const card = headerElement.parentElement;
@@ -162,6 +254,37 @@ window.toggleAccordion = function(headerElement, index) {
         card.classList.remove('open');
         expandedBedIndexes.delete(index);
     }
+};
+
+window.renameBed = async function(event, bIndex) {
+    event.stopPropagation(); // prevent accordion toggle
+    const bed = farmData[bIndex];
+    const currentName = bed.bed_name || `বেড ${bIndex + 1}`;
+    const targetBtn = event.currentTarget;
+    
+    window.showInputModal("বেডের নাম আপডেট করুন", currentName, "যেমন: বেড ১ - বাবু জাত", async (newName) => {
+        if (!newName || newName === currentName) return;
+        
+        bed.bed_name = newName;
+        
+        // Optimistically update dom
+        const bedTitleEl = targetBtn.parentElement.querySelector('.bed-title-text');
+        if(bedTitleEl) bedTitleEl.innerText = newName;
+        
+        const token = localStorage.getItem('farmer_jwt');
+        try {
+            await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ bed_name: bed.bed_name })
+            });
+        } catch(e) {
+            console.error("Rename failed", e);
+        }
+    });
 };
 
 // ========================
@@ -195,16 +318,16 @@ function handleChipClick(bed, node, bIndex, pIndex, chipElement) {
 // ========================
 function toggleBatchMode() {
     isBatchMode = !isBatchMode;
-    const btn = document.getElementById('batchSelectBtn');
     const actionBar = document.getElementById('batchActionBar');
     const bottomNav = document.querySelector('app-bottom-nav');
     
     if (isBatchMode) {
-        btn.classList.add('active');
         actionBar.classList.add('visible');
         if(bottomNav) bottomNav.style.display = 'none';
+        if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) {
+            try { navigator.vibrate(50); } catch(e) {}
+        }
     } else {
-        btn.classList.remove('active');
         actionBar.classList.remove('visible');
         if(bottomNav) bottomNav.style.display = '';
         selectedPlants.clear();
@@ -229,10 +352,14 @@ function toggleSelectionState(bedId, node, bIndex, pIndex, chipEl) {
         chipEl.classList.add('selected');
     }
     updateSelectedCountUI();
+    
+    if (selectedPlants.size === 0 && isBatchMode) {
+        toggleBatchMode();
+    }
 }
 
 function updateSelectedCountUI() {
-    document.getElementById('selectedCountValue').innerText = selectedPlants.size;
+    document.getElementById('selectedCountValue').innerText = `${selectedPlants.size} টি`;
 }
 
 async function markSelectedAreaStatus(status) {
@@ -282,7 +409,10 @@ async function markSelectedAreaStatus(status) {
 function openBottomSheet(bed, node, bIndex, pIndex) {
     currentlyEditingPlant = {bed, node, bIndex, pIndex};
 
-    document.getElementById('bsPlantTitle').innerText = `গাছ: ${node.id}`;
+    let titleTxt = `গাছ: ${node.id}`;
+    if (node.variety) titleTxt += ` (${node.variety})`;
+    document.getElementById('bsPlantTitle').innerText = titleTxt;
+    
     document.getElementById('bsPlantLocation').innerText = `বেড ${bIndex + 1}`;
     
     // Active toggles state
@@ -299,6 +429,9 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     document.getElementById('bsFruits').value = node.fruits || '';
     document.getElementById('bsLeaves').value = node.leaf_count || '';
     document.getElementById('bsNote').value = node.disease || '';
+    if (document.getElementById('bsVariety')) {
+        document.getElementById('bsVariety').value = node.variety || '';
+    }
     
     // Checkboxes
     const fChip = document.getElementById('bsFertilizerChip');
@@ -316,8 +449,8 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     let latestImage = 'https://placehold.co/100x100?text=Plant';
     if(node.logs && node.logs.length > 0) {
         for(let i = node.logs.length - 1; i >= 0; i--) {
-            if(node.logs[i].image_url) {
-                latestImage = node.logs[i].image_url;
+            if(node.logs[i].hasOwnProperty('image_url')) {
+                latestImage = node.logs[i].image_url || 'https://placehold.co/100x100?text=Plant';
                 break;
             }
         }
@@ -462,6 +595,9 @@ async function executeSavePlantDetails(btn) {
         node.height = document.getElementById('bsHeight').value;
         node.fruits = document.getElementById('bsFruits').value;
         node.leaf_count = document.getElementById('bsLeaves').value;
+        if (document.getElementById('bsVariety')) {
+            node.variety = document.getElementById('bsVariety').value;
+        }
         
         const noteText = document.getElementById('bsNote').value;
         node.disease = noteText;
@@ -721,10 +857,31 @@ async function executeGridSetupChanges(btn) {
 window.openBatchUpdateModal = function() {
     if (selectedPlants.size === 0) return alert('কোনো গাছ নির্বাচন করা হয়নি!');
     
+    let text = `${selectedPlants.size} টি`;
+    const firstPlant = Array.from(selectedPlants)[0].node;
+    let commonVariety = firstPlant ? firstPlant.variety : '';
+    
+    if (commonVariety) {
+        let allSame = true;
+        for (let sel of Array.from(selectedPlants)) {
+            if (sel.node.variety !== commonVariety) {
+                allSame = false;
+                break;
+            }
+        }
+        if (!allSame) {
+            commonVariety = ''; // Don't prefill if varieties mismatch
+        }
+    }
+    
     document.getElementById('batchModalCount').innerText = selectedPlants.size;
     document.getElementById('batchLeaves').value = '';
     document.getElementById('batchFruits').value = '';
     document.getElementById('batchNote').value = '';
+    if (document.getElementById('batchVariety')) {
+        document.getElementById('batchVariety').value = commonVariety || '';
+        document.getElementById('batchVariety').dataset.initialValue = commonVariety || '';
+    }
     document.getElementById('batchFertilizerChip').classList.remove('active');
     document.getElementById('batchPesticideChip').classList.remove('active');
     
@@ -741,6 +898,10 @@ window.saveBatchUpdateDetails = async function() {
     const bLeaves = document.getElementById('batchLeaves').value;
     const bFruits = document.getElementById('batchFruits').value;
     const bNote = document.getElementById('batchNote').value;
+    const batchVarietyInput = document.getElementById('batchVariety');
+    const bVariety = batchVarietyInput ? batchVarietyInput.value : '';
+    const initialVariety = batchVarietyInput ? batchVarietyInput.dataset.initialValue : '';
+    const varietyChanged = bVariety !== initialVariety;
     
     const loadingBtn = event.target;
     loadingBtn.innerHTML = 'সেভিং...';
@@ -753,6 +914,10 @@ window.saveBatchUpdateDetails = async function() {
         
         if(bLeaves) node.leaf_count = bLeaves;
         if(bFruits) node.fruits = bFruits;
+        
+        if (varietyChanged || bVariety !== '') {
+            node.variety = bVariety;
+        }
         node.is_fertilized = fertActive;
         node.is_pesticide = pestActive;
         
@@ -812,5 +977,38 @@ document.getElementById('confirmActionBtn').addEventListener('click', function()
     closeConfirmModal();
     if(cb) {
         cb();
+    }
+});
+
+// ========================
+// Global Input Modal Logic
+// ========================
+let currentInputCallback = null;
+
+window.showInputModal = function(title, defaultValue, placeholder, callback) {
+    document.getElementById('inputPromptTitle').innerText = title || 'ডেটা আপডেট করুন';
+    const inputField = document.getElementById('inputPromptField');
+    inputField.value = defaultValue || '';
+    inputField.placeholder = placeholder || 'এখানে লিখুন...';
+    currentInputCallback = callback;
+    document.getElementById('inputPromptModal').classList.add('active');
+    
+    // Focus the input field after a tiny delay for modal reveal animation
+    setTimeout(() => {
+        inputField.focus();
+    }, 100);
+};
+
+window.closeInputModal = function() {
+    document.getElementById('inputPromptModal').classList.remove('active');
+    currentInputCallback = null;
+};
+
+document.getElementById('inputPromptBtn').addEventListener('click', function() {
+    const val = document.getElementById('inputPromptField').value.trim();
+    const cb = currentInputCallback;
+    closeInputModal();
+    if(cb && val !== '') {
+        cb(val);
     }
 });

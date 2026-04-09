@@ -106,6 +106,11 @@ export async function updateBedConfig(request, env) {
         let updates = [];
         let params = [];
         
+        if (body.bed_name !== undefined) {
+            updates.push('bed_name = ?');
+            params.push(body.bed_name);
+        }
+        
         if (body.custom_settings !== undefined) {
             updates.push('custom_settings_json = ?');
             params.push(JSON.stringify(body.custom_settings));
@@ -182,14 +187,15 @@ export async function syncCropBeds(request, env) {
             const bed = beds[i];
             const plantsJsonStr = JSON.stringify(bed.plants_nodes_json || []);
             
+            const bedTitle = bed.bed_name || `Bed-${i + 1}`;
             if (typeof bed.id === 'string' && bed.id.startsWith('mock-')) {
                 // Insert new bed
                 await env.DB.prepare(`INSERT INTO crop_beds (crop_id, bed_name, plants_nodes_json) VALUES (?, ?, ?)`)
-                    .bind(cropId, `Bed-${i + 1}`, plantsJsonStr).run();
+                    .bind(cropId, bedTitle, plantsJsonStr).run();
             } else {
                 // Update existing bed
                 await env.DB.prepare(`UPDATE crop_beds SET bed_name = ?, plants_nodes_json = ? WHERE id = ? AND crop_id = ?`)
-                    .bind(`Bed-${i + 1}`, plantsJsonStr, bed.id, cropId).run();
+                    .bind(bedTitle, plantsJsonStr, bed.id, cropId).run();
             }
         }
         

@@ -21,8 +21,9 @@
 </head>
 <body>
 
-    <!-- Top Navigation Header -->
-    <div class="page-top-header">
+    <!-- Top Navigation Header & Tabs Sticky Wrapper -->
+    <div class="sticky-top-group">
+        <div class="page-top-header">
         <!-- Left: Back & Title -->
         <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
             <button class="back-btn" onclick="window.history.back()" aria-label="Go Back" style="flex-shrink: 0;">
@@ -34,17 +35,27 @@
             </div>
         </div>
         
-        <!-- Right: Batch Action Toggle -->
+        <!-- Right: Settings Icon -->
         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-            <button id="batchSelectBtn" onclick="toggleBatchMode()" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F8FAFC; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                <span>সিলেক্ট</span>
+            <button id="gridSettingsBtn" onclick="openGridSetupModal()" class="top-settings-btn" aria-label="Grid Settings" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: transparent; color: #475569; border: none; border-radius: 50%; cursor: pointer; transition: background 0.2s;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
             </button>
         </div>
     </div>
 
-    <main class="wrapper ld-sections" style="padding-top: 16px;">
-
+        <!-- Tab Filters -->
+        <div class="tracker-tabs-container">
+            <div class="ld-tabs" style="margin-bottom: 0;">
+                <button class="ld-tab active" data-filter="all">সব গাছ (<span id="countAll">0</span>)</button>
+                <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
+                <button class="ld-tab" style="color:#eab308;" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
+                <button class="ld-tab" style="color:#ef4444;" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
+            </div>
+        </div>
+    </div> <!-- Close sticky-top-group -->
 
     <!-- Grid Setup Modal -->
     <div id="gridSetupModal" class="modal-overlay">
@@ -66,15 +77,7 @@
         </div>
     </div>
 
-    <!-- Tab Filters -->
-    <div class="tracker-tabs-container">
-        <div class="ld-tabs" style="margin-bottom: 0;">
-            <button class="ld-tab active" data-filter="all">সব গাছ (<span id="countAll">0</span>)</button>
-            <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
-            <button class="ld-tab" style="color:#eab308;" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
-            <button class="ld-tab" style="color:#ef4444;" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
-        </div>
-    </div>
+
 
     <!-- Main Content: Beds > Plants -->
     <main class="tracker-main wrapper" id="trackerMain">
@@ -87,13 +90,15 @@
 
     <!-- Bottom Action Bar (Visible only in Batch Mode) -->
     <div id="batchActionBar" class="batch-action-bar">
-        <div class="selected-count">
-            <span id="selectedCountValue">0</span> টি সিলেক্টেড
+        <div class="selected-count" style="display: flex; align-items: center; gap: 6px;">
+            <button onclick="toggleBatchMode()" style="background:transparent; border:none; color:#64748b; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:16px; cursor:pointer; background: #e2e8f0; padding:0;">&times;</button>
+            <span id="selectedCountValue">0 টি</span>
         </div>
-        <div class="batch-actions">
-            <button class="action-btn-sm danger" onclick="markSelectedAreaStatus('S')">অসুস্থ মার্ক</button>
-            <button class="action-btn-sm success" onclick="markSelectedAreaStatus('H')">সুস্থ মার্ক</button>
-            <button class="action-btn-sm" style="background:var(--primary);" onclick="openBatchUpdateModal()">ডিটেইল আপডেট</button>
+        <div class="batch-actions" style="gap: 5px; flex-wrap: nowrap;">
+            <button class="action-btn-sm success" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('H')">সুস্থ</button>
+            <button class="action-btn-sm warning" style="padding: 6px 10px; background: #eab308; color: white;" onclick="markSelectedAreaStatus('S')">অসুস্থ</button>
+            <button class="action-btn-sm danger" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('C')">বিপজ.</button>
+            <button class="action-btn-sm" style="background:var(--primary); padding: 6px 10px;" onclick="openBatchUpdateModal()">আপডেট</button>
         </div>
     </div>
 
@@ -104,6 +109,11 @@
             <h2 style="margin-top:0;">ব্যাচ আপডেট</h2>
             <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
             
+            <div class="input-group">
+                <label>জাতের নাম (Variety)</label>
+                <input type="text" id="batchVariety" placeholder="উদা: হাইব্রিড, দেশি ইত্যাদি">
+            </div>
+
             <div class="form-grid-2">
                 <div class="input-group">
                     <label>পাতার সংখ্যা</label>
@@ -182,8 +192,10 @@
             <!-- Agronomy Smart Update Form -->
             <div id="bsTabForm" class="smart-agronomy-form" style="min-height: 480px;">
 
-
-                <div class="form-grid-2">
+                <div class="input-group">
+                    <label>জাতের নাম (Variety)</label>
+                    <input type="text" id="bsVariety" placeholder="উদা: দেশি পেঁপে, রেড লেডি ইত্যাদি">
+                </div>                <div class="form-grid-2">
                     <div class="input-group">
                         <label>উচ্চতা (ইঞ্চি)</label>
                         <input type="number" id="bsHeight" placeholder="উদা: ২৪">
@@ -239,19 +251,29 @@
         </div>
     </div>
 
+    <!-- Global Input Prompt Modal -->
+    <div class="center-modal" id="inputPromptModal" style="z-index: 99999;">
+        <div class="center-modal-content" style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
+            <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #3B82F6;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            <h3 id="inputPromptTitle" style="font-size: 18px; margin-bottom: 16px; font-weight: 700; color: #1E293B;">টাইটেল</h3>
+            <div style="margin-bottom: 24px; text-align: left;">
+                <input type="text" id="inputPromptField" style="width: 100%; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; padding: 12px; font-size: 15px; outline: none; background: #F8FAFC; color: #1E293B;" placeholder="...">
+            </div>
+            <div style="display: flex; gap: 12px; flex-direction: column;">
+                <button id="inputPromptBtn" class="btn-primary" style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">সেভ করুন</button>
+                <button onclick="window.closeInputModal()" style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল করুন</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Fullscreen Image Modal -->
     <div id="fullImageModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
         <button onclick="document.getElementById('fullImageModal').style.display='none'" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; font-size: 32px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10000000; line-height: 1;">&times;</button>
         <img id="fullImageView" src="" style="max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain;">
     </div>
 
-    <!-- Floating Action Button for Settings -->
-    <button class="fab-settings" onclick="openGridSetupModal()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-    </button>
 
     <!-- Navigation Bar for Mobile -->
     <app-bottom-nav></app-bottom-nav>
