@@ -88,13 +88,13 @@
         </div>
     </main>
 
-    <!-- Bottom Action Bar (Visible only in Batch Mode) -->
     <div id="batchActionBar" class="batch-action-bar">
         <div class="selected-count" style="display: flex; align-items: center; gap: 6px;">
             <button onclick="toggleBatchMode()" style="background:transparent; border:none; color:#64748b; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:16px; cursor:pointer; background: #e2e8f0; padding:0;">&times;</button>
             <span id="selectedCountValue">0 টি</span>
         </div>
         <div class="batch-actions" style="gap: 5px; flex-wrap: nowrap;">
+            <button id="btnSelectAllFarm" class="action-btn-sm" style="padding: 6px 8px; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 6px;" onclick="toggleSelectAllFarm()">☑ সব</button>
             <button class="action-btn-sm success" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('H')">সুস্থ</button>
             <button class="action-btn-sm warning" style="padding: 6px 10px; background: #eab308; color: white;" onclick="markSelectedAreaStatus('S')">অসুস্থ</button>
             <button class="action-btn-sm danger" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('C')">বিপজ.</button>
@@ -169,15 +169,15 @@
             </div>
 
             <div class="status-toggles" style="display:flex; gap:8px;">
-                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="updatePlantStateSingle('H')" style="flex:1;">
+                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="setPlantProfileStatusUI('H')" style="flex:1;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     সুস্থ
                 </button>
-                <button id="btnSetSick" class="status-btn sick-btn" onclick="updatePlantStateSingle('S')" style="flex:1;">
+                <button id="btnSetSick" class="status-btn sick-btn" onclick="setPlantProfileStatusUI('S')" style="flex:1;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     অসুস্থ
                 </button>
-                <button id="btnSetCritical" class="status-btn critical-btn" onclick="updatePlantStateSingle('C')" style="flex:1;">
+                <button id="btnSetCritical" class="status-btn critical-btn" onclick="setPlantProfileStatusUI('C')" style="flex:1;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     বিপজ্জনক
                 </button>

@@ -206,6 +206,11 @@ function renderBeds() {
             if(isBatchMode) bedCard.classList.add('batch-mode');
 
             const displayBedName = bed.bed_name ? bed.bed_name : `বেড ${bIndex + 1}`;
+            
+            const selectAllCheckHtml = isBatchMode ? 
+                `<button class="bed-select-btn" onclick="event.stopPropagation(); toggleSelectAllForBed(${bIndex})" style="border:none; background:#f1f5f9; font-size:13px; cursor:pointer; padding:4px 8px; border-radius:6px; color:#475569; font-weight:bold; margin-left:8px;">
+                    <span id="bedSelectIcon_${bIndex}">☐</span> সব
+                </button>` : '';
 
             bedCard.innerHTML = `
                 <div class="bed-header" onclick="toggleAccordion(this, ${bIndex})">
@@ -216,7 +221,10 @@ function renderBeds() {
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                     </h2>
-                    <div class="bed-stats">সুস্থ: ${bedHealthy} | অসুস্থ: ${bedSick} | বিপজ: ${bedCritical}</div>
+                    <div style="display:flex; align-items:center;">
+                        <div class="bed-stats">সুস্থ: ${bedHealthy} | অসুস্থ: ${bedSick} | বিপজ: ${bedCritical}</div>
+                        ${selectAllCheckHtml}
+                    </div>
                 </div>
                 <div class="bed-content"></div>
             `;
@@ -238,6 +246,11 @@ function renderBeds() {
     document.getElementById('countHealthy').innerText = totalHealthy;
     document.getElementById('countSick').innerText = totalSick;
     if (document.getElementById('countCritical')) document.getElementById('countCritical').innerText = totalCritical;
+
+    // Update Batch mode select all UI
+    if (typeof updateSelectAllUIState === 'function') {
+        updateSelectAllUIState();
+    }
 }
 
 // ========================
@@ -355,12 +368,163 @@ function toggleSelectionState(bedId, node, bIndex, pIndex, chipEl) {
     
     if (selectedPlants.size === 0 && isBatchMode) {
         toggleBatchMode();
+    } else {
+        if (typeof updateSelectAllUIState === 'function') updateSelectAllUIState();
     }
 }
 
 function updateSelectedCountUI() {
     document.getElementById('selectedCountValue').innerText = `${selectedPlants.size} টি`;
 }
+
+// ========================
+// Select All Logic
+// ========================
+function getVisiblePlantsList() {
+    let list = [];
+    farmData.forEach((bed, bIndex) => {
+        const nodes = bed.plants_nodes_json || [];
+        nodes.forEach((node, pIndex) => {
+            const state = node.state || 'H';
+            if (currentFilter === 'H' && state !== 'H') return;
+            if (currentFilter === 'S' && state !== 'S') return;
+            if (currentFilter === 'C' && state !== 'C') return;
+            list.push({ bedId: bed.id, node, bIndex, pIndex });
+        });
+    });
+    return list;
+}
+
+window.toggleSelectAllFarm = function() {
+    if (!isBatchMode) return;
+    
+    const visiblePlants = getVisiblePlantsList();
+    if (visiblePlants.length === 0) return;
+    
+    // Check if we already have all *visible* plants selected
+    const allSelected = selectedPlants.size === visiblePlants.length;
+    
+    selectedPlants.clear();
+    
+    if (!allSelected) {
+        visiblePlants.forEach(p => {
+            selectedPlants.add({bedId: p.bedId, node: p.node, bIndex: p.bIndex, pIndex: p.pIndex});
+        });
+    }
+    
+    updateSelectedCountUI();
+    renderBeds();
+    
+    if (selectedPlants.size === 0 && isBatchMode) {
+        toggleBatchMode();
+    } else {
+        updateSelectAllUIState();
+    }
+};
+
+window.toggleSelectAllForBed = function(bIndex) {
+    if (!isBatchMode) return;
+    
+    const bed = farmData[bIndex];
+    let visibleInBed = [];
+    
+    const nodes = bed.plants_nodes_json || [];
+    nodes.forEach((node, pIndex) => {
+        const state = node.state || 'H';
+        if (currentFilter === 'H' && state !== 'H') return;
+        if (currentFilter === 'S' && state !== 'S') return;
+        if (currentFilter === 'C' && state !== 'C') return;
+        visibleInBed.push({ bedId: bed.id, node, bIndex, pIndex });
+    });
+    
+    if (visibleInBed.length === 0) return;
+
+    let bedSelectedCount = 0;
+    visibleInBed.forEach(p => {
+        const key = `${p.bIndex}-${p.pIndex}`;
+        if (Array.from(selectedPlants).some(s => `${s.bIndex}-${s.pIndex}` === key)) {
+            bedSelectedCount++;
+        }
+    });
+
+    if (bedSelectedCount === visibleInBed.length) {
+        // Deselect all visible in bed
+        const newSet = new Set();
+        selectedPlants.forEach(s => {
+            if (s.bIndex !== bIndex) newSet.add(s);
+        });
+        selectedPlants = newSet;
+    } else {
+        // Select all missing visible in bed
+        visibleInBed.forEach(p => {
+            const key = `${p.bIndex}-${p.pIndex}`;
+            if (!Array.from(selectedPlants).some(s => `${s.bIndex}-${s.pIndex}` === key)) {
+                selectedPlants.add(p);
+            }
+        });
+    }
+    
+    updateSelectedCountUI();
+    renderBeds();
+    
+    if (selectedPlants.size === 0 && isBatchMode) {
+        toggleBatchMode();
+    } else {
+        updateSelectAllUIState();
+    }
+};
+
+window.updateSelectAllUIState = function() {
+    if (!isBatchMode) return;
+    
+    // Farm level BTN text
+    const farmBtn = document.getElementById('btnSelectAllFarm');
+    if (farmBtn) {
+        const visCount = getVisiblePlantsList().length;
+        if (visCount > 0 && selectedPlants.size === visCount) {
+            farmBtn.innerHTML = '☐ বাতিল';
+            farmBtn.style.color = '#ef4444';
+        } else {
+            farmBtn.innerHTML = '☑ সব';
+            farmBtn.style.color = '#475569';
+        }
+    }
+    
+    // Bed level checkboxes
+    farmData.forEach((bed, bIndex) => {
+        const iconSpan = document.getElementById(`bedSelectIcon_${bIndex}`);
+        if (!iconSpan) return;
+        
+        let visibleInBed = [];
+        const nodes = bed.plants_nodes_json || [];
+        nodes.forEach((node, pIndex) => {
+            const state = node.state || 'H';
+            if (currentFilter === 'H' && state !== 'H') return;
+            if (currentFilter === 'S' && state !== 'S') return;
+            if (currentFilter === 'C' && state !== 'C') return;
+            visibleInBed.push({ bIndex, pIndex });
+        });
+        
+        let bedSelectedCount = 0;
+        visibleInBed.forEach(p => {
+            const key = `${p.bIndex}-${p.pIndex}`;
+            if (Array.from(selectedPlants).some(s => `${s.bIndex}-${s.pIndex}` === key)) {
+                bedSelectedCount++;
+            }
+        });
+        
+        if (visibleInBed.length > 0 && bedSelectedCount === visibleInBed.length) {
+            iconSpan.innerHTML = '☑';
+            iconSpan.parentElement.style.color = 'var(--primary)';
+        } else if (bedSelectedCount > 0) {
+            iconSpan.innerHTML = '⊟'; // partial
+            iconSpan.parentElement.style.color = '#475569';
+        } else {
+            iconSpan.innerHTML = '☐';
+            iconSpan.parentElement.style.color = '#475569';
+        }
+    });
+};
 
 async function markSelectedAreaStatus(status) {
     if (selectedPlants.size === 0) return alert('কোনো গাছ নির্বাচন করা হয়নি!');
@@ -490,29 +654,16 @@ window.switchBsTab = function(tabName, btnEl) {
     }
 };
 
-// Submits single plant state fast update (e.g. mark sick) and hides sheet
-async function updatePlantStateSingle(status) {
-    if(!currentlyEditingPlant) return;
+// UI logic for updating plant status visually before saving
+window.setPlantProfileStatusUI = function(status) {
+    document.getElementById('btnSetHealthy').classList.remove('active');
+    document.getElementById('btnSetSick').classList.remove('active');
+    document.getElementById('btnSetCritical').classList.remove('active');
     
-    const {bed, node, bIndex, pIndex} = currentlyEditingPlant;
-    node.state = status;
-    farmData[bIndex].plants_nodes_json[pIndex] = node;
-
-    // Immediately reflect
-    closeBottomSheet();
-    renderBeds();
-
-    // Call Backend
-    const token = localStorage.getItem('farmer_jwt');
-    await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
-        method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
-    });
-}
+    if(status === 'H') document.getElementById('btnSetHealthy').classList.add('active');
+    else if(status === 'S') document.getElementById('btnSetSick').classList.add('active');
+    else if(status === 'C') document.getElementById('btnSetCritical').classList.add('active');
+};
 
 // Canvas Image Compression
 async function compressImageWebP(dataUrl, quality = 0.8, maxWidth = 1024) {

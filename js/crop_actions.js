@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     };
 
-    window.openCropActionSheet = function() {
+    window.openCropActionSheet = async function() {
         if (!activeCrop) {
-            alert('কোনো সক্রিয় ফসল নেই!');
+            await SmartDialog.alert('কোনো সক্রিয় ফসল নেই!', 'সতর্কতা', 'warning');
             return;
         }
         document.getElementById('cropActionSheet').classList.add('active');
@@ -59,18 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeCrop.status = newStatus;
                 const cropStatusEl = document.querySelector('.ld-crop-text p:nth-child(3) span');
                 if (cropStatusEl) cropStatusEl.innerHTML = `${newStatus} (ম্যানুয়াল আপডেট)`;
-                alert('ফসলের অবস্থা সফলভাবে আপডেট হয়েছে!');
+                await SmartDialog.alert('ফসলের অবস্থা সফলভাবে আপডেট হয়েছে!', 'সফল', 'success');
                 closeCropActionModals();
             } else {
-                alert(data.error || 'Update failed');
+                await SmartDialog.alert(data.error || 'Update failed', 'ত্রুটি', 'warning');
             }
-        } catch(e) { alert('Connection error'); }
+        } catch(e) { await SmartDialog.alert('Connection error', 'ত্রুটি', 'danger'); }
     };
 
     window.saveCropNote = async function() {
         const noteText = document.getElementById('cropNoteText').value.trim();
         if(!noteText) {
-            alert('দয়া করে নোট লিখুন।');
+            await SmartDialog.alert('দয়া করে নোট লিখুন।', 'সতর্কতা', 'warning');
             return;
         }
 
@@ -83,11 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
             if(data.success) {
-                alert('নোট সফলভাবে যোগ করা হয়েছে! নতুন নোটগুলো দেখতে পেজটি রিফ্রেশ হচ্ছে...');
+                await SmartDialog.alert('নোট সফলভাবে যোগ করা হয়েছে! নতুন নোটগুলো দেখতে পেজটি রিফ্রেশ হচ্ছে...', 'সফল', 'success');
                 closeCropActionModals();
                 window.location.reload();
-            } else alert(data.error || 'Failed to add note');
-        } catch(e) { alert('Connection error adding note: ' + e.message); }
+            } else await SmartDialog.alert(data.error || 'Failed to add note', 'ত্রুটি', 'warning');
+        } catch(e) { await SmartDialog.alert('Connection error adding note: ' + e.message, 'ত্রুটি', 'danger'); }
     };
 
 
@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeCropActionModals();
                 });
 
-            } else alert(data.error);
+            } else await SmartDialog.alert(data.error, 'ত্রুটি', 'warning');
         } catch(e) { 
             console.error("PDF Generate Error", e);
-            alert('Generate Error: ' + e.message + '\\n(দয়া করে পেজটি একবার রিলোড/রিফ্রেশ দিয়ে আবার চেষ্টা করুন)।'); 
+            await SmartDialog.alert('Generate Error: ' + e.message + '\\n(দয়া করে পেজটি একবার রিলোড/রিফ্রেশ দিয়ে আবার চেষ্টা করুন)।', 'ত্রুটি', 'danger'); 
         }
     };
 });

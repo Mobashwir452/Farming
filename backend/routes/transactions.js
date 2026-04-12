@@ -73,6 +73,40 @@ export const addTransaction = async (request, env) => {
     }
 };
 
+export const updateTransaction = async (request, env) => {
+    try {
+        const cropId = request.params.id;
+        const transactionId = request.params.txId;
+        const farmerId = request.user.id;
+        const body = await request.json();
+
+        if(!body.type || !body.category || !body.amount_bdt) {
+            return Response.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+        }
+
+        const query = `
+            UPDATE transactions 
+            SET type = ?, category = ?, amount_bdt = ?, transaction_date = coalesce(?, transaction_date), description = ?
+            WHERE id = ? AND crop_id = ? AND farmer_id = ?
+        `;
+        
+        await env.DB.prepare(query).bind(
+            body.type,
+            body.category,
+            parseFloat(body.amount_bdt),
+            body.transaction_date || null,
+            body.description || '',
+            transactionId,
+            cropId,
+            farmerId
+        ).run();
+
+        return Response.json({ success: true, message: 'Transaction updated successfully' });
+    } catch (e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
 export const deleteTransaction = async (request, env) => {
     try {
         const cropId = request.params.id;

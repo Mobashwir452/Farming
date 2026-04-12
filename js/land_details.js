@@ -257,10 +257,17 @@ async function fetchFarmAndCropDetails() {
 
                         try {
                             const tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
-                            const pTask = tasks.find(t => parseInt(t.day_offset) === 0 || t.title.includes('রোপণ') || t.title.includes('বপন') || t.title.includes('বীজতলা'));
-                            if (pTask && pTask.due_date) {
-                                derivedPlantingDateStr = pTask.due_date;
-                                plantingTaskId = pTask.id;
+                            const zeroTask = tasks.find(t => parseInt(t.day_offset) === 0);
+                            
+                            if (zeroTask && zeroTask.due_date) {
+                                derivedPlantingDateStr = zeroTask.due_date;
+                                plantingTaskId = zeroTask.id;
+                            } else {
+                                const fallbackTask = tasks.find(t => t.title.includes('রোপণ') || t.title.includes('বপন'));
+                                if (fallbackTask && fallbackTask.due_date) {
+                                    derivedPlantingDateStr = fallbackTask.due_date;
+                                    plantingTaskId = fallbackTask.id;
+                                }
                             }
                         } catch (e) { }
 
@@ -401,6 +408,9 @@ async function fetchFarmAndCropDetails() {
 
                 // Output Crop Scans specifically linked to this Land
                 fetchCropScansForLand();
+                
+                // Fetch dynamic plant count for harvest modal and overview
+                fetchLivePlantCountForHarvest(activeCrop.id, token, currentCount);
 
             } else {
                 const cropNameEl = document.querySelector('.ld-crop-text h4');
@@ -572,12 +582,12 @@ window.renderCropNotes = function (notesJsonString) {
     } catch (e) { console.error("Could not parse notes", e); }
 }
 
-window.editCropNote = function (index) {
+window.editCropNote = async function (index) {
     if (!window.activeCrop || !window.activeCrop.notes_json) return;
     try {
         let notes = JSON.parse(window.activeCrop.notes_json);
         const oldText = notes[index].note || notes[index].text;
-        const newText = prompt("নোট আপডেট করুন:", oldText);
+        const newText = await SmartDialog.prompt("নোট আপডেট করুন:", oldText, "তথ্য প্রদান");
         if (newText !== null && newText.trim() !== "") {
             notes[index].text = newText.trim();
             delete notes[index].note; // Normalize field mapping
@@ -588,9 +598,9 @@ window.editCropNote = function (index) {
     } catch (e) { console.error(e); }
 };
 
-window.deleteCropNote = function (index) {
+window.deleteCropNote = async function (index) {
     if (!window.activeCrop || !window.activeCrop.notes_json) return;
-    if (!confirm("আপনি কি নিশ্চিতভাবে এই নোটটি মুছে ফেলতে চান?")) return;
+    if (!(await SmartDialog.confirm("আপনি কি নিশ্চিতভাবে এই নোটটি মুছে ফেলতে চান?", "নিশ্চিতকরণ?", "warning"))) return;
     try {
         let notes = JSON.parse(window.activeCrop.notes_json);
         notes.splice(index, 1);
@@ -620,7 +630,7 @@ window.toggleResourceCheck = async function (id, el) {
 
             let cost = res.estimated_cost_bdt || 0;
             if (cost <= 0) {
-                const userCost = prompt(`"${res.name || 'রিসোর্স'}" ক্রয় করতে কত টাকা লেগেছে?`, "0");
+                const userCost = await SmartDialog.prompt(`"${res.name || 'রিসোর্স'}" ক্রয় করতে কত টাকা লেগেছে?`, "0", "খরচ ইনপুট");
                 if (userCost === null) {
                     el.checked = false; // Revert
                     parent.classList.remove('bought');
@@ -633,7 +643,7 @@ window.toggleResourceCheck = async function (id, el) {
                 const costInput = parent.querySelector('.res-cost-input');
                 if (costInput) costInput.value = cost;
             } else {
-                const confirmRes = confirm(`"${res.name || 'রিসোর্স'}" এর খরচ ৳${cost} হিসেবে ডাটাবেসে সেভ হবে। আপনি কি নিশ্চিত?`);
+                const confirmRes = await SmartDialog.confirm(`"${res.name || 'রিসোর্স'}" এর খরচ ৳${cost} হিসেবে ডাটাবেসে সেভ হবে। আপনি কি নিশ্চিত?`, "নিশ্চিতকরণ?");
                 if (!confirmRes) {
                     el.checked = false;
                     parent.classList.remove('bought');
@@ -648,11 +658,12 @@ window.toggleResourceCheck = async function (id, el) {
             // Push to Backend Transactions BEFORE saving local state so if it fails, we revert
             const token = localStorage.getItem('farmer_jwt');
             const catMap = { 'seed_or_sapling': 'বীজ/চারা', 'fertilizer': 'সার', 'pesticide': 'বালাইনাশক', 'irrigation': 'সেচ', 'labor_and_other': 'অন্যান্য' };
+            const amtStr = res.amount ? ` - ${res.amount}` : '';
             const payload = {
                 type: 'expense',
                 category: catMap[res.category || 'labor_and_other'] || 'অন্যান্য',
                 amount_bdt: cost,
-                description: `${res.name || 'অজানা রিসোর্স'} ক্রয়`
+                description: `${res.name || 'অজানা রিসোর্স'} ক্রয়${amtStr}`
             };
 
             const txRes = await fetch(`${API_URL}/api/crops/${activeCrop.id}/transactions`, {
@@ -664,7 +675,7 @@ window.toggleResourceCheck = async function (id, el) {
             if (txData.success && txData.transaction) {
                 res.transaction_id = txData.transaction.id;
             } else {
-                alert("দুঃখিত, ট্রানজ্যাকশন সেভ হয়নি: " + (txData.error || 'Server Error'));
+                await SmartDialog.alert("দুঃখিত, ট্রানজ্যাকশন সেভ হয়নি: " + (txData.error || 'Server Error'), "ত্রুটি", "warning");
                 el.checked = false;
                 parent.classList.remove('bought');
                 parent.querySelectorAll('input.res-name-input, input.res-amount-input, input.res-cost-input').forEach(input => input.readOnly = false);
@@ -674,7 +685,7 @@ window.toggleResourceCheck = async function (id, el) {
             }
         } else {
             // UN-CHECK (Delete transaction)
-            if (!confirm("আপনি কি নিশ্চিত যে এই খরচটি বাতিল করে পুনরায় এডিট করতে চান?")) {
+            if (!(await SmartDialog.confirm("আপনি কি নিশ্চিত যে এই খরচটি বাতিল করে পুনরায় এডিট করতে চান?", "নিশ্চিতকরণ?"))) {
                 el.checked = true;
                 return;
             }
@@ -703,7 +714,7 @@ window.toggleResourceCheck = async function (id, el) {
         renderResourcesTab(activeCrop.resources_state_json);
     } catch (e) {
         console.error(e);
-        alert("লোকাল এরর। দয়া করে পেজটি রিফ্রেশ করুন।");
+        await SmartDialog.alert("লোকাল এরর। দয়া করে পেজটি রিফ্রেশ করুন।", "ত্রুটি", "warning");
     }
 };
 
@@ -732,8 +743,8 @@ window.updateResourceCategory = function (id, value) {
     } catch (e) { }
 };
 
-window.deleteLocalResource = function (id) {
-    if (!confirm("এই রিসোর্সটি কি মুছে ফেলতে চান?")) return;
+window.deleteLocalResource = async function (id) {
+    if (!(await SmartDialog.confirm("এই রিসোর্সটি কি মুছে ফেলতে চান?", "নিশ্চিতকরণ?", "warning"))) return;
     try {
         let resArr = JSON.parse(activeCrop.resources_state_json || '[]');
         resArr = resArr.filter(r => r.id !== id);
@@ -812,10 +823,13 @@ window.cancelTask = function (taskId) {
     } catch (e) { }
 };
 
-window.addCustomTask = function () {
+window.addCustomTask = async function () {
     const title = document.getElementById('customStepTitle')?.value || '';
     const desc = document.getElementById('customStepDesc')?.value || '';
-    if (!title) return alert('কাজের নাম আবশ্যক');
+    if (!title) {
+        await SmartDialog.alert('কাজের নাম আবশ্যক', 'ত্রুটি', 'warning');
+        return;
+    }
 
     try {
         let tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
@@ -833,7 +847,7 @@ window.addCustomTask = function () {
         activeCrop.tasks_state_json = JSON.stringify(tasks);
         saveCropState();
         renderTasksTab(activeCrop.tasks_state_json);
-        alert('নতুন কাজ যোগ করা হয়েছে');
+        await SmartDialog.alert('নতুন কাজ যোগ করা হয়েছে', 'সফল', 'success');
         document.getElementById('customStepModal').classList.remove('active');
         document.body.style.overflow = '';
     } catch (e) {
@@ -919,13 +933,13 @@ function renderTasksTab(tasksJsonStr) {
 
         if (firstMissed) {
             smartAlertHtml = `
-            <div style="background: #FEF2F2; border: 1px solid #FECDD3; padding: 12px; margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
-                <div style="color: #DC2626; margin-top: 2px;">
+            <div style="background: #FEF2F2; border: none; border-left: 4px solid #F43F5E; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 12px; margin-bottom: 16px; margin-left: 12px; margin-right: 12px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
+                <div style="color: #F43F5E; margin-top: 2px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
                 <div style="flex: 1;">
-                    <h4 style="margin: 0 0 4px 0; color: #9F1239; font-size: 14px; font-weight: 700;">সতর্কতা: "${firstMissed.title}" মিস হয়েছে!</h4>
-                    <p style="margin: 0; color: #BE185D; font-size: 12px; line-height: 1.5;">অবিলম্বে মিস হওয়া কাজটি <b>সম্পন্ন</b> করুন অথবা বাতিল করুন!</p>
+                    <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;"><span style="color:#F43F5E;">সতর্কতা:</span> "${firstMissed.title}" মিস হয়েছে!</h4>
+                    <p style="margin: 0; color: #475569; font-size: 12px; line-height: 1.5;">অবিলম্বে নিচে থেকে কাজটি <b>সম্পন্ন</b> করুন অথবা <b>বাতিল</b> করুন!</p>
                 </div>
             </div>
             `;
@@ -1058,10 +1072,33 @@ function renderTasksTab(tasksJsonStr) {
     for (const [dateStr, dateTasks] of Object.entries(groupedTasks)) {
         const headerLabel = formatBengaliDate(dateStr);
 
+        let offsetHtml = '';
+        let firstTaskWithOffset = dateTasks.find(t => t.day_offset !== undefined && t.day_offset !== null && t.day_offset !== '');
+        if (firstTaskWithOffset) {
+            let offsetDays = parseInt(firstTaskWithOffset.day_offset);
+            if (!isNaN(offsetDays)) {
+                if (offsetDays === 0) {
+                    offsetHtml = `<span style="font-size: 11px; font-weight: 600; color: #059669; background: #ECFDF5; padding: 4px 8px; border-radius: 12px;">রোপণ দিবস</span>`;
+                } else if (offsetDays > 0) {
+                    offsetHtml = `<span style="font-size: 11px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 12px;">রোপণের ${toBngDigits(offsetDays)} তম দিন</span>`;
+                } else {
+                    offsetHtml = `<span style="font-size: 11px; font-weight: 600; color: #D97706; background: #FFFBEB; padding: 4px 8px; border-radius: 12px;">রোপণের ${toBngDigits(Math.abs(offsetDays))} দিন পূর্বে</span>`;
+                }
+            }
+        }
+
         let groupHtml = `
-            <div class="date-group" style="margin-bottom: 24px;">
-                <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; padding: 0 12px;">${headerLabel}</h3>
-                <div class="tasks-section" style="padding: 0 12px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="date-group" style="margin-bottom: 24px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 12px; position: relative; z-index: 2;">
+                    <h3 style="font-size: 14px; font-weight: 700; color: #334155; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px #ECFDF5;"></span>
+                        ${headerLabel}
+                    </h3>
+                    ${offsetHtml}
+                </div>
+                <!-- Vertical Timeline Line -->
+                <div style="position: absolute; left: 15px; top: 20px; bottom: -20px; width: 2px; background: #E2E8F0; z-index: 0;"></div>
+                <div class="tasks-section" style="padding: 0 12px 0 28px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1;">
         `;
 
         dateTasks.forEach(task => {
@@ -1338,8 +1375,10 @@ window.renderFinanceTab = async function () {
                 const sign = isInc ? '+' : '-';
                 const dateStr = t.transaction_date ? new Date(t.transaction_date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' }) : 'অজানা';
 
+                // Serialize transaction object for edit modal
+                const tJson = encodeURIComponent(JSON.stringify(t));
                 return `
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-color);">
+                    <div onclick="window.openEditTransactionModal(this.dataset.tx)" data-tx="${tJson}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 40px; height: 40px; border-radius: 20px; background: ${iconBg}; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
                                 ${isInc ?
@@ -1384,14 +1423,132 @@ window.renderFinanceTab = async function () {
     }
 };
 
+window.currentEditTxId = null;
+
+window.openCalendarForTransaction = function(targetId) {
+    window.calendarTargetId = targetId;
+    window.currentRescheduleTaskId = null; // Clear task reschedule context
+    
+    const targetEl = document.getElementById(targetId);
+    
+    // Create robust local date string YYYY-MM-DD
+    const d = new Date();
+    const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    let initialDate = localDateStr;
+    
+    if (targetEl && targetEl.dataset.date && targetEl.dataset.date.trim() !== '') {
+        initialDate = targetEl.dataset.date.trim();
+    }
+    
+    const hiddenInput = document.getElementById('selectedPlantingDate');
+    if (hiddenInput) {
+        hiddenInput.value = initialDate;
+    }
+    
+    window.renderDatePickerGrid('selectedPlantingDate', initialDate);
+
+    const overlay = document.getElementById('datePickerOverlay');
+    const content = document.getElementById('datePickerContent');
+    if (overlay && content) {
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            content.style.bottom = '0';
+        }, 10);
+    }
+};
+
+window.openNewTransactionModal = function() {
+    window.currentEditTxId = null;
+    const modal = document.getElementById('addTransactionModal');
+    modal.querySelector('h4').textContent = 'নতুন হিসাব যোগ করুন';
+    
+    document.getElementById('transactionAmountInput').value = '';
+    document.getElementById('transactionDescInput').value = '';
+    document.getElementById('transactionQuantityInput').value = '';
+    document.getElementById('transactionDateTrigger').textContent = '(আজ)';
+    document.getElementById('transactionDateTrigger').dataset.date = '';
+    
+    document.getElementById('deleteTransactionBtn').style.display = 'none';
+    document.getElementById('saveTransaction').textContent = 'যোগ করুন';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.openEditTransactionModal = function(txJsonStr) {
+    try {
+        const tx = JSON.parse(decodeURIComponent(txJsonStr));
+        window.currentEditTxId = tx.id;
+        
+        const modal = document.getElementById('addTransactionModal');
+        modal.querySelector('h4').textContent = 'হিসাব পরিবর্তন করুন';
+        
+        // Select Income or Expense
+        const isInc = tx.type === 'income';
+        modal.querySelector('input[name="tr_type"][value="income"]').checked = isInc;
+        modal.querySelector('input[name="tr_type"][value="expense"]').checked = !isInc;
+        
+        document.getElementById('transactionAmountInput').value = tx.amount_bdt || '';
+        
+        let desc = tx.description || tx.category || '';
+        let qty = '';
+        const match = desc.match(/^(.*?)\s*-\s*([^-\s].*?)$/);
+        if (match) {
+            desc = match[1].trim();
+            qty = match[2].trim();
+        }
+        document.getElementById('transactionDescInput').value = desc;
+        document.getElementById('transactionQuantityInput').value = qty;
+        
+        // Date
+        const dateTrigger = document.getElementById('transactionDateTrigger');
+        if (tx.transaction_date) {
+            const d = new Date(tx.transaction_date);
+            const dateStr = d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' });
+            dateTrigger.textContent = dateStr;
+            dateTrigger.dataset.date = tx.transaction_date.split('T')[0];
+        } else {
+            dateTrigger.textContent = '(আজ)';
+            dateTrigger.dataset.date = '';
+        }
+        
+        document.getElementById('deleteTransactionBtn').style.display = 'block';
+        document.getElementById('saveTransaction').textContent = 'সেভ করুন';
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } catch(e) {
+        console.error("Failed to parse transaction data", e);
+    }
+};
+
 window.saveManualTransaction = async function () {
     const modal = document.getElementById('addTransactionModal');
     const type = modal.querySelector('input[name="tr_type"][value="income"]').checked ? 'income' : 'expense';
-    const amountVal = parseFloat(modal.querySelector('input[type="number"]').value) || 0;
-    const descVal = modal.querySelector('input[type="text"]').value.trim();
+    const amountVal = parseFloat(document.getElementById('transactionAmountInput').value) || 0;
+    let descVal = document.getElementById('transactionDescInput').value.trim();
+    const qtyVal = document.getElementById('transactionQuantityInput').value.trim();
+    
+    if (qtyVal) {
+        descVal = descVal ? `${descVal} - ${qtyVal}` : qtyVal;
+    }
+    
+    // Check custom date
+    const dateTrigger = document.getElementById('transactionDateTrigger');
+    // Important: Calendar Modal logic typically writes back directly to textContent. 
+    // We try to pull date string. If we can't get a proper date, we leave it blank.
+    let dateVal = dateTrigger.dataset.date || '';
+    const textContentDate = dateTrigger.textContent.trim();
+    if (textContentDate !== '(আজ)' && !dateVal && textContentDate.includes('২০২')) { // basic sanity check
+        // timeline rescheduler sets format like: `২৫ মার্চ ২০২৬`
+        // Normally we'd parse it, but for simplicity if calendarModal doesn't set dataset.date, we might just default to today.
+        // Actually, we should make sure calendar sets the standard ISO string if possible.
+        // For now, if no dataset date, leave empty to use CURRENT_TIMESTAMP in backend.
+    }
 
     if (amountVal <= 0) {
-        alert("দয়া করে সঠিক টাকার পরিমাণ লিখুন।");
+        await SmartDialog.alert("দয়া করে সঠিক টাকার পরিমাণ লিখুন।", "ত্রুটি", "warning");
         return;
     }
 
@@ -1406,9 +1563,19 @@ window.saveManualTransaction = async function () {
             amount_bdt: amountVal,
             description: descVal || (type === 'income' ? 'আয়' : 'ব্যয়')
         };
+        
+        if (dateVal) {
+            payload.transaction_date = dateVal;
+        }
 
-        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/transactions`, {
-            method: 'POST',
+        const isEdit = !!window.currentEditTxId;
+        const endpoint = isEdit ? 
+            `${API_URL}/api/crops/${activeCrop.id}/transactions/${window.currentEditTxId}` : 
+            `${API_URL}/api/crops/${activeCrop.id}/transactions`;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(endpoint, {
+            method: method,
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -1417,18 +1584,65 @@ window.saveManualTransaction = async function () {
             modal.classList.remove('active');
             document.body.style.overflow = '';
 
-            // clear inputs
+            document.getElementById('transactionAmountInput').value = '';
+            document.getElementById('transactionDescInput').value = '';
+            document.getElementById('transactionQuantityInput').value = '';
+            dateTrigger.dataset.date = '';
+            dateTrigger.textContent = '(আজ)';
+
+            // clear generic inputs just in case
             modal.querySelector('input[type="number"]').value = '';
-            modal.querySelector('input[type="text"]').value = '';
+            modal.querySelectorAll('input[type="text"]').forEach(el => el.value = '');
 
             // Refresh dashboard
             renderFinanceTab();
         } else {
-            alert('Error: ' + data.error);
+            await SmartDialog.alert('Error: ' + data.error, "ত্রুটি", "danger");
         }
     } catch (e) {
         console.error(e);
-        alert("সার্ভার এরর।");
+        await SmartDialog.alert("সার্ভার এরর।", "ত্রুটি", "danger");
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+};
+
+window.deleteManualTransaction = async function() {
+    if (!window.currentEditTxId) return;
+    
+    // Setup SmartDialog Confirm
+    const confirmed = await SmartDialog.confirm(
+        "আপনি কি নিশ্চিত যে এই হিসাবটি মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।",
+        "হিসাব ডিলিট",
+        "হ্যাঁ, ডিলিট করুন",
+        "না, থাক",
+        "danger"
+    );
+    
+    if (!confirmed) return;
+
+    const btn = document.getElementById('deleteTransactionBtn');
+    if (btn) btn.disabled = true;
+
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const res = await fetch(`${API_URL}/api/crops/${activeCrop.id}/transactions/${window.currentEditTxId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            const modal = document.getElementById('addTransactionModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            renderFinanceTab();
+        } else {
+            await SmartDialog.alert('Error: ' + data.error, "ত্রুটি", "danger");
+        }
+    } catch(e) {
+        console.error(e);
+        await SmartDialog.alert("সার্ভার এরর।", "ত্রুটি", "danger");
     } finally {
         if (btn) btn.disabled = false;
     }
@@ -2043,7 +2257,7 @@ window.confirmDateSelection = function () {
             }
         } catch (e) { console.error(e); }
     } else if (window.calendarTargetId) {
-        // Fallback for custom loss inputs if needed
+        // Fallback for custom loss inputs or transaction date pickers
         const targetEl = document.getElementById(window.calendarTargetId);
         if (targetEl) {
             const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
@@ -2051,6 +2265,7 @@ window.confirmDateSelection = function () {
             const dObj = new Date(newDate);
             targetEl.textContent = `${toBngDigits(dObj.getDate())} ${EN_TO_BN_MONTHS[dObj.getMonth()]} ${toBngDigits(dObj.getFullYear())}`;
             targetEl.dataset.value = newDate;
+            targetEl.dataset.date = newDate; // Used by standard transaction APIs
         }
     }
     window.closeDatePicker();
@@ -2177,7 +2392,8 @@ window.renderDatePickerGrid = function (inputId, initialDateStr = null, resetVie
         const cellDateStr = `${currentYear}-${monthStr}-${dayStr}`;
 
         if (thisCellDate < realTodayCopy) {
-            dayEl.classList.add('past');
+            // Past dates are natively active now
+            // dayEl.classList.add('past');
         }
 
         // Allow clicking on any date, past or future
@@ -2188,7 +2404,7 @@ window.renderDatePickerGrid = function (inputId, initialDateStr = null, resetVie
             if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
         });
 
-        if (selectedDateStr === cellDateStr) {
+        if (selectedDateStr && typeof selectedDateStr === 'string' && selectedDateStr.trim() === cellDateStr) {
             dayEl.classList.add('selected');
             const hiddenDateInput = document.getElementById('selectedPlantingDate');
             if (hiddenDateInput) hiddenDateInput.value = cellDateStr;
@@ -2204,11 +2420,11 @@ window.changeCalendarMonth = function (offset) {
     window.renderDatePickerGrid(window.currentCalendarInputId, null, false);
 };
 
-window.saveNewCustomTask = function () {
+window.saveNewCustomTask = async function () {
     const title = document.getElementById('customTaskTitle').value.trim();
     const desc = document.getElementById('customTaskDesc').value.trim();
     if (!title) {
-        alert('দয়া করে কাজের নামটি লিখুন।');
+        await SmartDialog.alert('দয়া করে কাজের নামটি লিখুন।', 'ত্রুটি', 'warning');
         return;
     }
     const dateSpan = document.getElementById('customStepDate');
@@ -2241,14 +2457,14 @@ window.saveNewCustomTask = function () {
     }
 };
 
-window.saveNewResourceFromModal = function () {
+window.saveNewResourceFromModal = async function () {
     const cat = document.getElementById('newResourceCategory').value;
     const name = document.getElementById('newResourceName').value.trim();
     const amount = document.getElementById('newResourceAmount').value.trim();
     const cost = parseFloat(document.getElementById('newResourceCost').value) || 0;
 
     if (!name) {
-        alert("দয়া করে রিসোর্সের নাম লিখুন।");
+        await SmartDialog.alert("দয়া করে রিসোর্সের নাম লিখুন।", "ত্রুটি", "warning");
         return;
     }
 
@@ -2276,7 +2492,7 @@ window.saveNewResourceFromModal = function () {
 
     } catch (e) {
         console.error(e);
-        alert('রিসোর্স সেভ করতে সমস্যা হয়েছে।');
+        await SmartDialog.alert('রিসোর্স সেভ করতে সমস্যা হয়েছে।', 'ত্রুটি', 'danger');
     }
 };
 
@@ -2450,7 +2666,7 @@ window.sendChatMessage = async function () {
                 if (window.showPaywallModal) {
                     window.toggleChatbot(); // Close chat interface
                     setTimeout(() => window.showPaywallModal('এআই চ্যাট অ্যাসিস্ট্যান্ট'), 350);
-                } else alert(data.error);
+                } else await SmartDialog.alert(data.error, 'সাবস্ক্রিপশন প্রয়োজন', 'warning');
             } else {
                 msgsContainer.innerHTML += `<div style="margin-bottom: 12px; text-align: left;">
                     <div style="background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 4px; display: inline-block; max-width: 85%; font-size: 14px; line-height: 1.5;">
@@ -2574,7 +2790,7 @@ window.savePlantingDate = function () {
             tasks.forEach(task => {
                 if (!task.is_completed && task.day_offset !== undefined) {
                     let newDueDate = new Date(pDate);
-                    newDueDate.setDate(newDueDate.getDate() + task.day_offset);
+                    newDueDate.setDate(newDueDate.getDate() + parseInt(task.day_offset));
 
                     // Identify past tasks
                     if (newDueDate < today) {
@@ -2721,11 +2937,13 @@ window.saveLossEvent = async function () {
     const reasonInput = document.getElementById('lossReasonInput').value;
 
     if (!amountInput || !reasonInput) {
-        return alert("ক্ষয়ক্ষতির পরিমাণ এবং কারণ অবশ্যই দিতে হবে!");
+        await SmartDialog.alert("ক্ষয়ক্ষতির পরিমাণ এবং কারণ অবশ্যই দিতে হবে!", "ত্রুটি", "warning");
+        return;
     }
     const amountInt = parseInt(amountInput);
     if (isNaN(amountInt) || amountInt <= 0) {
-        return alert("সঠিক পরিমাণ দিন!");
+        await SmartDialog.alert("সঠিক পরিমাণ দিন!", "ত্রুটি", "warning");
+        return;
     }
 
     let currentLosses = [];
@@ -2831,7 +3049,7 @@ window.submitHarvestEntry = async function () {
         if (note) note = `অংশ: ${note}`;
 
         if (yieldKg <= 0 && isFinal === false) {
-            alert('দয়াকরে একটি সঠিক পরিমাণ দিন।');
+            await SmartDialog.alert('দয়াকরে একটি সঠিক পরিমাণ দিন।', "ত্রুটি", "warning");
             return;
         }
     } else {
@@ -2868,14 +3086,14 @@ window.submitHarvestEntry = async function () {
         });
 
         if (!res.ok) throw new Error('API Error');
-        alert(willComplete ? 'ফসল বন্ধ করে হিস্ট্রিতে সেভ করা হয়েছে!' : 'কর্তন আপডেট হয়েছে।');
+        await SmartDialog.alert(willComplete ? 'ফসল বন্ধ করে হিস্ট্রিতে সেভ করা হয়েছে!' : 'কর্তন আপডেট হয়েছে।', 'সফল', 'success');
 
         document.getElementById('harvestModal').classList.remove('active');
         document.body.style.overflow = '';
 
         await fetchFarmAndCropDetails();
     } catch (e) {
-        alert("Failed: " + e.message);
+        await SmartDialog.alert("Failed: " + e.message, "ত্রুটি", "danger");
     }
 
     btn.disabled = false;
@@ -2922,14 +3140,14 @@ window.submitDeleteCrop = async function () {
         });
         if (!res.ok) throw new Error('Failed to delete');
 
-        alert('ফসল সম্পূর্ণরূপে মুছে ফেলা হয়েছে।');
+        await SmartDialog.alert('ফসল সম্পূর্ণরূপে মুছে ফেলা হয়েছে।', 'সফল', 'info');
         localStorage.removeItem('agritech_active_crop_name');
 
         document.getElementById('deleteCropModal').classList.remove('active');
         document.body.style.overflow = '';
         window.location.href = 'khamar.html';
     } catch (e) {
-        alert("Error: " + e.message);
+        await SmartDialog.alert("Error: " + e.message, "ত্রুটি", "danger");
         btn.innerText = oldText;
         btn.disabled = false;
     }
@@ -3032,5 +3250,38 @@ window.generate3DMapGrid = async function () {
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
+    }
+}
+
+async function fetchLivePlantCountForHarvest(cropId, token, currentCountFallback) {
+    const plantCountEl = document.getElementById('harvestPlantCount');
+    const plantCountDisplaySpan = document.getElementById('currentPlantSpan');
+    
+    try {
+        const res = await fetch(`${API_URL}/api/crops/${cropId}/plants`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.beds && data.beds.length > 0) {
+            let total = 0;
+            data.beds.forEach(bed => {
+                try {
+                    const nodes = JSON.parse(bed.plants_nodes_json || '[]');
+                    total += nodes.length;
+                } catch(e) {}
+            });
+            
+            if(plantCountEl) plantCountEl.textContent = `${total.toLocaleString('bn-BD')} টি`;
+            if(plantCountDisplaySpan) plantCountDisplaySpan.textContent = `${total}`;
+        } else {
+             // fallback to currentCount
+             if(plantCountEl) plantCountEl.textContent = `${currentCountFallback.toLocaleString('bn-BD')} টি`;
+             if(plantCountDisplaySpan) plantCountDisplaySpan.textContent = `${currentCountFallback}`;
+        }
+    } catch (e) {
+        console.error("Failed to fetch live plant count", e);
+        if(plantCountEl) plantCountEl.textContent = `${currentCountFallback.toLocaleString('bn-BD')} টি`;
+        if(plantCountDisplaySpan) plantCountDisplaySpan.textContent = `${currentCountFallback}`;
     }
 };

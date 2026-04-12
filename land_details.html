@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/land_details.css">
 
     <!-- Web Components & Modules -->
+    <script src="components/modal/SmartDialog.js"></script>
     <script type="module" src="js/components.js" defer></script>
     <script type="module" src="js/land_details.js" defer></script>
     <script src="js/timeline.js" defer></script>
@@ -254,15 +255,15 @@
                         </button>
                     </div>
                     
-                    <div id="task-filter-chips" class="filter-chips-container" style="display: flex; gap: 6px; margin-top: 12px; margin-bottom: 4px; overflow-x: auto; padding: 0 12px 8px 12px; scrollbar-width: none; -ms-overflow-style: none;">
+                    <div id="task-filter-chips" class="filter-chips-container" style="display: flex; gap: 4px; margin: 12px 12px 4px 12px; overflow-x: auto; padding: 4px; background: #F1F5F9; border-radius: 12px; scrollbar-width: none; -ms-overflow-style: none;">
                         <style>
                             .filter-chips-container::-webkit-scrollbar { display: none; }
-                            .filter-chip { flex: 1; padding: 6px 4px; border: 1px solid var(--border-color); background: white; color: var(--text-muted); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; }
-                            .filter-chip.active { border-color: var(--primary); background: var(--primary); color: white; }
+                            .filter-chip { flex: 1; padding: 8px 6px; border: none; background: transparent; color: #475569; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; }
+                            .filter-chip.active { background: #FFFFFF; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
                             .cnt-badge { display: inline-flex; align-items: center; justify-content: center; background: #E2E8F0; color: #475569; border-radius: 10px; padding: 0 4px; font-size: 10px; margin-left: 4px; font-weight: 700; min-width: 16px; height: 16px; transition: all 0.2s; }
-                            .filter-chip.active .cnt-badge { background: white; color: var(--primary); }
+                            .filter-chip.active .cnt-badge { background: #ECFDF5; color: var(--primary); }
                             .cnt-badge.danger { background: #FEF2F2; color: #DC2626; animation: pulseBadge 2s infinite; }
-                            .filter-chip.active .cnt-badge.danger { background: white; color: #DC2626; }
+                            .filter-chip.active .cnt-badge.danger { background: #FEF2F2; color: #DC2626; }
                             @keyframes pulseBadge { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
                         </style>
                         <button class="filter-chip active" data-filter="pending" onclick="window.setTaskFilter('pending')">পেন্ডিং <span class="cnt-badge" style="display: none;">0</span></button>
@@ -298,7 +299,7 @@
                         </button>
                     </div>
 
-                    <div id="resource-filter-chips" class="filter-chips-container" style="display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
+                    <div id="resource-filter-chips" class="filter-chips-container" style="display: flex; gap: 4px; margin-bottom: 12px; overflow-x: auto; padding: 4px; background: #F1F5F9; border-radius: 12px; scrollbar-width: none; -ms-overflow-style: none;">
                         <button class="filter-chip active" data-filter="pending" onclick="window.setResourceFilter('pending')">কেনার বাকি</button>
                         <button class="filter-chip" data-filter="bought" onclick="window.setResourceFilter('bought')">কেনা হয়েছে</button>
                         <button class="filter-chip" data-filter="all" onclick="window.setResourceFilter('all')">সব</button>
@@ -320,7 +321,7 @@
                             style="border: 1px solid var(--primary); background: #ECFDF5; cursor: pointer; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; font-size: 13px; font-weight: 600; font-family: 'Noto Sans Bengali', sans-serif; border-radius: 8px; transition: all 0.2s;"
                             onmouseover="this.style.background='var(--primary)'; this.style.color='white'"
                             onmouseout="this.style.background='#ECFDF5'; this.style.color='var(--primary)'"
-                            onclick="document.getElementById('addTransactionModal').classList.add('active'); document.body.style.overflow='hidden';">
+                            onclick="window.openNewTransactionModal()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -330,7 +331,7 @@
                         </button>
                     </div>
 
-                    <div id="finance-filter-chips" class="filter-chips-container" style="display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
+                    <div id="finance-filter-chips" class="filter-chips-container" style="display: flex; gap: 4px; margin-bottom: 12px; overflow-x: auto; padding: 4px; background: #F1F5F9; border-radius: 12px; scrollbar-width: none; -ms-overflow-style: none;">
                         <button class="filter-chip" data-filter="income" onclick="window.setFinanceFilter('income')">আয়</button>
                         <button class="filter-chip" data-filter="expense" onclick="window.setFinanceFilter('expense')">ব্যয়</button>
                         <button class="filter-chip active" data-filter="all" onclick="window.setFinanceFilter('all')">সব</button>
@@ -374,21 +375,37 @@
                     </div>
                     <div class="input-group" style="margin-bottom: 16px;">
                         <label
-                            style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">পরিমাণ
-                            (৳)</label>
-                        <input type="number" placeholder="0"
+                            style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">কী কেনা বা বিক্রি হলো?</label>
+                        <input type="text" id="transactionDescInput" placeholder="যেমন: ইউরিয়া সার"
                             style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div class="input-group">
+                            <label
+                                style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">পরিমাণ</label>
+                            <input type="text" id="transactionQuantityInput" placeholder="যেমন: ৫ কেজি"
+                                style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
+                        </div>
+                        <div class="input-group">
+                            <label
+                                style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">মোট খরচ/আয় (৳)</label>
+                            <input type="number" id="transactionAmountInput" placeholder="0"
+                                style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
+                        </div>
                     </div>
                     <div class="input-group" style="margin-bottom: 24px;">
                         <label
-                            style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">বিবরণ</label>
-                        <input type="text" placeholder="যেমন: সার ক্রয়"
-                            style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
+                            style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">তারিখ</label>
+                        <div id="transactionDateTrigger" 
+                            style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; background: #fff; cursor: pointer; color: var(--text-main);"
+                            onclick="window.openCalendarForTransaction('transactionDateTrigger')">
+                            (আজ)
+                        </div>
                     </div>
                 </div>
-                <div class="calendar-footer">
-                    <button class="btn-primary w-100" id="saveTransaction" onclick="saveManualTransaction()">যোগ
-                        করুন</button>
+                <div class="calendar-footer" style="display: flex; gap: 12px;">
+                    <button class="btn-danger" id="deleteTransactionBtn" style="display: none; padding: 14px; border-radius: 12px; font-weight: 600; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; flex: 1; cursor: pointer;" onclick="window.deleteManualTransaction()">মুছে ফেলুন</button>
+                    <button class="btn-primary" id="saveTransaction" style="flex: 2; padding: 14px; border-radius: 12px;" onclick="window.saveManualTransaction()">যোগ করুন</button>
                 </div>
             </div>
         </div>
@@ -1198,7 +1215,29 @@
             </div>
         </div>
 
-        <!-- 3D Map Wizard Modal -->
+        <!-- Calendar Bottom Sheet Modal (For Dates) -->
+    <div class="calendar-modal" id="calendarModal" style="z-index: 10000;">
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <h4>তারিখ নির্বাচন করুন</h4>
+                <button class="close-modal" aria-label="Close modal" onclick="this.closest('.calendar-modal').classList.remove('active');">&times;</button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-month">মার্চ ২০২৬</div>
+                <div class="calendar-weekdays">
+                    <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+            <div class="calendar-footer">
+                <button class="btn-primary w-100" id="confirmReschedule">নির্ধারণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Map Wizard Modal -->
         <div id="mapWizardModal" class="calendar-modal">
             <div class="calendar-content" style="max-height: 85vh; overflow-y: auto; max-width: 450px; padding: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

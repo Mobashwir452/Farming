@@ -17,7 +17,7 @@ import { getPackages, updatePackage, addPackage, deletePackage, getActiveSubscri
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
 import { handleCropChat } from './routes/ai_chat.js';
-import { getTransactions, addTransaction, deleteTransaction } from './routes/transactions.js';
+import { getTransactions, addTransaction, updateTransaction, deleteTransaction } from './routes/transactions.js';
 import { getPlantGrid, generatePlantGrid, updateBedConfig, getPlantLogs, addPlantLog, uploadPlantImage, syncCropBeds } from './routes/plants.js';
 import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
@@ -157,6 +157,7 @@ router.post('/api/crops/:id/notes', withAuth(['farmer']), addCropNote);
 router.get('/api/crops/:id/report', withAuth(['farmer']), generateCropReport);
 router.get('/api/crops/:id/transactions', withAuth(['farmer']), getTransactions);
 router.post('/api/crops/:id/transactions', withAuth(['farmer']), addTransaction);
+router.put('/api/crops/:id/transactions/:txId', withAuth(['farmer']), updateTransaction);
 router.delete('/api/crops/:id/transactions/:txId', withAuth(['farmer']), deleteTransaction);
 
 // 3.8 Plant Tracking 3D Grids & Logs
