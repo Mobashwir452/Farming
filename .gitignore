@@ -34,3 +34,7 @@ Thumbs.db
 # Temporary / Script files
 tmp_inject.js
 tmp/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
