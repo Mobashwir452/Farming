@@ -67,7 +67,6 @@ body {
 .tracker-tabs-container {
     padding: 0;
     /* Full width */
-    margin-top: 15px;
 
 }
 
@@ -249,6 +248,14 @@ body {
     color: var(--critical-color);
 }
 
+.plant-chip.dead .avatar-ring {
+    border-color: #94a3b8;
+    background-color: #cbd5e1;
+    color: #475569;
+    filter: grayscale(100%);
+    opacity: 0.8;
+}
+
 /* Empty State / Photo Needed */
 .avatar-ring.empty-state {
     border-style: dashed;
@@ -289,6 +296,42 @@ body {
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+}
+
+.plant-chip.dead .avatar-ring::after {
+    content: '✖';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #64748b;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.replant-badge {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background: #d1fae5;
+    color: #059669;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    z-index: 2;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 /* Batch Mode Styles */
@@ -694,6 +737,12 @@ body {
     border-color: rgba(239, 68, 68, 0.3);
 }
 
+.dead-btn {
+    background: white;
+    color: #64748b;
+    border-color: rgba(100, 116, 139, 0.3);
+}
+
 .status-btn.active {
     outline: 2px solid;
     background: #f8fafc;
@@ -712,6 +761,11 @@ body {
 .critical-btn.active {
     outline-color: var(--critical-color);
     background: var(--critical-bg);
+}
+
+.dead-btn.active {
+    outline-color: #64748b;
+    background: #f1f5f9;
 }
 
 /* Avatar Styles */

@@ -1,58 +1,79 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plant Tracker - AgriTech</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/plant_tracker.css">
+    <link rel="stylesheet" href="css/add_crop.css">
     <script type="module">
         import { registerComponents } from './js/components.js';
         registerComponents();
     </script>
 </head>
+
 <body>
 
     <!-- Top Navigation Header & Tabs Sticky Wrapper -->
     <div class="sticky-top-group">
-        <div class="page-top-header">
-        <!-- Left: Back & Title -->
-        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
-            <button class="back-btn" onclick="window.history.back()" aria-label="Go Back" style="flex-shrink: 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            </button>
-            <div style="min-width: 0;">
-                <h2 id="headerCropName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; font-size: 16px; margin: 0; font-weight: 700; color: var(--text-dark);">লোড হচ্ছে...</h2>
-                <span id="headerFarmName" style="display: block; font-size: 11px; font-weight: 500; color: #64748B; margin-top: 2px;">লোড হচ্ছে...</span>
+        <div class="page-top-header"
+            style="justify-content: space-between; align-items: center; padding: 12px 16px; flex-wrap: nowrap; gap: 8px;">
+            <!-- Left: Back & Title -->
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                <button class="back-btn" onclick="window.history.back()" aria-label="Go Back" style="flex-shrink: 0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <div style="min-width: 0;">
+                    <h2 id="headerCropName"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; font-size: 16px; margin: 0; font-weight: 700; color: var(--text-dark);">
+                        লোড হচ্ছে...</h2>
+                    <span id="headerFarmName"
+                        style="display: block; font-size: 11px; font-weight: 500; color: #64748B; margin-top: 2px;">লোড
+                        হচ্ছে...</span>
+                </div>
+            </div>
+
+            <!-- Right: Settings Icon -->
+            <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                <button id="gridSettingsBtn" onclick="openGridSetupModal()" class="top-settings-btn"
+                    aria-label="Grid Settings"
+                    style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F8FAFC; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: background 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    <span>সেটিংস</span>
+                </button>
             </div>
         </div>
-        
-        <!-- Right: Settings Icon -->
-        <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-            <button id="gridSettingsBtn" onclick="openGridSetupModal()" class="top-settings-btn" aria-label="Grid Settings" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: transparent; color: #475569; border: none; border-radius: 50%; cursor: pointer; transition: background 0.2s;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
 
         <!-- Tab Filters -->
         <div class="tracker-tabs-container">
             <div class="ld-tabs" style="margin-bottom: 0;">
-                <button class="ld-tab active" data-filter="all">সব গাছ (<span id="countAll">0</span>)</button>
+                <button class="ld-tab active" data-filter="all">সব (<span id="countAll">0</span>)</button>
                 <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
-                <button class="ld-tab" style="color:#eab308;" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
-                <button class="ld-tab" style="color:#ef4444;" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
+                <button class="ld-tab" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
+                <button class="ld-tab" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
+                <button class="ld-tab" data-filter="D">মৃত (<span id="countDead">0</span>)</button>
             </div>
         </div>
     </div> <!-- Close sticky-top-group -->
@@ -63,16 +84,23 @@
             <span class="modal-close" onclick="closeGridSetupModal()">&times;</span>
             <h2 style="margin-top:0; font-size: 20px; font-weight: 700; color: #1E293B;">ম্যাপ লেআউট এডিটর</h2>
             <p class="text-dim" style="font-size:14px; margin-bottom: 20px;">বেড এবং গাছের সংখ্যা কাস্টমাইজ করুন।</p>
-            
-            <div id="gridSetupBedList" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+
+            <div id="gridSetupBedList"
+                style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
                 <!-- JS will generate bed editors here -->
             </div>
-            
-            <button class="action-btn-sm success w-full" style="margin-top:10px; padding:12px; border-radius:12px; font-weight: 600;" onclick="addNewBedToGrid()">+ নতুন বেড যুক্ত করুন</button>
-            
+
+            <button class="action-btn-sm success w-full"
+                style="margin-top:10px; padding:12px; border-radius:12px; font-weight: 600;"
+                onclick="addNewBedToGrid()">+ নতুন বেড যুক্ত করুন</button>
+
             <div style="display:flex; gap:12px; margin-top:24px;">
-                <button class="sheet-close-btn" style="flex:1; background:#F1F5F9; color:#475569; border:none; margin:0; border-radius: 12px; font-weight:600;" onclick="closeGridSetupModal()">বাতিল করুন</button>
-                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; border-radius: 12px; font-weight:600;" onclick="window.saveGridSetupChanges()">সেভ করুন</button>
+                <button class="sheet-close-btn"
+                    style="flex:1; background:#F1F5F9; color:#475569; border:none; margin:0; border-radius: 12px; font-weight:600;"
+                    onclick="closeGridSetupModal()">বাতিল করুন</button>
+                <button class="sheet-close-btn"
+                    style="flex:1; background:var(--primary); color:white; border:none; margin:0; border-radius: 12px; font-weight:600;"
+                    onclick="window.saveGridSetupChanges()">সেভ করুন</button>
             </div>
         </div>
     </div>
@@ -90,15 +118,22 @@
 
     <div id="batchActionBar" class="batch-action-bar">
         <div class="selected-count" style="display: flex; align-items: center; gap: 6px;">
-            <button onclick="toggleBatchMode()" style="background:transparent; border:none; color:#64748b; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:16px; cursor:pointer; background: #e2e8f0; padding:0;">&times;</button>
+            <button onclick="toggleBatchMode()"
+                style="background:transparent; border:none; color:#64748b; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:16px; cursor:pointer; background: #e2e8f0; padding:0;">&times;</button>
             <span id="selectedCountValue">0 টি</span>
         </div>
         <div class="batch-actions" style="gap: 5px; flex-wrap: nowrap;">
-            <button id="btnSelectAllFarm" class="action-btn-sm" style="padding: 6px 8px; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 6px;" onclick="toggleSelectAllFarm()">☑ সব</button>
-            <button class="action-btn-sm success" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('H')">সুস্থ</button>
-            <button class="action-btn-sm warning" style="padding: 6px 10px; background: #eab308; color: white;" onclick="markSelectedAreaStatus('S')">অসুস্থ</button>
-            <button class="action-btn-sm danger" style="padding: 6px 10px;" onclick="markSelectedAreaStatus('C')">বিপজ.</button>
-            <button class="action-btn-sm" style="background:var(--primary); padding: 6px 10px;" onclick="openBatchUpdateModal()">আপডেট</button>
+            <button id="btnSelectAllFarm" class="action-btn-sm"
+                style="padding: 6px 8px; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 6px;"
+                onclick="toggleSelectAllFarm()">☑ সব</button>
+            <button class="action-btn-sm success" style="padding: 6px 10px;"
+                onclick="markSelectedAreaStatus('H')">সুস্থ</button>
+            <button class="action-btn-sm warning" style="padding: 6px 10px; background: #eab308; color: white;"
+                onclick="markSelectedAreaStatus('S')">অসুস্থ</button>
+            <button class="action-btn-sm danger" style="padding: 6px 10px;"
+                onclick="markSelectedAreaStatus('C')">বিপজ.</button>
+            <button class="action-btn-sm" style="background:var(--primary); padding: 6px 10px;"
+                onclick="openBatchUpdateModal()">আপডেট</button>
         </div>
     </div>
 
@@ -107,8 +142,9 @@
         <div class="modal-content">
             <span class="modal-close" onclick="closeBatchUpdateModal()">&times;</span>
             <h2 style="margin-top:0;">ব্যাচ আপডেট</h2>
-            <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
-            
+            <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span
+                    id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
+
             <div class="input-group">
                 <label>জাতের নাম (Variety)</label>
                 <input type="text" id="batchVariety" placeholder="উদা: হাইব্রিড, দেশি ইত্যাদি">
@@ -126,18 +162,24 @@
             </div>
 
             <div class="care-checkboxes">
-                <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া হয়েছে</div>
-                <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ স্প্রে করা হয়েছে</div>
+                <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া
+                    হয়েছে</div>
+                <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ
+                    স্প্রে করা হয়েছে</div>
             </div>
 
             <div class="input-group">
                 <label>নোট / লক্ষণ</label>
-                <textarea id="batchNote" rows="2" placeholder="সাধারণ নোট লিখুন..." style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                <textarea id="batchNote" rows="2" placeholder="সাধারণ নোট লিখুন..."
+                    style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
             </div>
-            
+
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="sheet-close-btn" style="flex:1; border:1px solid #ccc; background:#f8fafc; margin:0;" onclick="closeBatchUpdateModal()">বাতিল</button>
-                <button class="sheet-close-btn" style="flex:1; background:var(--primary); color:white; border:none; margin:0; font-weight:bold;" onclick="saveBatchUpdateDetails()">আপডেট করুন</button>
+                <button class="sheet-close-btn" style="flex:1; border:1px solid #ccc; background:#f8fafc; margin:0;"
+                    onclick="closeBatchUpdateModal()">বাতিল</button>
+                <button class="sheet-close-btn"
+                    style="flex:1; background:var(--primary); color:white; border:none; margin:0; font-weight:bold;"
+                    onclick="saveBatchUpdateDetails()">আপডেট করুন</button>
             </div>
         </div>
     </div>
@@ -148,38 +190,78 @@
             <div class="sheet-header" style="margin-top: 15px;">
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <div class="plant-avatar-wrapper" style="position: relative; display: inline-block;">
-                        <img id="bsAvatarPreview" src="https://placehold.co/100x100?text=Plant" alt="Plant Avatar" onclick="openFullScreenImage(this.src)" style="cursor: zoom-in; display: block;">
-                        
+                        <img id="bsAvatarPreview" src="https://placehold.co/100x100?text=Plant" alt="Plant Avatar"
+                            onclick="openFullScreenImage(this.src)" style="cursor: zoom-in; display: block;">
+
                         <!-- Upload Camera Icon at bottom right -->
-                        <button onclick="document.getElementById('bsImageInput').click()" style="position: absolute; bottom: -2px; right: -2px; background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        <button onclick="document.getElementById('bsImageInput').click()"
+                            style="position: absolute; bottom: -2px; right: -2px; background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                </path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
                         </button>
-                        
-                        <button id="bsAvatarRemove" onclick="removePlantAvatar(event)" style="position: absolute; top: -5px; right: -5px; display:none;" title="ছবি মুছে দিন">&times;</button>
-                        <input type="file" id="bsImageInput" accept="image/*" style="display:none;" onchange="previewPlantAvatar(this)">
+
+                        <button id="bsAvatarRemove" onclick="removePlantAvatar(event)"
+                            style="position: absolute; top: -5px; right: -5px; display:none;"
+                            title="ছবি মুছে দিন">&times;</button>
+                        <input type="file" id="bsImageInput" accept="image/*" style="display:none;"
+                            onchange="previewPlantAvatar(this)">
                     </div>
                     <div>
                         <h2 id="bsPlantTitle" style="margin: 0; font-size: 20px;">গাছ: T1</h2>
                         <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
+                        <div id="bsReplantStatus" style="display:none; margin-top:6px; background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;"></div>
                     </div>
                 </div>
-                <div class="ai-score-ring" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;">
-                    <button onclick="closeBottomSheet()" style="border:none; background:transparent; font-size:24px; color:#64748b; cursor:pointer; line-height: 1;">&times;</button>
+                <div class="ai-score-ring"
+                    style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;">
+                    <button onclick="closeBottomSheet()"
+                        style="border:none; background:transparent; font-size:24px; color:#64748b; cursor:pointer; line-height: 1;">&times;</button>
                 </div>
             </div>
 
-            <div class="status-toggles" style="display:flex; gap:8px;">
-                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="setPlantProfileStatusUI('H')" style="flex:1;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <div class="status-toggles" style="display:flex; gap:6px; flex-wrap: wrap;">
+                <button id="btnSetHealthy" class="status-btn healthy-btn" onclick="setPlantProfileStatusUI('H')"
+                    style="flex:1; min-width: calc(25% - 6px); font-size: 13px; padding: 8px 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
                     সুস্থ
                 </button>
-                <button id="btnSetSick" class="status-btn sick-btn" onclick="setPlantProfileStatusUI('S')" style="flex:1;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <button id="btnSetSick" class="status-btn sick-btn" onclick="setPlantProfileStatusUI('S')"
+                    style="flex:1; min-width: calc(25% - 6px); font-size: 13px; padding: 8px 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
                     অসুস্থ
                 </button>
-                <button id="btnSetCritical" class="status-btn critical-btn" onclick="setPlantProfileStatusUI('C')" style="flex:1;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    বিপজ্জনক
+                <button id="btnSetCritical" class="status-btn critical-btn" onclick="setPlantProfileStatusUI('C')"
+                    style="flex:1; min-width: calc(25% - 6px); font-size: 13px; padding: 8px 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2">
+                        </polygon>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    বিপজ.
+                </button>
+                <button id="btnSetDead" class="status-btn dead-btn" onclick="setPlantProfileStatusUI('D')"
+                    style="flex:1; min-width: calc(25% - 6px); font-size: 13px; padding: 8px 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    মৃত
                 </button>
             </div>
 
@@ -192,38 +274,111 @@
             <!-- Agronomy Smart Update Form -->
             <div id="bsTabForm" class="smart-agronomy-form" style="min-height: 480px;">
 
-                <div class="input-group">
-                    <label>জাতের নাম (Variety)</label>
-                    <input type="text" id="bsVariety" placeholder="উদা: দেশি পেঁপে, রেড লেডি ইত্যাদি">
-                </div>                <div class="form-grid-2">
-                    <div class="input-group">
-                        <label>উচ্চতা (ইঞ্চি)</label>
-                        <input type="number" id="bsHeight" placeholder="উদা: ২৪">
+                <!-- Dead State view & Replant Form Container -->
+                <div id="deadStateContainer"
+                    style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; text-align: center;">
+                    <div
+                        style="width: 60px; height: 60px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; color: #64748B;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
                     </div>
-                    <div class="input-group">
-                        <label>পাতার সংখ্যা</label>
-                        <input type="number" id="bsLeaves" placeholder="উদা: ১৫">
+                    <h3 style="margin: 0 0 8px 0; color: #1E293B;">গাছটি মৃত / নষ্ট</h3>
+                    
+                    <!-- Section 1: Marking as Dead (visible if transitioning to dead) -->
+                    <div id="markDeadSection" style="width: 100%; text-align: left; margin-bottom: 5px;">
+                        <div class="input-group">
+                            <label>মৃত্যুর কারণ (ঐচ্ছিক)</label>
+                            <input type="text" id="deadReason" placeholder="কী কারণে গাছটি মারা গেল?"
+                                style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; margin-bottom: 15px;">
+                        </div>
+                        <button class="btn-primary w-full" style="background: #64748B;" onclick="window.saveDeadStatus(this)">
+                            মৃত স্ট্যাটাস সেভ করুন
+                        </button>
+                    </div>
+
+                    <!-- Section 2: Replanting (visible if already officially dead) -->
+                    <div id="replantSection" style="width: 100%; display: none;">
+                        <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">এখানে কি নতুন চারা রোপণ করা হয়েছে?</p>
+
+                        <button class="btn-primary w-full"
+                            style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; background: #10B981; border: 1px solid #059669;"
+                            onclick="window.showReplantForm()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v14"></path>
+                                <path d="M5 12h14"></path>
+                            </svg>
+                            নতুন চারা রোপণ করুন
+                        </button>
+                    </div>
+                    <!-- Actual Replant form (hidden initially) -->
+                    <div id="replantFormContainer"
+                        style="display: none; width: 100%; text-align: left; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 15px; border-radius: 12px; box-sizing: border-box;">
+                        <div class="input-group">
+                            <label>নতুন চারা রোপণের তারিখ</label>
+                            <input type="text" id="replantDate" readonly onclick="window.openDatePicker('replantDate')"
+                                style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; background: white; cursor: pointer;">
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>জাত (ঐচ্ছিক)</label>
+                            <input type="text" id="replantVariety" placeholder="অন্য জাত হলে লিখুন..."
+                                style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box;">
+                        </div>
+                        <button class="btn-primary w-full" style="margin-top: 15px; background: #059669;"
+                            onclick="window.saveReplantDetails()">
+                            সেভ করুন
+                        </button>
+                        <button class="sheet-close-btn w-full" style="margin-top: 8px;"
+                            onclick="window.hideReplantForm()">
+                            বাতিল
+                        </button>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label>ফলের সংখ্যা</label>
-                    <input type="number" id="bsFruits" placeholder="উদা: ৫">
-                </div>
+                <!-- Normal Update Form Container -->
+                <div id="normalUpdateFormContainer">
+                    <div class="input-group">
+                        <label>জাতের নাম (Variety)</label>
+                        <input type="text" id="bsVariety" placeholder="উদা: দেশি পেঁপে, রেড লেডি ইত্যাদি">
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="input-group">
+                            <label>উচ্চতা (ইঞ্চি)</label>
+                            <input type="number" id="bsHeight" placeholder="উদা: ২৪">
+                        </div>
+                        <div class="input-group">
+                            <label>পাতার সংখ্যা</label>
+                            <input type="number" id="bsLeaves" placeholder="উদা: ১৫">
+                        </div>
+                    </div>
 
-                <div class="care-checkboxes">
-                    <div class="toggle-chip" id="bsFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া হয়েছে</div>
-                    <div class="toggle-chip" id="bsPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ স্প্রে করা হয়েছে</div>
-                </div>
+                    <div class="input-group">
+                        <label>ফলের সংখ্যা</label>
+                        <input type="number" id="bsFruits" placeholder="উদা: ৫">
+                    </div>
 
-                <div class="input-group">
-                    <label>লক্ষণ বা নোট</label>
-                    <textarea id="bsNote" rows="3" placeholder="রোগের লক্ষণ বা অন্যান্য নোট..." style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                    <div class="care-checkboxes">
+                        <div class="toggle-chip" id="bsFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার
+                            দেওয়া হয়েছে</div>
+                        <div class="toggle-chip" id="bsPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ
+                            স্প্রে করা হয়েছে</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>লক্ষণ বা নোট</label>
+                        <textarea id="bsNote" rows="3" placeholder="রোগের লক্ষণ বা অন্যান্য নোট..."
+                            style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                    </div>
+
+                    <button id="bsSaveBtn" class="btn-primary w-full" style="margin-top: 10px;"
+                        onclick="savePlantDetails()">
+                        আপডেট সেভ করুন
+                    </button>
                 </div>
-                
-                <button id="bsSaveBtn" class="btn-primary w-full" style="margin-top: 10px;" onclick="savePlantDetails()">
-                    আপডেট সেভ করুন
-                </button>
             </div>
 
             <!-- Timeline -->
@@ -238,47 +393,122 @@
 
     <!-- Global Confirmation Modal -->
     <div class="center-modal" id="confirmActionModal" style="z-index: 99999;">
-        <div class="center-modal-content" style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
-            <div style="width: 48px; height: 48px; background: #FEF2F2; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #EF4444;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <div class="center-modal-content"
+            style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
+            <div
+                style="width: 48px; height: 48px; background: #FEF2F2; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #EF4444;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                    </path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
             </div>
-            <h3 id="confirmActionTitle" style="font-size: 18px; margin-bottom: 8px; font-weight: 700; color: #1E293B;">নিশ্চিত করুন</h3>
-            <p id="confirmActionText" style="color: #64748B; font-size: 14.5px; line-height: 1.5; margin-bottom: 24px;">আপনি কি এই কাজটি করতে চান?</p>
+            <h3 id="confirmActionTitle" style="font-size: 18px; margin-bottom: 8px; font-weight: 700; color: #1E293B;">
+                নিশ্চিত করুন</h3>
+            <p id="confirmActionText" style="color: #64748B; font-size: 14.5px; line-height: 1.5; margin-bottom: 24px;">
+                আপনি কি এই কাজটি করতে চান?</p>
             <div style="display: flex; gap: 12px; flex-direction: column;">
-                <button id="confirmActionBtn" class="btn-primary" style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">হ্যাঁ, নিশ্চিত</button>
-                <button onclick="window.closeConfirmModal()" style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল করুন</button>
+                <button id="confirmActionBtn" class="btn-primary"
+                    style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">হ্যাঁ,
+                    নিশ্চিত</button>
+                <button onclick="window.closeConfirmModal()"
+                    style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল
+                    করুন</button>
             </div>
         </div>
     </div>
 
     <!-- Global Input Prompt Modal -->
     <div class="center-modal" id="inputPromptModal" style="z-index: 99999;">
-        <div class="center-modal-content" style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
-            <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #3B82F6;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <div class="center-modal-content"
+            style="max-width: 320px; padding: 24px; text-align: center; border-radius: 20px;">
+            <div
+                style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #3B82F6;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
             </div>
-            <h3 id="inputPromptTitle" style="font-size: 18px; margin-bottom: 16px; font-weight: 700; color: #1E293B;">টাইটেল</h3>
+            <h3 id="inputPromptTitle" style="font-size: 18px; margin-bottom: 16px; font-weight: 700; color: #1E293B;">
+                টাইটেল</h3>
             <div style="margin-bottom: 24px; text-align: left;">
-                <input type="text" id="inputPromptField" style="width: 100%; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; padding: 12px; font-size: 15px; outline: none; background: #F8FAFC; color: #1E293B;" placeholder="...">
+                <input type="text" id="inputPromptField"
+                    style="width: 100%; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; padding: 12px; font-size: 15px; outline: none; background: #F8FAFC; color: #1E293B;"
+                    placeholder="...">
             </div>
             <div style="display: flex; gap: 12px; flex-direction: column;">
-                <button id="inputPromptBtn" class="btn-primary" style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">সেভ করুন</button>
-                <button onclick="window.closeInputModal()" style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল করুন</button>
+                <button id="inputPromptBtn" class="btn-primary"
+                    style="width: 100%; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">সেভ
+                    করুন</button>
+                <button onclick="window.closeInputModal()"
+                    style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল
+                    করুন</button>
             </div>
         </div>
     </div>
 
     <!-- Fullscreen Image Modal -->
-    <div id="fullImageModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
-        <button onclick="document.getElementById('fullImageModal').style.display='none'" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; font-size: 32px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10000000; line-height: 1;">&times;</button>
-        <img id="fullImageView" src="" style="max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain;">
+    <div id="fullImageModal"
+        style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
+        <button onclick="document.getElementById('fullImageModal').style.display='none'"
+            style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; font-size: 32px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10000000; line-height: 1;">&times;</button>
+        <img id="fullImageView" src=""
+            style="max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain;">
     </div>
 
 
     <!-- Navigation Bar for Mobile -->
+    
+    <!-- Calendar Bottom Sheet Modal -->
+    <div class="method-sheet-overlay" id="datePickerOverlay" style="z-index: 1050;" onclick="window.closeDatePicker(event)"></div>
+    <div class="method-sheet" id="datePickerContent" style="padding-bottom: 24px; z-index: 1055;">
+        <div class="method-sheet-header">
+            <h3>তারিখ নির্বাচন করুন</h3>
+            <button class="close-sheet" onclick="window.closeDatePicker(event)">✕</button>
+        </div>
+        
+        <div class="calendar-body" style="margin-bottom: 24px; padding: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="calendar-month" id="calendarMonthLabel"
+                    style="text-align: left; font-size: 16px; font-weight: 700;">
+                    মার্চ ২০২৬</div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="window.changeCalendarMonth(-1)"
+                        style="border: 1px solid var(--border-color); background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s;"
+                        onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <button onclick="window.changeCalendarMonth(1)"
+                        style="border: 1px solid var(--border-color); background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s;"
+                        onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-weekdays" style="margin-bottom: 12px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; font-weight: 600; color: #64748B;">
+                <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+            </div>
+            <div class="calendar-days" id="calendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 0;">
+                <!-- JS will populate -->
+            </div>
+        </div>
+
+        <button class="btn-primary" style="width: 100%;" onclick="window.confirmDateSelection()">তারিখ সেভ করুন</button>
+    </div>
+
     <app-bottom-nav></app-bottom-nav>
 
     <!-- Application Script -->
     <script src="js/plant_tracker.js"></script>
 </body>
+
 </html>

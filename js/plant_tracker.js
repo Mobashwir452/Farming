@@ -74,7 +74,7 @@ function renderBeds() {
     const main = document.getElementById('trackerMain');
     main.innerHTML = '';
     
-    let totalAll = 0, totalHealthy = 0, totalSick = 0, totalCritical = 0;
+    let totalAll = 0, totalHealthy = 0, totalSick = 0, totalCritical = 0, totalDead = 0;
 
     farmData.forEach((bed, bIndex) => {
         const nodes = bed.plants_nodes_json || [];
@@ -82,6 +82,7 @@ function renderBeds() {
         let bedHealthy = 0;
         let bedSick = 0;
         let bedCritical = 0;
+        let bedDead = 0;
 
         // Create Grid container for chips
         const gridDiv = document.createElement('div');
@@ -92,17 +93,20 @@ function renderBeds() {
             totalAll++;
             if (state === 'C') { totalCritical++; bedCritical++; }
             else if (state === 'S') { totalSick++; bedSick++; }
+            else if (state === 'D') { totalDead++; bedDead++; }
             else { totalHealthy++; bedHealthy++; }
 
             // Filter logic
             if (currentFilter === 'H' && state !== 'H') return;
             if (currentFilter === 'S' && state !== 'S') return;
             if (currentFilter === 'C' && state !== 'C') return;
+            if (currentFilter === 'D' && state !== 'D') return;
 
             const chip = document.createElement('div');
             let stateClass = 'healthy';
             if (state === 'S') stateClass = 'sick';
             if (state === 'C') stateClass = 'critical';
+            if (state === 'D') stateClass = 'dead';
 
             chip.className = `plant-chip ${stateClass}`;
             chip.title = node.variety ? `${node.id}\nজাত: ${node.variety}` : node.id;
@@ -138,6 +142,10 @@ function renderBeds() {
                 </div>
                 <div class="chip-id">${node.id.split('-')[1]}</div>
             `;
+            
+            if (node.replanted_date) {
+                innerContent += '<div class="replant-badge">🌱</div>';
+            }
             
             if (node.variety) {
                 innerContent += `<div class="chip-variety">${node.variety}</div>`;
@@ -222,7 +230,7 @@ function renderBeds() {
                         </button>
                     </h2>
                     <div style="display:flex; align-items:center;">
-                        <div class="bed-stats">সুস্থ: ${bedHealthy} | অসুস্থ: ${bedSick} | বিপজ: ${bedCritical}</div>
+                        <div class="bed-stats">সু: ${bedHealthy} | অ: ${bedSick} | বি: ${bedCritical} | মৃত: ${bedDead}</div>
                         ${selectAllCheckHtml}
                     </div>
                 </div>
@@ -246,6 +254,7 @@ function renderBeds() {
     document.getElementById('countHealthy').innerText = totalHealthy;
     document.getElementById('countSick').innerText = totalSick;
     if (document.getElementById('countCritical')) document.getElementById('countCritical').innerText = totalCritical;
+    if (document.getElementById('countDead')) document.getElementById('countDead').innerText = totalDead;
 
     // Update Batch mode select all UI
     if (typeof updateSelectAllUIState === 'function') {
@@ -579,14 +588,48 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     
     document.getElementById('bsPlantLocation').innerText = `বেড ${bIndex + 1}`;
     
+    const replantBadgeEl = document.getElementById('bsReplantStatus');
+    if (node.replanted_date) {
+        const dObj = new Date(node.replanted_date);
+        if (!isNaN(dObj)) {
+            const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+            const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+            const formattedDate = `${toBngDigits(dObj.getDate())} ${EN_TO_BN_MONTHS[dObj.getMonth()]} ${toBngDigits(dObj.getFullYear())}`;
+            replantBadgeEl.style.display = 'inline-block';
+            replantBadgeEl.innerText = `🌱 পুনরায় রোপণ করা হয়েছে: ${formattedDate}`;
+        } else {
+            replantBadgeEl.style.display = 'inline-block';
+            replantBadgeEl.innerText = `🌱 পুনরায় রোপণ করা হয়েছে: ${node.replanted_date}`;
+        }
+    } else {
+        replantBadgeEl.style.display = 'none';
+    }
+    
     // Active toggles state
     const state = node.state || 'H';
     document.getElementById('btnSetHealthy').classList.remove('active');
     document.getElementById('btnSetSick').classList.remove('active');
     document.getElementById('btnSetCritical').classList.remove('active');
+    document.getElementById('btnSetDead').classList.remove('active');
+    
     if(state === 'H') document.getElementById('btnSetHealthy').classList.add('active');
     else if(state === 'S') document.getElementById('btnSetSick').classList.add('active');
     else if(state === 'C') document.getElementById('btnSetCritical').classList.add('active');
+    else if(state === 'D') document.getElementById('btnSetDead').classList.add('active');
+
+    // Show/Hide Replant logic
+    if(state === 'D') {
+        document.getElementById('deadStateContainer').style.display = 'flex';
+        document.getElementById('normalUpdateFormContainer').style.display = 'none';
+        document.getElementById('replantFormContainer').style.display = 'none';
+        document.getElementById('replantDate').value = new Date().toISOString().split('T')[0];
+        
+        document.getElementById('markDeadSection').style.display = 'none';
+        document.getElementById('replantSection').style.display = 'block';
+    } else {
+        document.getElementById('deadStateContainer').style.display = 'none';
+        document.getElementById('normalUpdateFormContainer').style.display = 'block';
+    }
 
     // Prepare inputs
     document.getElementById('bsHeight').value = node.height || '';
@@ -654,15 +697,140 @@ window.switchBsTab = function(tabName, btnEl) {
     }
 };
 
-// UI logic for updating plant status visually before saving
 window.setPlantProfileStatusUI = function(status) {
     document.getElementById('btnSetHealthy').classList.remove('active');
     document.getElementById('btnSetSick').classList.remove('active');
     document.getElementById('btnSetCritical').classList.remove('active');
+    document.getElementById('btnSetDead').classList.remove('active');
     
     if(status === 'H') document.getElementById('btnSetHealthy').classList.add('active');
     else if(status === 'S') document.getElementById('btnSetSick').classList.add('active');
     else if(status === 'C') document.getElementById('btnSetCritical').classList.add('active');
+    else if(status === 'D') document.getElementById('btnSetDead').classList.add('active');
+
+    if (status === 'D') {
+        document.getElementById('deadStateContainer').style.display = 'flex';
+        document.getElementById('normalUpdateFormContainer').style.display = 'none';
+
+        if (currentlyEditingPlant && currentlyEditingPlant.node.state === 'D') {
+            document.getElementById('markDeadSection').style.display = 'none';
+            document.getElementById('replantSection').style.display = 'block';
+        } else {
+            document.getElementById('markDeadSection').style.display = 'block';
+            document.getElementById('replantSection').style.display = 'none';
+            document.getElementById('deadReason').value = '';
+        }
+    } else {
+        document.getElementById('deadStateContainer').style.display = 'none';
+        document.getElementById('normalUpdateFormContainer').style.display = 'block';
+    }
+};
+
+window.saveDeadStatus = function(btnEl) {
+    showConfirmModal('মৃত স্ট্যাটাস নিশ্চিত করুন', 'আপনি কি নিশ্চিত যে এই গাছটিকে মৃত হিসেবে সেভ করতে চান?', () => executeSaveDeadStatus(btnEl));
+};
+
+async function executeSaveDeadStatus(btnEl) {
+    if(!currentlyEditingPlant) return;
+    const {bed, node, bIndex, pIndex} = currentlyEditingPlant;
+    node.state = 'D';
+    
+    const reason = document.getElementById('deadReason').value.trim();
+    let noteTxt = `গাছটি মৃত হিসেবে চিহ্নিত করা হয়েছে`;
+    if(reason) noteTxt += ` - কারণ: ${reason}`;
+
+    if(!node.logs) node.logs = [];
+    node.logs.push({
+        date: new Date().toLocaleDateString('bn-BD'),
+        note: noteTxt,
+        state: 'D'
+    });
+
+    farmData[bIndex].plants_nodes_json[pIndex] = node;
+
+    const token = localStorage.getItem('farmer_jwt');
+    const originalText = btnEl.innerText;
+    btnEl.innerText = 'সেভিং...';
+    btnEl.disabled = true;
+
+    try {
+        await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
+        });
+    } catch (e) {
+        console.error("Failed to save dead status", e);
+    } finally {
+        btnEl.innerText = originalText;
+        btnEl.disabled = false;
+    }
+    
+    closeBottomSheet();
+    renderBeds();
+}
+
+window.showReplantForm = function() {
+    const inputEl = document.getElementById('replantDate');
+    if (!inputEl.value) {
+        const today = new Date();
+        const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+        const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+        const todayStr = today.toISOString().split('T')[0];
+        
+        inputEl.dataset.value = todayStr;
+        inputEl.value = `${toBngDigits(today.getDate())} ${EN_TO_BN_MONTHS[today.getMonth()]} ${toBngDigits(today.getFullYear())}`;
+    }
+    document.getElementById('replantFormContainer').style.display = 'block';
+};
+
+window.hideReplantForm = function() {
+    document.getElementById('replantFormContainer').style.display = 'none';
+};
+
+window.saveReplantDetails = async function() {
+    showConfirmModal('নতুন চারা রোপণ', 'আপনি কি নিশ্চিত যে এখানে নতুন চারা রোপণ করা হয়েছে?', async () => {
+        if(!currentlyEditingPlant) return;
+        const {bed, node, bIndex, pIndex} = currentlyEditingPlant;
+        const rDate = document.getElementById('replantDate').dataset.value || document.getElementById('replantDate').value;
+        const variety = document.getElementById('replantVariety').value;
+        
+        node.state = 'H';
+        node.replanted_date = rDate;
+        if(variety) {
+            node.variety = variety;
+        }
+
+        if(!node.logs) node.logs = [];
+        node.logs.push({
+            date: new Date().toLocaleDateString('bn-BD'),
+            note: `নতুন চারা রোপণ করা হয়েছে (Replanted) - ${variety || ''}`,
+            state: 'H',
+            replanted: true
+        });
+
+        farmData[bIndex].plants_nodes_json[pIndex] = node;
+
+        const token = localStorage.getItem('farmer_jwt');
+        try {
+            await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
+            });
+        } catch (e) {
+            console.error("Failed to save replant", e);
+        }
+        
+        closeBottomSheet();
+        renderBeds();
+    });
 };
 
 // Canvas Image Compression
@@ -1163,3 +1331,123 @@ document.getElementById('inputPromptBtn').addEventListener('click', function() {
         cb(val);
     }
 });
+
+// ========================
+// Custom Date Picker Logic
+// ========================
+window.currentCalendarViewDate = null;
+window.currentCalendarTargetId = null;
+window.selectedCalendarDateStr = null;
+
+window.openDatePicker = function(targetId) {
+    if (document.activeElement) document.activeElement.blur();
+    window.currentCalendarTargetId = targetId;
+
+    const overlay = document.getElementById('datePickerOverlay');
+    const content = document.getElementById('datePickerContent');
+    const inputEl = document.getElementById(targetId);
+
+    let viewDateStr = new Date().toISOString().split('T')[0];
+    if (inputEl && inputEl.dataset.value) {
+        viewDateStr = inputEl.dataset.value;
+    }
+    window.selectedCalendarDateStr = viewDateStr;
+
+    window.renderDatePickerGrid(viewDateStr);
+
+    overlay.style.display = 'block';
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        content.style.bottom = '0';
+    }, 10);
+};
+
+window.closeDatePicker = function(e) {
+    if (e && e.target.id !== 'datePickerOverlay' && !e.target.classList.contains('close-sheet')) return;
+    const overlay = document.getElementById('datePickerOverlay');
+    const content = document.getElementById('datePickerContent');
+    overlay.style.opacity = '0';
+    content.style.bottom = '-100%';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        window.currentCalendarTargetId = null;
+    }, 300);
+};
+
+window.renderDatePickerGrid = function(initialDateStr, resetView = true) {
+    if (resetView) {
+        if (initialDateStr) {
+            const parsed = new Date(initialDateStr);
+            window.currentCalendarViewDate = !isNaN(parsed) ? parsed : new Date();
+        } else {
+            window.currentCalendarViewDate = new Date();
+        }
+    } else if (!window.currentCalendarViewDate) {
+        window.currentCalendarViewDate = new Date();
+    }
+
+    const calendarDays = document.getElementById('calendarDays');
+    const monthLabel = document.getElementById('calendarMonthLabel');
+    if (!calendarDays || !monthLabel) return;
+    calendarDays.innerHTML = '';
+
+    const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+    const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+
+    const realToday = new Date();
+    const currentMonth = window.currentCalendarViewDate.getMonth();
+    const currentYear = window.currentCalendarViewDate.getFullYear();
+
+    monthLabel.textContent = `${EN_TO_BN_MONTHS[currentMonth]} ${toBngDigits(currentYear)}`;
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyDiv = document.createElement('div');
+        calendarDays.appendChild(emptyDiv);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'cal-day';
+        dayEl.textContent = toBngDigits(i);
+
+        const monthStr = String(currentMonth + 1).padStart(2, '0');
+        const dayStr = String(i).padStart(2, '0');
+        const cellDateStr = `${currentYear}-${monthStr}-${dayStr}`;
+
+        dayEl.addEventListener('click', () => {
+            document.querySelectorAll('#calendarDays .cal-day').forEach(el => el.classList.remove('selected'));
+            dayEl.classList.add('selected');
+            window.selectedCalendarDateStr = cellDateStr;
+        });
+
+        if (window.selectedCalendarDateStr === cellDateStr) {
+            dayEl.classList.add('selected');
+        }
+
+        calendarDays.appendChild(dayEl);
+    }
+};
+
+window.changeCalendarMonth = function(offset) {
+    if (!window.currentCalendarViewDate) return;
+    window.currentCalendarViewDate.setMonth(window.currentCalendarViewDate.getMonth() + offset);
+    window.renderDatePickerGrid(null, false);
+};
+
+window.confirmDateSelection = function() {
+    if (window.currentCalendarTargetId && window.selectedCalendarDateStr) {
+        const targetEl = document.getElementById(window.currentCalendarTargetId);
+        if (targetEl) {
+            const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+            const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+            const dObj = new Date(window.selectedCalendarDateStr);
+            targetEl.value = `${toBngDigits(dObj.getDate())} ${EN_TO_BN_MONTHS[dObj.getMonth()]} ${toBngDigits(dObj.getFullYear())}`;
+            targetEl.dataset.value = window.selectedCalendarDateStr;
+        }
+    }
+    window.closeDatePicker();
+};
+
