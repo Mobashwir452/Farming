@@ -222,3 +222,180 @@ export async function syncCropBeds(request, env) {
         return error(500, e.message);
     }
 }
+
+// 7. Insert new hole and shift plant identifiers iteratively backward
+export async function insertShiftPlant(request, env) {
+    try {
+        const { bedId } = request.params;
+        const { targetPlantId } = await request.json(); // e.g. "B1-T2"
+        
+        // 1. Fetch current plants
+        const { results: beds } = await env.DB.prepare('SELECT plants_nodes_json FROM crop_beds WHERE id = ?').bind(bedId).all();
+        if (!beds || beds.length === 0 || !beds[0].plants_nodes_json) {
+            return error(404, "Bed or plants not found.");
+        }
+        
+        let plants = [];
+        try { plants = JSON.parse(beds[0].plants_nodes_json); } catch(e){}
+        
+        const targetIndex = plants.findIndex(p => p.id === targetPlantId);
+        if (targetIndex === -1) {
+            return error(404, "Target plant not found.");
+        }
+        
+        // Identify prefix and max identifier
+        let prefix = "B1-T";
+        const parts = targetPlantId.split('-T');
+        if (parts.length === 2) {
+            prefix = parts[0] + '-T';
+        }
+        
+        let maxIdNum = 0;
+        plants.forEach(p => { 
+            const idStr = String(p.id || '');
+            if(idStr.includes('-T')) {
+                const pt = idStr.split('-T');
+                const num = parseInt(pt[1], 10);
+                if(!isNaN(num) && num > maxIdNum) maxIdNum = num;
+            }
+        });
+        
+        const queries = [];
+        const targetNum = parseInt(parts[1], 10) || 0;
+        
+        // 2. Shift IDs backwards in SQL to prevent overwrite collision
+        if (targetNum > 0) {
+            for (let i = maxIdNum; i >= targetNum; i--) {
+                const oldId = `${prefix}${i}`;
+                const newId = `${prefix}${i + 1}`;
+                queries.push(
+                    env.DB.prepare('UPDATE plant_logs SET plant_identifier = ? WHERE bed_id = ? AND plant_identifier = ?')
+                        .bind(newId, bedId, oldId)
+                );
+            }
+        }
+        
+        // 3. Shift the JSON array physically (just update IDs of everyone from targetIndex to end)
+        for (let i = targetIndex; i < plants.length; i++) {
+            const currentIdStr = plants[i].id;
+            const pParts = currentIdStr.split('-T');
+            if(pParts.length === 2 && !isNaN(parseInt(pParts[1], 10))) {
+                const currentNum = parseInt(pParts[1], 10);
+                plants[i].id = `${pParts[0]}-T${currentNum + 1}`;
+            }
+        }
+        
+        // 4. Create new empty hole and insert at targetIndex
+        const newEmptyNode = {
+            id: targetPlantId, // Takes the old name of target plant
+            state: 'H',
+            row: plants[targetIndex] ? plants[targetIndex].row : 1,     // Keep approx same loc
+            col: plants[targetIndex] ? plants[targetIndex].col : 1,
+            x: plants[targetIndex] ? plants[targetIndex].x : 0,
+            z: plants[targetIndex] ? plants[targetIndex].z : 0,
+            height: "",
+            fruits: "",
+            leaf_count: "",
+            logs: []
+        };
+        
+        plants.splice(targetIndex, 0, newEmptyNode);
+        
+        queries.push(
+            env.DB.prepare('UPDATE crop_beds SET plants_nodes_json = ? WHERE id = ?')
+                .bind(JSON.stringify(plants), bedId)
+        );
+        
+        // Execute batch transaction
+        await env.DB.batch(queries);
+        
+        return json({ success: true, plants });
+    } catch (e) {
+        return error(500, e.message);
+    }
+}
+
+// 8. Delete a hole and shift subsequent plant identifiers iteratively forward
+export async function deleteShiftPlant(request, env) {
+    try {
+        const { bedId } = request.params;
+        const { targetPlantId } = await request.json(); // e.g. "B1-T3"
+        
+        // 1. Fetch current plants
+        const { results: beds } = await env.DB.prepare('SELECT plants_nodes_json FROM crop_beds WHERE id = ?').bind(bedId).all();
+        if (!beds || beds.length === 0 || !beds[0].plants_nodes_json) {
+            return error(404, "Bed or plants not found.");
+        }
+        
+        let plants = [];
+        try { plants = JSON.parse(beds[0].plants_nodes_json); } catch(e){}
+        
+        const targetIndex = plants.findIndex(p => p.id === targetPlantId);
+        if (targetIndex === -1) {
+            return error(404, "Target plant not found.");
+        }
+        
+        // Identify prefix and max identifier
+        let prefix = "B1-T";
+        const parts = targetPlantId.split('-T');
+        if (parts.length === 2) {
+            prefix = parts[0] + '-T';
+        }
+        
+        let maxIdNum = 0;
+        plants.forEach(p => { 
+            const idStr = String(p.id || '');
+            if(idStr.includes('-T')) {
+                const pt = idStr.split('-T');
+                const num = parseInt(pt[1], 10);
+                if(!isNaN(num) && num > maxIdNum) maxIdNum = num;
+            }
+        });
+        
+        const queries = [];
+        const targetNum = parseInt(parts[1], 10) || 0;
+        
+        // 2. Delete the logs of the target plant
+        queries.push(
+            env.DB.prepare('DELETE FROM plant_logs WHERE bed_id = ? AND plant_identifier = ?')
+                .bind(bedId, targetPlantId)
+        );
+        
+        // 3. Shift IDs forwards in SQL (from target+1 up to max) to fill the gap
+        if (targetNum > 0) {
+            for (let i = targetNum + 1; i <= maxIdNum; i++) {
+                const oldId = `${prefix}${i}`;
+                const newId = `${prefix}${i - 1}`;
+                queries.push(
+                    env.DB.prepare('UPDATE plant_logs SET plant_identifier = ? WHERE bed_id = ? AND plant_identifier = ?')
+                        .bind(newId, bedId, oldId)
+                );
+            }
+        }
+        
+        // 4. Remove the node from JSON array
+        plants.splice(targetIndex, 1);
+        
+        // 5. Shift subsequent IDs in the array format
+        for (let i = targetIndex; i < plants.length; i++) {
+            const currentIdStr = plants[i].id;
+            const pParts = currentIdStr.split('-T');
+            if(pParts.length === 2 && !isNaN(parseInt(pParts[1], 10))) {
+                const currentNum = parseInt(pParts[1], 10);
+                plants[i].id = `${pParts[0]}-T${currentNum - 1}`;
+            }
+        }
+        
+        queries.push(
+            env.DB.prepare('UPDATE crop_beds SET plants_nodes_json = ? WHERE id = ?')
+                .bind(JSON.stringify(plants), bedId)
+        );
+        
+        // Execute batch transaction
+        await env.DB.batch(queries);
+        
+        return json({ success: true, plants });
+    } catch (e) {
+        return error(500, e.message);
+    }
+}

@@ -22,8 +22,11 @@ async function fetchFCMToken() {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            // Provide a vapidKey if needed for web. Or let Firebase use the default sender ID
-            const currentToken = await getToken(messaging);
+            // NOTE: You must provide a vapidKey to receive foreground/background push on the web!
+            // Get it from Firebase Console > Project Settings > Cloud Messaging > Web configuration > Generate key pair
+            const currentToken = await getToken(messaging, {
+                vapidKey: 'BPlgbUh2AhKgOZCR3jpY1yquAEcj32Wl5igS2S0I3MDf8glRGkpnQtoJx-L2zI_8bbJ2q4JqKl3fyF01BAwVqM8'
+            });
             return currentToken;
         }
     } catch (e) {
@@ -249,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 let fcmToken = null;
-                try { fcmToken = await fetchFCMToken(); } catch(e) {}
+                try { fcmToken = await fetchFCMToken(); } catch (e) { }
 
                 const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
                 const response = await fetch(`${apiUrl}/api/auth/login-pin`, {
@@ -410,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 let fcmToken = null;
-                try { fcmToken = await fetchFCMToken(); } catch(e) {}
+                try { fcmToken = await fetchFCMToken(); } catch (e) { }
 
                 const token = localStorage.getItem('farmer_jwt');
                 const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';

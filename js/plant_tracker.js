@@ -1044,15 +1044,14 @@ function populateTimeline(logs) {
 
     const logsWithImages = logs.filter(l => l.image_url);
     if (logsWithImages.length >= 2) {
-        const oldImg = logsWithImages[0].image_url;
-        const newImg = logsWithImages[logsWithImages.length - 1].image_url;
         const oldDate = logsWithImages[0].date;
         const newDate = logsWithImages[logsWithImages.length - 1].date;
+        const logsArrayStr = encodeURIComponent(JSON.stringify(logsWithImages));
         
         html += `
         <div style="margin-bottom: 20px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:16px; text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <div style="width: 40px; height: 40px; background: #DBEAFE; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2563EB;">
+                <div style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color, #10b981);">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12h-6"/><polyline points="12 9 15 12 12 15"/><path d="M19 12A7 7 0 1 1 5 12a7 7 0 0 1 14 0z"/></svg>
                 </div>
                 <div style="text-align: left;">
@@ -1060,7 +1059,7 @@ function populateTimeline(logs) {
                     <p style="margin: 2px 0 0; font-size: 12px; color: #64748B;">${oldDate} বনাম ${newDate}</p>
                 </div>
             </div>
-            <button class="btn-primary w-full" style="background: #3B82F6; box-shadow: 0 4px 10px rgba(59,130,246,0.25);" onclick="window.openImageCompare('${oldImg}', '${newImg}', '${oldDate}', '${newDate}')">
+            <button class="btn-primary w-full" style="background: var(--primary-color, #10b981); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);" onclick="window.openImageCompare('${logsArrayStr}')">
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
                     <polyline points="15 18 9 12 15 6"></polyline><polyline points="9 18 15 12 9 6"></polyline>
                  </svg>
@@ -1440,31 +1439,64 @@ document.getElementById('inputPromptBtn').addEventListener('click', function() {
 // ========================
 // Image Comparison Slider Modal
 // ========================
-window.openImageCompare = function(oldUrl, newUrl, oldDate, newDate) {
-    document.getElementById('compareImgBefore').src = oldUrl;
-    document.getElementById('compareImgAfter').src = newUrl;
-    document.getElementById('compareDateOld').innerText = oldDate;
-    document.getElementById('compareDateNew').innerText = newDate;
-    
-    // Reset slider
-    const ctrl = document.getElementById('compareSliderCtrl');
-    ctrl.value = 50;
-    document.getElementById('compareImgBeforeContainer').style.clipPath = `polygon(0 0, 50% 0, 50% 100%, 0 100%)`;
-    document.getElementById('compareSliderLine').style.left = `50%`;
+let globalCompareLogs = [];
 
-    document.getElementById('compareModalOverlay').style.display = 'block';
-    
-    // Slide up animation
-    const content = document.getElementById('compareModalContent');
-    content.style.display = 'flex';
-    content.style.flexDirection = 'column';
-    content.style.bottom = '-100%';
-    
-    // Give it a tiny delay for CSS transition
-    setTimeout(() => {
-        content.style.transition = 'bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1)';
-        content.style.bottom = '0';
-    }, 10);
+window.openImageCompare = function(encodedLogsParams) {
+    try {
+        const logsWithImages = JSON.parse(decodeURIComponent(encodedLogsParams));
+        if (!logsWithImages || logsWithImages.length < 2) return;
+        
+        globalCompareLogs = logsWithImages;
+        
+        const newLog = logsWithImages[logsWithImages.length - 1]; // Latest
+        const oldLog = logsWithImages[0]; // Oldest by default
+
+        document.getElementById('compareImgAfter').src = newLog.image_url;
+        document.getElementById('compareImgBefore').src = oldLog.image_url;
+        document.getElementById('compareDateNew').innerText = newLog.date;
+        
+        // Populate Select Dropdown
+        const selectEl = document.getElementById('compareDateSelect');
+        selectEl.innerHTML = ''; // clear options
+        
+        // Add all historical images except the very last one to the dropdown
+        for (let i = 0; i < logsWithImages.length - 1; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = logsWithImages[i].date;
+            opt.style.color = "#000"; // for dropdown visibility on mobile
+            if (i === 0) opt.selected = true;
+            selectEl.appendChild(opt);
+        }
+
+        // Reset slider
+        const ctrl = document.getElementById('compareSliderCtrl');
+        ctrl.value = 50;
+        document.getElementById('compareImgBeforeContainer').style.clipPath = `polygon(0 0, 50% 0, 50% 100%, 0 100%)`;
+        document.getElementById('compareSliderLine').style.left = `50%`;
+
+        document.getElementById('compareModalOverlay').style.display = 'block';
+        
+        // Slide up animation
+        const content = document.getElementById('compareModalContent');
+        content.style.display = 'flex';
+        content.style.flexDirection = 'column';
+        content.style.bottom = '-100%';
+        
+        // Give it a tiny delay for CSS transition
+        setTimeout(() => {
+            content.style.transition = 'bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1)';
+            content.style.bottom = '0';
+        }, 10);
+    } catch(e) {
+        console.error("Failed to open image comparison", e);
+    }
+};
+
+window.onCompareDateChange = function(index) {
+    if (globalCompareLogs[index] && globalCompareLogs[index].image_url) {
+        document.getElementById('compareImgBefore').src = globalCompareLogs[index].image_url;
+    }
 };
 
 window.closeCompareModal = function() {
@@ -1757,7 +1789,36 @@ window.executeRelocation = function(type) {
             showConfirmModal('সতর্কতা', 'কোথাও সমস্যা হচ্ছে, আবার চেষ্টা করুন।', null);
         }
     };
-    
+    if (type === 'shift_insert') {
+        closeRelocateModal();
+        closeBottomSheet();
+        const loader = document.getElementById('fullScreenLoader');
+        if(loader) loader.style.display = 'flex';
+        
+        const token = localStorage.getItem('farmer_jwt');
+        fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}/insert-shift`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ targetPlantId: node.id })
+        }).then(res => res.json()).then(data => {
+            if (data.success) {
+                Object.assign(bed, {plants_nodes_json: data.plants});
+                renderBeds();
+            } else {
+                showConfirmModal('সতর্কতা', data.error || 'শিফট করতে সমস্যা হচ্ছে।', null);
+            }
+        }).catch(e => {
+            console.error("Shift API error: ", e);
+            showConfirmModal('সতর্কতা', 'কোথাও সমস্যা হচ্ছে, আবার চেষ্টা করুন।', null);
+        }).finally(() => {
+            if(loader) loader.style.display = 'none';
+        });
+        return;
+    }
+
     if (type === 'swap') {
         if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
         const targetNode = plants[targetIndex];
@@ -1775,34 +1836,6 @@ window.executeRelocation = function(type) {
         plants[targetIndex] = clone1;
         
         finalizeAndSave(plants);
-        
-    } else if (type === 'new') {
-        // Find max ID correctly by parsing numbers from strings like "B1-T12"
-        let maxIdNum = 0;
-        let prefix = "B1-T"; // default fallback
-        
-        plants.forEach(p => { 
-            const idStr = String(p.id || '');
-            if(idStr.includes('-T')) {
-                const parts = idStr.split('-T');
-                prefix = parts[0] + '-T';
-                const num = parseInt(parts[1], 10);
-                if(!isNaN(num) && num > maxIdNum) maxIdNum = num;
-            } else if (!isNaN(parseInt(idStr, 10))) {
-                if (parseInt(idStr, 10) > maxIdNum) maxIdNum = parseInt(idStr, 10);
-            }
-        });
-        
-        const newId = maxIdNum > 0 ? (prefix + (maxIdNum + 1)) : (node.id + "-N");
-        const clone = JSON.parse(JSON.stringify(node));
-        clone.id = newId;
-        plants.push(clone);
-        
-        // Reset current
-        plants[pIndex] = { id: node.id, state: 'H', height: "", fruits: "", leaf_count: "", logs: [] };
-        
-        finalizeAndSave(plants);
-        
     } else if (type === 'overwrite') {
         if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
         showConfirmModal('আপনি কি নিশ্চিত?', 'এই অপশনের ফলে টার্গেট গাছের আগের সব ডেটা সম্পূর্ণ মুছে যাবে। আপনি কি সত্যিই ওভাররাইট করতে চান?', () => {
@@ -1820,4 +1853,39 @@ window.executeRelocation = function(type) {
             finalizeAndSave(plants);
         });
     }
+};
+window.deleteShiftPlantSerial = function() {
+    if(!currentlyEditingPlant) return;
+    showConfirmModal('সতর্কতা', 'আপনি কি নিশ্চিত যে আপনি এই চারা বা গর্তটি মুছে ফেলতে চান? এটি মুছে ফেললে ডানদিকের সব গর্ত বামদিকে সরে আসবে এবং এই গর্তের পুরনো ছবি ডিলিট হয়ে যাবে।', async () => {
+        const {bed, node, pIndex} = currentlyEditingPlant;
+        closeBottomSheet();
+        
+        const loader = document.getElementById('fullScreenLoader');
+        if(loader) loader.style.display = 'flex';
+        
+        const token = localStorage.getItem('farmer_jwt');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}/delete-shift`, {
+                method: 'DELETE',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ targetPlantId: node.id })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                Object.assign(bed, {plants_nodes_json: data.plants});
+                renderBeds();
+            } else {
+                showConfirmModal('সতর্কতা', data.error || 'ডিলিট করতে সমস্যা হচ্ছে।', null);
+            }
+        } catch(e) {
+            console.error("Delete Shift API error: ", e);
+            showConfirmModal('সতর্কতা', 'কোথাও সমস্যা হচ্ছে, আবার চেষ্টা করুন।', null);
+        } finally {
+            if(loader) loader.style.display = 'none';
+        }
+    });
 };

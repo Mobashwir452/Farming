@@ -220,6 +220,9 @@
                                     <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </button>
+                            <button onclick="window.deleteShiftPlantSerial()" style="background: #FFF1F2; border: 1px solid #FECDD3; cursor: pointer; color: #E11D48; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="এই গর্তটি মুছে ফেলুন">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
                         </div>
                         <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
                         <div id="bsReplantStatus" style="display:none; margin-top:6px; background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;"></div>
@@ -393,10 +396,10 @@
 
     <!-- Image Comparison Modal -->
     <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none;" onclick="window.closeCompareModal()"></div>
-    <div class="method-sheet" id="compareModalContent" style="padding: 0; z-index: 1055; display:none; background: #0F172A; max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
-        <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E293B;">
+    <div class="method-sheet" id="compareModalContent" style="padding: 0; z-index: 1055; display:none; background: var(--primary-color, #10b981); max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
+        <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <h3 style="color: #FFF; font-size: 16px; margin: 0; font-weight: 600;">গাছের পরিবর্তন দেখুন</h3>
-            <button onclick="window.closeCompareModal()" style="background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
+            <button onclick="window.closeCompareModal()" style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
         </div>
         
         <div class="compare-container" style="position: relative; width: 100%; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
@@ -419,9 +422,15 @@
             </div>
 
             <!-- Labels -->
-            <div style="position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
-                <span id="compareDateOld"></span> (আগের)
+            <!-- Left Side Select Dropdown (pointer-events: auto so it can be clicked) -->
+            <div style="z-index: 20; position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;">
+                <select id="compareDateSelect" onchange="window.onCompareDateChange(this.value)" style="background: transparent; color: #FFF; border: none; font-size: 13px; font-weight: 500; outline: none; cursor: pointer; padding-right: 4px;">
+                    <!-- Options populated via JS -->
+                </select>
+                <span> (আগের)</span>
             </div>
+            
+            <!-- Right Side Static Date -->
             <div style="position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
                 <span id="compareDateNew"></span> (বর্তমান)
             </div>
@@ -528,13 +537,13 @@
             </div>
             
             <div style="display: flex; gap: 12px; flex-direction: column;">
+                <button onclick="window.executeRelocation('shift_insert')" style="width: 100%; background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" title="এই সিরিয়ালে নতুন গর্ত যোগ করুন এবং অন্য সব গাছ ডানে সরিয়ে দিন">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    এই গাছের আগে নতুন গর্ত যোগ করুন (শিফট)
+                </button>
                 <button onclick="window.executeRelocation('swap')" style="width: 100%; background: #059669; color: white; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                     অদলবদল
-                </button>
-                <button onclick="window.executeRelocation('new')" style="width: 100%; background: #ECFDF5; color: #047857; border: 1px solid #D1FAE5; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#D1FAE5'" onmouseout="this.style.background='#ECFDF5'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    নতুন গাছ তৈরি করুন
                 </button>
                 <button onclick="window.executeRelocation('overwrite')" style="width: 100%; background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>

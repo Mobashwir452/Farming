@@ -18,7 +18,7 @@ import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
 import { handleCropChat } from './routes/ai_chat.js';
 import { getTransactions, addTransaction, updateTransaction, deleteTransaction } from './routes/transactions.js';
-import { getPlantGrid, generatePlantGrid, updateBedConfig, getPlantLogs, addPlantLog, uploadPlantImage, syncCropBeds } from './routes/plants.js';
+import { getPlantGrid, generatePlantGrid, updateBedConfig, getPlantLogs, addPlantLog, uploadPlantImage, syncCropBeds, insertShiftPlant, deleteShiftPlant } from './routes/plants.js';
 import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
 import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
@@ -169,6 +169,8 @@ router.put('/api/crops/:id/beds/:bedId', withAuth(['farmer']), updateBedConfig);
 router.put('/api/crops/:id/beds-sync', withAuth(['farmer']), syncCropBeds);
 router.get('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), getPlantLogs);
 router.post('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), addPlantLog);
+router.post('/api/crops/:id/beds/:bedId/insert-shift', withAuth(['farmer']), insertShiftPlant);
+router.delete('/api/crops/:id/beds/:bedId/delete-shift', withAuth(['farmer']), deleteShiftPlant);
 
 // 3.9 Testing Route for Reminders!
 router.get('/api/test-reminders', async (request, env) => {
