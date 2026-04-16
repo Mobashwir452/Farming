@@ -152,10 +152,28 @@ export async function addPlantLog(request, env) {
     try {
         const { bedId, plantIdentifier } = request.params;
         const body = await request.json();
-        const { note, image_url } = body; // Without ai_scan_id since admin linkage removed
+        const { note, image_url } = body; 
 
         await env.DB.prepare(`INSERT INTO plant_logs (bed_id, plant_identifier, note, image_url) VALUES (?, ?, ?, ?)`)
             .bind(bedId, plantIdentifier, note || null, image_url || null).run();
+            
+        // Touch the last_updated_at timestamp for this plant inside crop_beds
+        const { results: beds } = await env.DB.prepare('SELECT plants_nodes_json FROM crop_beds WHERE id = ?').bind(bedId).all();
+        if (beds && beds.length > 0 && beds[0].plants_nodes_json) {
+            let parsed = [];
+            try { parsed = JSON.parse(beds[0].plants_nodes_json); } catch (e) {}
+            let changed = false;
+            parsed.forEach(node => {
+                if (node.id === plantIdentifier) {
+                    node.last_updated_at = Date.now();
+                    changed = true;
+                }
+            });
+            if (changed) {
+                await env.DB.prepare('UPDATE crop_beds SET plants_nodes_json = ? WHERE id = ?')
+                    .bind(JSON.stringify(parsed), bedId).run();
+            }
+        }
             
         return json({ success: true });
     } catch (e) {

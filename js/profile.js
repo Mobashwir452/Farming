@@ -60,6 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
             editAddr.value = '';
         }
 
+        const editEmail = document.getElementById('editEmail');
+        if(editEmail) {
+            editEmail.value = farmer.email || '';
+        }
+
         // Subscription Stats
         const type = farmer.subscription_level || 'free';
         const txtEl = document.getElementById('subscriptionStatusText');
@@ -349,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSaveProfile.addEventListener('click', () => {
             const nameObj = document.getElementById('editName');
             const addressObj = document.getElementById('editAddress');
+            const emailObj = document.getElementById('editEmail');
             
             if (!nameObj.value.trim()) {
                 if (window.showToast) window.showToast('দয়া করে নাম লিখুন।');
@@ -357,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newName = nameObj.value.trim();
             const newAddress = addressObj.value.trim();
+            const newEmail = emailObj ? emailObj.value.trim() : null;
             const token = localStorage.getItem('farmer_jwt');
 
             btnSaveProfile.innerHTML = '<span class="material-icons-round" style="font-size:18px;margin-right:8px;vertical-align:middle;">autorenew</span> সংরক্ষণ হচ্ছে...';
@@ -368,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ name: newName, address: newAddress })
+                body: JSON.stringify({ name: newName, address: newAddress, email: newEmail })
             })
             .then(res => res.json())
             .then(data => {

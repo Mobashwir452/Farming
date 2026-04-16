@@ -57,7 +57,7 @@ export const verifyFirebase = async (request, env) => {
             isNewUser,
             needsProfileCompletion,
             token: customToken,
-            user: { id: user.id, name: user.full_name, phone: user.phone_number }
+            user: { id: user.id, name: user.full_name, phone: user.phone_number, email: user.email }
         });
 
     } catch (err) {
@@ -97,6 +97,7 @@ export const getProfile = async (request, env) => {
                 id: user.id,
                 name: user.full_name,
                 phone: user.phone_number,
+                email: user.email,
                 address: user.address,
                 subscription_level: user.subscription_status || 'free',
                 total_lands: totalLandsCount,
@@ -119,7 +120,7 @@ export const getProfile = async (request, env) => {
 
 export const updateProfile = async (request, env) => {
     try {
-        const { name, pin, address } = await request.json();
+        const { name, pin, address, email, fcmToken } = await request.json();
 
         if (!name) {
             return error(400, 'Name is required.');
@@ -132,17 +133,17 @@ export const updateProfile = async (request, env) => {
             const pinHash = await bcrypt.hash(pin, 10);
             updateQuery = `
                 UPDATE farmers 
-                SET full_name = ?, address = ?, pin_hash = ?, updated_at = CURRENT_TIMESTAMP
+                SET full_name = ?, address = ?, email = ?, pin_hash = ?, fcm_token = COALESCE(?, fcm_token), updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             `;
-            params = [name, address || null, pinHash, request.user.id];
+            params = [name, address || null, email || null, pinHash, fcmToken || null, request.user.id];
         } else {
             updateQuery = `
                 UPDATE farmers 
-                SET full_name = ?, address = ?, updated_at = CURRENT_TIMESTAMP
+                SET full_name = ?, address = ?, email = ?, fcm_token = COALESCE(?, fcm_token), updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             `;
-            params = [name, address || null, request.user.id];
+            params = [name, address || null, email || null, fcmToken || null, request.user.id];
         }
 
         await env.DB.prepare(updateQuery).bind(...params).run();
@@ -153,7 +154,7 @@ export const updateProfile = async (request, env) => {
         return json({
             success: true,
             message: 'Profile updated successfully',
-            user: { id: updatedUser.id, name: updatedUser.full_name, phone: updatedUser.phone_number, address: updatedUser.address }
+            user: { id: updatedUser.id, name: updatedUser.full_name, phone: updatedUser.phone_number, email: updatedUser.email, address: updatedUser.address }
         });
 
     } catch (err) {
@@ -183,7 +184,7 @@ export const checkUser = async (request, env) => {
 
 export const loginPin = async (request, env) => {
     try {
-        const { phone, pin } = await request.json();
+        const { phone, pin, fcmToken } = await request.json();
         if (!phone || !pin) return error(400, 'Phone and PIN required');
 
         const query = `SELECT * FROM farmers WHERE phone_number = ?`;
@@ -195,6 +196,10 @@ export const loginPin = async (request, env) => {
 
         const isValid = await bcrypt.compare(pin, user.pin_hash);
         if (!isValid) return error(401, 'Incorrect PIN');
+
+        if (fcmToken) {
+            await env.DB.prepare('UPDATE farmers SET fcm_token = ? WHERE id = ?').bind(fcmToken, user.id).run();
+        }
 
         const customToken = await signJWT({
             id: user.id,
@@ -208,7 +213,7 @@ export const loginPin = async (request, env) => {
             isNewUser: false,
             needsProfileCompletion: false, // Assumed false since they needed a PIN to log in
             token: customToken,
-            user: { id: user.id, name: user.full_name, phone: user.phone_number }
+            user: { id: user.id, name: user.full_name, phone: user.phone_number, email: user.email }
         });
 
     } catch (err) {

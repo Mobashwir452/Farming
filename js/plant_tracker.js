@@ -96,6 +96,16 @@ async function initApp() {
                  }).catch(e => console.error("Silent fix failed:", e));
             });
 
+            // Handle FCM highlight_sick logic
+            const highlightSick = new URLSearchParams(window.location.search).get('highlight_sick');
+            if (highlightSick === 'true') {
+                currentFilter = 'S';
+                // Find and activate the sick filter UI button
+                document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('active'));
+                const sickBtn = document.querySelector('.filter-chip[data-filter="S"]');
+                if (sickBtn) sickBtn.classList.add('active');
+            }
+
             renderBeds();
         } else {
             document.getElementById('trackerMain').innerHTML = '<div style="text-align:center; padding: 40px;">কোনো ডেটা পাওয়া যায়নি। আগে ম্যাপ তৈরি করুন।</div>';
@@ -1030,8 +1040,36 @@ function populateTimeline(logs) {
         return;
     }
 
-    // Mock visual timeline
     let html = '';
+
+    const logsWithImages = logs.filter(l => l.image_url);
+    if (logsWithImages.length >= 2) {
+        const oldImg = logsWithImages[0].image_url;
+        const newImg = logsWithImages[logsWithImages.length - 1].image_url;
+        const oldDate = logsWithImages[0].date;
+        const newDate = logsWithImages[logsWithImages.length - 1].date;
+        
+        html += `
+        <div style="margin-bottom: 20px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:16px; text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <div style="width: 40px; height: 40px; background: #DBEAFE; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2563EB;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12h-6"/><polyline points="12 9 15 12 12 15"/><path d="M19 12A7 7 0 1 1 5 12a7 7 0 0 1 14 0z"/></svg>
+                </div>
+                <div style="text-align: left;">
+                    <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1E293B;">গাছের পরিবর্তন দেখুন</h4>
+                    <p style="margin: 2px 0 0; font-size: 12px; color: #64748B;">${oldDate} বনাম ${newDate}</p>
+                </div>
+            </div>
+            <button class="btn-primary w-full" style="background: #3B82F6; box-shadow: 0 4px 10px rgba(59,130,246,0.25);" onclick="window.openImageCompare('${oldImg}', '${newImg}', '${oldDate}', '${newDate}')">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                    <polyline points="15 18 9 12 15 6"></polyline><polyline points="9 18 15 12 9 6"></polyline>
+                 </svg>
+                 ছবি পাশাপাশি তুলনা করুন
+            </button>
+        </div>
+        <hr style="border: none; border-top: 1px dashed #E2E8F0; margin-bottom: 16px;">
+        `;
+    }
     [...logs].reverse().forEach((log, i) => {
         const actualIndex = logs.length - 1 - i;
         html += `
@@ -1396,6 +1434,58 @@ document.getElementById('inputPromptBtn').addEventListener('click', function() {
     closeInputModal();
     if(cb && val !== '') {
         cb(val);
+    }
+});
+
+// ========================
+// Image Comparison Slider Modal
+// ========================
+window.openImageCompare = function(oldUrl, newUrl, oldDate, newDate) {
+    document.getElementById('compareImgBefore').src = oldUrl;
+    document.getElementById('compareImgAfter').src = newUrl;
+    document.getElementById('compareDateOld').innerText = oldDate;
+    document.getElementById('compareDateNew').innerText = newDate;
+    
+    // Reset slider
+    const ctrl = document.getElementById('compareSliderCtrl');
+    ctrl.value = 50;
+    document.getElementById('compareImgBeforeContainer').style.clipPath = `polygon(0 0, 50% 0, 50% 100%, 0 100%)`;
+    document.getElementById('compareSliderLine').style.left = `50%`;
+
+    document.getElementById('compareModalOverlay').style.display = 'block';
+    
+    // Slide up animation
+    const content = document.getElementById('compareModalContent');
+    content.style.display = 'flex';
+    content.style.flexDirection = 'column';
+    content.style.bottom = '-100%';
+    
+    // Give it a tiny delay for CSS transition
+    setTimeout(() => {
+        content.style.transition = 'bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1)';
+        content.style.bottom = '0';
+    }, 10);
+};
+
+window.closeCompareModal = function() {
+    const content = document.getElementById('compareModalContent');
+    content.style.bottom = '-100%';
+    
+    setTimeout(() => {
+        content.style.display = 'none';
+        document.getElementById('compareModalOverlay').style.display = 'none';
+    }, 300);
+};
+
+// Listen for slider changes globally
+document.addEventListener('DOMContentLoaded', () => {
+    const ctrl = document.getElementById('compareSliderCtrl');
+    if(ctrl) {
+        ctrl.addEventListener('input', function(e) {
+            const val = e.target.value;
+            document.getElementById('compareImgBeforeContainer').style.clipPath = `polygon(0 0, ${val}% 0, ${val}% 100%, 0 100%)`;
+            document.getElementById('compareSliderLine').style.left = `${val}%`;
+        });
     }
 });
 

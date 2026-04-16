@@ -25,6 +25,7 @@ import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
 import { cleanOldCropScanImages } from './services/r2_cleaner.js';
 import { resetMonthlyLimits } from './services/limitResetter.js';
 import { compressUncompressedImages, findOrphanImages, deleteOrphanImages } from './routes/admin_dbtools.js';
+import { checkAndSendPlantReminders } from './services/statusReminderService.js';
 
 
 const router = Router();
@@ -169,6 +170,13 @@ router.put('/api/crops/:id/beds-sync', withAuth(['farmer']), syncCropBeds);
 router.get('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), getPlantLogs);
 router.post('/api/crops/beds/:bedId/plants/:plantIdentifier/logs', withAuth(['farmer']), addPlantLog);
 
+// 3.9 Testing Route for Reminders!
+router.get('/api/test-reminders', async (request, env) => {
+    const isForce = new URL(request.url).searchParams.get('force') === 'true';
+    const result = await checkAndSendPlantReminders(env, isForce);
+    return new Response(JSON.stringify(result), { headers: { 'Content-Type': 'application/json' } });
+});
+
 // 4. AI Engine Sub-Router (Admin Only - auth handled in sub-router)
 router.all('/api/admin/ai/*', aiRouter.handle);
 
@@ -210,7 +218,8 @@ export default {
             checkOverdueTasks(env),
             syncWeatherData(env),
             cleanOldCropScanImages(env),
-            resetMonthlyLimits(env)
+            resetMonthlyLimits(env),
+            checkAndSendPlantReminders(env)
         ]));
     }
 };

@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS farmers (
     remaining_scans INTEGER DEFAULT 3,
     remaining_timelines INTEGER DEFAULT 5,
     remaining_chats INTEGER DEFAULT 15,
+    fcm_token TEXT,                     -- Firebase FCM Notification token
+    email TEXT,                         -- Optional email for testing / notifications
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

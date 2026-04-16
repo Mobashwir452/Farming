@@ -452,8 +452,8 @@ class AppBottomNav extends HTMLElement {
             }
         });
 
-        // Ensure home is set if we couldn't figure it out
-        if (isHome && !currentPath.includes('khamar') && !currentPath.includes('land_details') && !currentPath.includes('add_land') && !currentPath.includes('tasks') && !currentPath.includes('hishab') && !currentPath.includes('transactions')) {
+        // Highlight 'Home' by default only when opening the root without a page name
+        if (isHome && (currentPath === '/' || currentPath === '' || currentPath.endsWith('/') || currentPath.includes('index.html'))) {
             const homeBtn = this.querySelector('[data-page="dashboard.html"]');
             if (homeBtn) homeBtn.classList.add('active');
         }

@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging.js";
 
 export const API_URL = 'https://agritech-backend.mobashwir9.workers.dev';
 
@@ -15,6 +16,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 auth.useDeviceLanguage();
+const messaging = getMessaging(app);
+
+async function fetchFCMToken() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            // Provide a vapidKey if needed for web. Or let Firebase use the default sender ID
+            const currentToken = await getToken(messaging);
+            return currentToken;
+        }
+    } catch (e) {
+        console.log("FCM Warning:", e);
+    }
+    return null;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Basic Custom Toast if standard component not active
@@ -232,11 +248,14 @@ document.addEventListener('DOMContentLoaded', () => {
             btnLogin.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> লগইন হচ্ছে...';
 
             try {
+                let fcmToken = null;
+                try { fcmToken = await fetchFCMToken(); } catch(e) {}
+
                 const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
                 const response = await fetch(`${apiUrl}/api/auth/login-pin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: currentLoginPhone, pin: pin })
+                    body: JSON.stringify({ phone: currentLoginPhone, pin: pin, fcmToken })
                 });
 
                 if (!response.ok) {
@@ -372,11 +391,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 4: Signup Final
     const btnSignup = document.getElementById('btnSignup');
     const signupName = document.getElementById('signupName');
+    const signupEmail = document.getElementById('signupEmail');
     const signupPin = document.getElementById('signupPin');
 
     if (btnSignup && signupName && signupPin) {
         btnSignup.addEventListener('click', async () => {
             const name = signupName.value.trim();
+            const email = signupEmail ? signupEmail.value.trim() : null;
             const pin = signupPin.value.trim();
 
             if (!name || pin.length < 4) {
@@ -388,6 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSignup.innerHTML = '<span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span> অ্যাকাউন্ট তৈরি হচ্ছে...';
 
             try {
+                let fcmToken = null;
+                try { fcmToken = await fetchFCMToken(); } catch(e) {}
+
                 const token = localStorage.getItem('farmer_jwt');
                 const apiUrl = 'https://agritech-backend.mobashwir9.workers.dev';
 
@@ -397,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ name, pin })
+                    body: JSON.stringify({ name, email, pin, fcmToken })
                 });
 
                 if (!response.ok) {

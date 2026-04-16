@@ -8,6 +8,8 @@ compatibility_date = "2023-12-01"
 CF_ACCOUNT_ID = "56c92f2a4088a1e2118779d94f2a3b80"
 CF_API_TOKEN = "cfat_og84DbE15erDiOpL7l3w91FfbtCmhknaHCWXEO512d99e467"
 # API_SECRET = "super_secret_jwt_key_here" # We will set this securely using `wrangler secret put`
+# GAS_EMAIL_URL = "your_google_apps_script_web_app_url_here" # Set using wrangler secret
+# FCM_SERVER_KEY = "your_firebase_fcm_server_key_here" # Set using wrangler secret
 
 [[d1_databases]]
 binding = "DB"

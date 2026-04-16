@@ -391,6 +391,47 @@
         </div>
     </div>
 
+    <!-- Image Comparison Modal -->
+    <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none;" onclick="window.closeCompareModal()"></div>
+    <div class="method-sheet" id="compareModalContent" style="padding: 0; z-index: 1055; display:none; background: #0F172A; max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
+        <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E293B;">
+            <h3 style="color: #FFF; font-size: 16px; margin: 0; font-weight: 600;">গাছের পরিবর্তন দেখুন</h3>
+            <button onclick="window.closeCompareModal()" style="background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
+        </div>
+        
+        <div class="compare-container" style="position: relative; width: 100%; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+            <!-- After Image (Background) -->
+            <img id="compareImgAfter" style="display: block; width: 100%; height: 100%; object-fit: contain;">
+            
+            <!-- Before Image (Clipped) -->
+            <div id="compareImgBeforeContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">
+                 <img id="compareImgBefore" style="display: block; width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            
+            <!-- Range Slider Overlay -->
+            <input type="range" min="0" max="100" value="50" id="compareSliderCtrl" style="position: absolute; top:0; left:0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; z-index: 10; margin: 0; -webkit-appearance: none;">
+            
+            <!-- Visual Handle -->
+            <div id="compareSliderLine" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; pointer-events: none;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                    </div>
+            </div>
+
+            <!-- Labels -->
+            <div style="position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
+                <span id="compareDateOld"></span> (আগের)
+            </div>
+            <div style="position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
+                <span id="compareDateNew"></span> (বর্তমান)
+            </div>
+        </div>
+
+        <div style="padding: 24px 20px; background: #FFF; text-align: center;">
+             <p style="margin: 0; color: #475569; font-size: 14px;">মাঝখানের স্লাইডারটি ডানে-বামে সরিয়ে দেখুন।</p>
+        </div>
+    </div>
+
     <!-- Global Confirmation Modal -->
     <div class="center-modal" id="confirmActionModal" style="z-index: 99999;">
         <div class="center-modal-content"
