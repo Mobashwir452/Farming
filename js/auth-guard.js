@@ -18,7 +18,30 @@
     // Exclude Admin pages (they have their own auth logic)
     const isAdminPage = path.includes('/admin/');
 
-    if (!token && !isPublicPage && !isAdminPage) {
+    function isTokenExpired(t) {
+        try {
+            const parts = t.split('.');
+            if (parts.length !== 3) return true;
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload && payload.exp) {
+                // Return true if expired (Date.now() is greater than exp timestamp)
+                return Date.now() >= payload.exp;
+            }
+            return false;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    if (token) {
+        if (isTokenExpired(token)) {
+            // Token is dead
+            localStorage.removeItem('farmer_jwt');
+            if (!isPublicPage && !isAdminPage) {
+                window.location.replace('login.html');
+            }
+        }
+    } else if (!isPublicPage && !isAdminPage) {
         // Immediately redirect to login
         window.location.replace('login.html');
     }

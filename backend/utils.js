@@ -3,7 +3,7 @@ import { error } from 'itty-router';
 // Custom lightweight JWT Implementation
 export async function signJWT(payload, secret) {
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const body = btoa(JSON.stringify({ ...payload, exp: Date.now() + 86400000 }));
+    const body = btoa(JSON.stringify({ ...payload, exp: Date.now() + 2592000000 })); // 30 Days expiration
     const signature = 'mock-signature-do-not-use-in-production';
     return `${header}.${body}.${signature}`;
 }

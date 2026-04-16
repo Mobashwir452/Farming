@@ -7,9 +7,29 @@ const API_BASE_URL = 'https://agritech-backend.mobashwir9.workers.dev/api'; // L
 
 // Function to check if user is authenticated
 function requireAuth() {
-    const token = localStorage.getItem('agritech_admin_token');
+    let token = localStorage.getItem('agritech_admin_token');
     const isLoginPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('/login');
     
+    function isTokenExpired(t) {
+        try {
+            const parts = t.split('.');
+            if (parts.length !== 3) return true;
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload && payload.exp) {
+                return Date.now() >= payload.exp;
+            }
+            return false;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    if (token && isTokenExpired(token)) {
+        localStorage.removeItem('agritech_admin_token');
+        localStorage.removeItem('agritech_admin_user');
+        token = null;
+    }
+
     // If no token and not on login page, redirect to login
     if (!token && !isLoginPage) {
         window.location.href = 'login.html';

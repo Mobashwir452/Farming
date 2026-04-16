@@ -51,12 +51,51 @@ async function initApp() {
         }
 
         if (data && data.success && data.beds) {
-            farmData = data.beds.map(bed => {
+            let needsSave = [];
+            farmData = data.beds.map((bed, bIndex) => {
                 if (typeof bed.plants_nodes_json === 'string') {
                     bed.plants_nodes_json = JSON.parse(bed.plants_nodes_json);
                 }
+                
+                // --- Auto Fix Corrupted Number IDs ---
+                if (Array.isArray(bed.plants_nodes_json)) {
+                    let maxT = 0;
+                    let prefix = `B${bIndex + 1}-T`;
+                    bed.plants_nodes_json.forEach(p => {
+                        let idStr = String(p.id || '');
+                        if (idStr.includes('-T')) {
+                            const parts = idStr.split('-T');
+                            prefix = parts[0] + '-T';
+                            let num = parseInt(parts[1], 10);
+                            if (!isNaN(num) && num > maxT) maxT = num;
+                        }
+                    });
+                    
+                    let bedChanged = false;
+                    bed.plants_nodes_json.forEach(p => {
+                        let idStr = String(p.id || '');
+                        if (!idStr.includes('-')) {
+                            maxT++;
+                            p.id = prefix + maxT;
+                            bedChanged = true;
+                        }
+                    });
+                    
+                    if (bedChanged) needsSave.push(bed);
+                }
+                
                 return bed;
             });
+            
+            // Silently fix corrupted beds in backend
+            needsSave.forEach(bed => {
+                 fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+                     method: 'PUT',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({ plants_nodes_json: bed.plants_nodes_json })
+                 }).catch(e => console.error("Silent fix failed:", e));
+            });
+
             renderBeds();
         } else {
             document.getElementById('trackerMain').innerHTML = '<div style="text-align:center; padding: 40px;">কোনো ডেটা পাওয়া যায়নি। আগে ম্যাপ তৈরি করুন।</div>';
@@ -140,7 +179,7 @@ function renderBeds() {
                 <div class="avatar-ring ${emptyClass}" style="${bgStyle}">
                     ${emptyIcon}
                 </div>
-                <div class="chip-id">${node.id.split('-')[1]}</div>
+                <div class="chip-id">${String(node.id || '').includes('-') ? String(node.id).split('-')[1] : String(node.id)}</div>
             `;
             
             if (node.replanted_date) {
@@ -640,11 +679,7 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
         document.getElementById('bsVariety').value = node.variety || '';
     }
     
-    // Checkboxes
-    const fChip = document.getElementById('bsFertilizerChip');
-    const pChip = document.getElementById('bsPesticideChip');
-    if(node.is_fertilized) fChip.classList.add('active'); else fChip.classList.remove('active');
-    if(node.is_pesticide) pChip.classList.add('active'); else pChip.classList.remove('active');
+    // Checkboxes removed from UI
     
     // Reset image / load latest image
     document.getElementById('bsImageInput').value = '';
@@ -921,8 +956,9 @@ async function executeSavePlantDetails(btn) {
         const noteText = document.getElementById('bsNote').value;
         node.disease = noteText;
         
-        node.is_fertilized = document.getElementById('bsFertilizerChip').classList.contains('active');
-        node.is_pesticide = document.getElementById('bsPesticideChip').classList.contains('active');
+        // Checkboxes removed from UI, keeping defaults or existing states
+        node.is_fertilized = node.is_fertilized || false;
+        node.is_pesticide = node.is_pesticide || false;
 
         if (document.getElementById('btnSetCritical').classList.contains('active')) node.state = 'C';
         else if (document.getElementById('btnSetSick').classList.contains('active')) node.state = 'S';
@@ -1054,13 +1090,44 @@ async function executeDeletePlantLog(logIndex) {
     }
 }
 
+window.globalViewerInstance = null;
 window.openFullScreenImage = function(src) {
-    const modal = document.getElementById('fullImageModal');
-    const view = document.getElementById('fullImageView');
-    if (modal && view) {
-        view.src = src;
-        modal.style.display = 'flex';
+    if (!src || src.includes('placehold.co')) return;
+    
+    const tempImg = document.createElement('img');
+    tempImg.src = src;
+    
+    if (window.globalViewerInstance) {
+        window.globalViewerInstance.destroy();
     }
+    
+    window.globalViewerInstance = new Viewer(tempImg, {
+        hidden: function () {
+            if (window.globalViewerInstance) {
+                window.globalViewerInstance.destroy();
+                window.globalViewerInstance = null;
+            }
+        },
+        toolbar: {
+            zoomIn: 1,
+            zoomOut: 1,
+            oneToOne: 1,
+            reset: 1,
+            play: 0,
+            prev: 0,
+            next: 0,
+            rotateLeft: 1,
+            rotateRight: 1,
+            flipHorizontal: 1,
+            flipVertical: 1
+        },
+        navbar: false,
+        title: false,
+        button: true,
+        backdrop: true,
+        transition: true
+    });
+    window.globalViewerInstance.show();
 };
 
 // ========================
@@ -1451,3 +1518,216 @@ window.confirmDateSelection = function() {
     window.closeDatePicker();
 };
 
+// ========================
+// Smart Data Relocation Logic
+// ========================
+window.toggleCustomSelect = function() {
+    const dropdown = document.getElementById('customSelectDropdown');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+};
+
+window.selectCustomOption = function(val, text) {
+    document.getElementById('relocateTargetSelect').value = val;
+    document.getElementById('customSelectText').innerText = text;
+    document.getElementById('customSelectDropdown').style.display = 'none';
+};
+
+document.addEventListener('click', function(e) {
+    const display = document.getElementById('customSelectDisplay');
+    const dropdown = document.getElementById('customSelectDropdown');
+    if (display && dropdown && !display.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+let confirmModalCallback = null;
+window.showConfirmModal = function(title, text, callback) {
+    let confirmModal = document.getElementById('customConfirmModal');
+    if (!confirmModal) {
+        confirmModal = document.createElement('div');
+        confirmModal.id = 'customConfirmModal';
+        confirmModal.className = 'center-modal';
+        confirmModal.style.zIndex = '99999'; // Ekdom top z-index
+        confirmModal.innerHTML = `
+            <div class="center-modal-content">
+                <h3 id="confirmModalTitle" style="font-size: 20px; color: #0F172A; margin-bottom: 12px;"></h3>
+                <p id="confirmModalText" style="color: #64748B; font-size: 14px; margin-bottom: 24px; line-height: 1.5;"></p>
+                <div style="display: flex; gap: 12px;">
+                    <button id="confirmModalCancel" style="flex: 1; padding: 12px; border-radius: 12px; background: #F1F5F9; color: #475569; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">বাতিল</button>
+                    <button id="confirmModalOk" style="flex: 1; padding: 12px; border-radius: 12px; background: #059669; color: white; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">ঠিক আছে</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmModal);
+        
+        document.getElementById('confirmModalCancel').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').classList.remove('active');
+        });
+        document.getElementById('confirmModalOk').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').classList.remove('active');
+            if(confirmModalCallback) confirmModalCallback();
+        });
+    }
+    
+    document.getElementById('confirmModalTitle').innerText = title;
+    document.getElementById('confirmModalText').innerText = text;
+    
+    if(!callback) {
+        document.getElementById('confirmModalCancel').style.display = 'none';
+        document.getElementById('confirmModalOk').innerText = 'ঠিক আছে';
+    } else {
+        document.getElementById('confirmModalCancel').style.display = 'block';
+        document.getElementById('confirmModalOk').innerText = 'নিশ্চিত';
+    }
+    confirmModalCallback = callback;
+    confirmModal.classList.add('active');
+};
+
+window.openRelocateModal = function() {
+    if(!currentlyEditingPlant) return;
+    const {bed, node, pIndex} = currentlyEditingPlant;
+    
+    document.getElementById('relocateTargetSelect').value = '';
+    document.getElementById('customSelectText').innerText = 'গাছ নির্বাচন করুন';
+    const dropdown = document.getElementById('customSelectDropdown');
+    dropdown.innerHTML = '';
+    
+    let html = '';
+    bed.plants_nodes_json.forEach((p, idx) => {
+        if(idx !== pIndex && p.state !== 'M') {
+            let stateTxt = '';
+            if(p.state === 'H') stateTxt = 'সুস্থ';
+            else if(p.state === 'S') stateTxt = 'অসুস্থ';
+            else if(p.state === 'C') stateTxt = 'বিপজ্জনক';
+            
+            p.id = String(p.id || '');
+            let displayId = p.id.includes('-') ? p.id.split('-')[1] : p.id;
+            html += `<div class="custom-option" style="padding: 12px 16px; cursor: pointer; font-size: 14px; color: #1E293B; border-bottom: 1px solid #F1F5F9; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" onclick="window.selectCustomOption('${idx}', 'গাছ ${displayId} (বর্তমান অবস্থা: ${stateTxt})')">গাছ ${displayId} (বর্তমান অবস্থা: ${stateTxt})</div>`;
+        }
+    });
+    
+    const container = document.getElementById('relocateSelectContainer');
+    if (html === '') {
+        container.style.display = 'none';
+        const modalBtns = document.getElementById('relocateModal').querySelectorAll('button');
+        modalBtns.forEach(btn => {
+            if(btn.innerText.includes('অদলবদল') || btn.innerText.includes('ওভাররাইট')) {
+                btn.style.display = 'none';
+            }
+        });
+    } else {
+        dropdown.innerHTML = html;
+        container.style.display = 'block';
+        const modalBtns = document.getElementById('relocateModal').querySelectorAll('button');
+        modalBtns.forEach(btn => {
+            if(btn.innerText.includes('অদলবদল') || btn.innerText.includes('ওভাররাইট') || btn.innerText.includes('নতুন গাছ তৈরি')) {
+                btn.style.display = ''; 
+            }
+        });
+    }
+    
+    document.getElementById('relocateModal').classList.add('active');
+};
+
+window.closeRelocateModal = function() {
+    document.getElementById('relocateModal').classList.remove('active');
+};
+
+window.executeRelocation = function(type) {
+    if(!currentlyEditingPlant) return;
+    const {bed, node, pIndex} = currentlyEditingPlant;
+    const select = document.getElementById('relocateTargetSelect');
+    
+    let targetIndex = select.value !== "" ? parseInt(select.value) : -1;
+    let plants = bed.plants_nodes_json;
+
+    const finalizeAndSave = async (updatedPlants) => {
+        closeRelocateModal();
+        closeBottomSheet();
+        
+        const loader = document.getElementById('fullScreenLoader');
+        if(loader) loader.style.display = 'flex';
+        
+        const token = localStorage.getItem('farmer_jwt');
+        try {
+            await fetch(`${API_BASE_URL}/api/crops/${cropId}/beds/${bed.id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ plants_nodes_json: updatedPlants })
+            });
+            Object.assign(bed, {plants_nodes_json: updatedPlants});
+            renderBeds();
+            if(loader) loader.style.display = 'none';
+        } catch(e) {
+            console.error("Relocation API error: ", e);
+            if(loader) loader.style.display = 'none';
+            showConfirmModal('সতর্কতা', 'কোথাও সমস্যা হচ্ছে, আবার চেষ্টা করুন।', null);
+        }
+    };
+    
+    if (type === 'swap') {
+        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
+        const targetNode = plants[targetIndex];
+        
+        const tempId1 = node.id;
+        const tempId2 = targetNode.id;
+        
+        const clone1 = JSON.parse(JSON.stringify(node));
+        const clone2 = JSON.parse(JSON.stringify(targetNode));
+        
+        clone1.id = tempId2;
+        clone2.id = tempId1;
+        
+        plants[pIndex] = clone2;
+        plants[targetIndex] = clone1;
+        
+        finalizeAndSave(plants);
+        
+    } else if (type === 'new') {
+        // Find max ID correctly by parsing numbers from strings like "B1-T12"
+        let maxIdNum = 0;
+        let prefix = "B1-T"; // default fallback
+        
+        plants.forEach(p => { 
+            const idStr = String(p.id || '');
+            if(idStr.includes('-T')) {
+                const parts = idStr.split('-T');
+                prefix = parts[0] + '-T';
+                const num = parseInt(parts[1], 10);
+                if(!isNaN(num) && num > maxIdNum) maxIdNum = num;
+            } else if (!isNaN(parseInt(idStr, 10))) {
+                if (parseInt(idStr, 10) > maxIdNum) maxIdNum = parseInt(idStr, 10);
+            }
+        });
+        
+        const newId = maxIdNum > 0 ? (prefix + (maxIdNum + 1)) : (node.id + "-N");
+        const clone = JSON.parse(JSON.stringify(node));
+        clone.id = newId;
+        plants.push(clone);
+        
+        // Reset current
+        plants[pIndex] = { id: node.id, state: 'H', height: "", fruits: "", leaf_count: "", logs: [] };
+        
+        finalizeAndSave(plants);
+        
+    } else if (type === 'overwrite') {
+        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
+        showConfirmModal('আপনি কি নিশ্চিত?', 'এই অপশনের ফলে টার্গেট গাছের আগের সব ডেটা সম্পূর্ণ মুছে যাবে। আপনি কি সত্যিই ওভাররাইট করতে চান?', () => {
+            const targetNode = plants[targetIndex];
+            const targetId = targetNode.id;
+            
+            const clone = JSON.parse(JSON.stringify(node));
+            clone.id = targetId;
+            
+            plants[targetIndex] = clone;
+            
+            // Reset current
+            plants[pIndex] = { id: node.id, state: 'H', height: "", fruits: "", leaf_count: "", logs: [] };
+            
+            finalizeAndSave(plants);
+        });
+    }
+};
