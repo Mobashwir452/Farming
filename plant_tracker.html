@@ -119,23 +119,33 @@
     </main>
 
     <div id="batchActionBar" class="batch-action-bar">
-        <div class="selected-count" style="display: flex; align-items: center; gap: 6px;">
+        <!-- Left Side: Close & Count -->
+        <div class="selected-count" style="display: flex; align-items: center; gap: 8px;">
             <button onclick="toggleBatchMode()"
-                style="background:transparent; border:none; color:#64748b; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:16px; cursor:pointer; background: #e2e8f0; padding:0;">&times;</button>
-            <span id="selectedCountValue">0 টি</span>
+                style="background: #F1F5F9; border:none; color:#475569; display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; font-size:18px; cursor:pointer;">&times;</button>
+            <span id="selectedCountValue" style="font-size: 14px; font-weight: 700; color: #1E293B;">0 টি</span>
         </div>
-        <div class="batch-actions" style="gap: 5px; flex-wrap: nowrap;">
-            <button id="btnSelectAllFarm" class="action-btn-sm"
-                style="padding: 6px 8px; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 6px;"
-                onclick="toggleSelectAllFarm()">☑ সব</button>
-            <button class="action-btn-sm success" style="padding: 6px 10px;"
-                onclick="markSelectedAreaStatus('H')">সুস্থ</button>
-            <button class="action-btn-sm warning" style="padding: 6px 10px; background: #eab308; color: white;"
-                onclick="markSelectedAreaStatus('S')">অসুস্থ</button>
-            <button class="action-btn-sm danger" style="padding: 6px 10px;"
-                onclick="markSelectedAreaStatus('C')">বিপজ.</button>
-            <button class="action-btn-sm" style="background:var(--primary); padding: 6px 10px;"
-                onclick="openBatchUpdateModal()">আপডেট</button>
+
+        <!-- Right Side: Actions -->
+        <div class="batch-actions" style="display: flex; gap: 8px; align-items: center;">
+            <button id="btnSelectAllFarm" onclick="toggleSelectAllFarm()"
+                style="padding: 4px 6px; background: transparent; color: #475569; font-weight: 600; font-size: 13px; border: none; cursor: pointer;">সব</button>
+            
+            <div style="width: 1px; height: 18px; background: #CBD5E1; margin: 0 2px;"></div>
+            
+            <!-- Quick Status Colors (Dots) -->
+            <button onclick="markSelectedAreaStatus('H')" title="সুস্থ"
+                style="width: 26px; height: 26px; border-radius: 50%; background: var(--healthy-bg); border: 2px solid var(--healthy-color); cursor: pointer; padding: 0;"></button>
+            <button onclick="markSelectedAreaStatus('S')" title="অসুস্থ"
+                style="width: 26px; height: 26px; border-radius: 50%; background: var(--sick-bg); border: 2px solid var(--sick-color); cursor: pointer; padding: 0;"></button>
+            <button onclick="markSelectedAreaStatus('C')" title="বিপজ্জনক"
+                style="width: 26px; height: 26px; border-radius: 50%; background: var(--critical-bg); border: 2px solid var(--critical-color); cursor: pointer; padding: 0;"></button>
+                
+            <div style="width: 1px; height: 18px; background: #CBD5E1; margin: 0 2px;"></div>
+            
+            <!-- Update Button -->
+            <button onclick="openBatchUpdateModal()"
+                style="background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);">আপডেট</button>
         </div>
     </div>
 
@@ -147,11 +157,14 @@
             <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span
                     id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
 
-            <div id="batchReplantContainer" style="display:none; margin-bottom: 15px; padding: 15px; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC;">
-                <label style="font-weight: bold; color: #334155; margin-bottom: 8px; display: block;">🌱 চারা পুনরায় রোপণ (Replant)</label>
+            <div id="batchReplantContainer"
+                style="display:none; margin-bottom: 15px; padding: 15px; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC;">
+                <label style="font-weight: bold; color: #334155; margin-bottom: 8px; display: block;">🌱 চারা পুনরায়
+                    রোপণ (Replant)</label>
                 <div class="input-group" style="margin-bottom: 10px;">
                     <label>নতুন চারা রোপণের তারিখ</label>
-                    <input type="text" id="batchReplantDate" readonly onclick="window.openDatePicker('batchReplantDate')">
+                    <input type="text" id="batchReplantDate" readonly
+                        onclick="window.openDatePicker('batchReplantDate')">
                 </div>
                 <div class="input-group" style="margin-bottom: 0;">
                     <label>নতুন জাত (Variety)</label>
@@ -162,7 +175,9 @@
             <div id="batchNormalFieldsContainer">
                 <div class="input-group" style="margin-bottom: 10px;">
                     <label>রোপণের তারিখ</label>
-                    <input type="text" id="batchPlantingDateInput" readonly onclick="window.openDatePicker('batchPlantingDateInput')" placeholder="পরিবর্তন না করতে চাইলে ফাঁকা রাখুন">
+                    <input type="text" id="batchPlantingDateInput" readonly
+                        onclick="window.openDatePicker('batchPlantingDateInput')"
+                        placeholder="পরিবর্তন না করতে চাইলে ফাঁকা রাখুন">
                 </div>
 
                 <div class="input-group">
@@ -182,7 +197,8 @@
                 </div>
 
                 <div class="care-checkboxes">
-                    <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া
+                    <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার
+                        দেওয়া
                         হয়েছে</div>
                     <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ
                         স্প্রে করা হয়েছে</div>
@@ -212,7 +228,8 @@
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <div class="plant-avatar-wrapper" style="position: relative; display: inline-block;">
                         <img id="bsAvatarPreview" src="https://placehold.co/100x100?text=Plant" alt="Plant Avatar"
-                            onclick="openFullScreenImage(this.src)" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; cursor: zoom-in; display: block; border: 2px solid #E2E8F0;">
+                            onclick="openFullScreenImage(this.src)"
+                            style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; cursor: zoom-in; display: block; border: 2px solid #E2E8F0;">
 
                         <!-- Upload Camera Icon at bottom right -->
                         <button onclick="document.getElementById('bsImageInput').click()"
@@ -235,20 +252,39 @@
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <h2 id="bsPlantTitle" style="margin: 0; font-size: 20px;">গাছ: T1</h2>
-                            <button onclick="window.openRelocateModal()" style="background: #F1F5F9; border: 1px solid #CBD5E1; cursor: pointer; color: #475569; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="ডেটা স্থানান্তর">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            <button onclick="window.openRelocateModal()"
+                                style="background: #F1F5F9; border: 1px solid #CBD5E1; cursor: pointer; color: #475569; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                title="ডেটা স্থানান্তর">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </button>
-                            <button onclick="window.deleteShiftPlantSerial()" style="background: #FFF1F2; border: 1px solid #FECDD3; cursor: pointer; color: #E11D48; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="এই গর্তটি মুছে ফেলুন">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <button onclick="window.deleteShiftPlantSerial()"
+                                style="background: #FFF1F2; border: 1px solid #FECDD3; cursor: pointer; color: #E11D48; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                title="এই গর্তটি মুছে ফেলুন">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                </svg>
                             </button>
                         </div>
                         <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
-                        <div id="bsPlantingDateContainer" style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;">
+                        <div id="bsPlantingDateContainer"
+                            style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;">
                             <span id="bsPlantingDateText">🌱 রোপণের তারিখ: -</span>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            <input type="date" id="bsPlantingDateInput" style="position:absolute; opacity:0; width:0; height:0; border:none; padding:0; margin:0;" onchange="window.updatePlantingDate(this.value)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <input type="date" id="bsPlantingDateInput"
+                                style="position:absolute; opacity:0; width:0; height:0; border:none; padding:0; margin:0;"
+                                onchange="window.updatePlantingDate(this.value)">
                         </div>
                     </div>
                 </div>
@@ -322,7 +358,7 @@
                         </svg>
                     </div>
                     <h3 style="margin: 0 0 8px 0; color: #1E293B;">গাছটি মৃত / নষ্ট</h3>
-                    
+
                     <!-- Section 1: Marking as Dead (visible if transitioning to dead) -->
                     <div id="markDeadSection" style="width: 100%; text-align: left; margin-bottom: 5px;">
                         <div class="input-group">
@@ -330,14 +366,16 @@
                             <input type="text" id="deadReason" placeholder="কী কারণে গাছটি মারা গেল?"
                                 style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; margin-bottom: 15px;">
                         </div>
-                        <button class="btn-primary w-full" style="background: #64748B;" onclick="window.saveDeadStatus(this)">
+                        <button class="btn-primary w-full" style="background: #64748B;"
+                            onclick="window.saveDeadStatus(this)">
                             মৃত স্ট্যাটাস সেভ করুন
                         </button>
                     </div>
 
                     <!-- Section 2: Replanting (visible if already officially dead) -->
                     <div id="replantSection" style="width: 100%; display: none;">
-                        <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">এখানে কি নতুন চারা রোপণ করা হয়েছে?</p>
+                        <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">এখানে কি নতুন চারা রোপণ করা
+                            হয়েছে?</p>
 
                         <button class="btn-primary w-full"
                             style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; background: #10B981; border: 1px solid #059669;"
@@ -419,49 +457,66 @@
     </div>
 
     <!-- Image Comparison Modal -->
-    <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none;" onclick="window.closeCompareModal()"></div>
-    <div class="method-sheet" id="compareModalContent" style="padding: 0; z-index: 1055; display:none; background: var(--primary-color, #10b981); max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
-        <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none;"
+        onclick="window.closeCompareModal()"></div>
+    <div class="method-sheet" id="compareModalContent"
+        style="padding: 0; z-index: 1055; display:none; background: var(--primary-color, #10b981); max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
+        <div
+            style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <h3 style="color: #FFF; font-size: 16px; margin: 0; font-weight: 600;">গাছের পরিবর্তন দেখুন</h3>
-            <button onclick="window.closeCompareModal()" style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
+            <button onclick="window.closeCompareModal()"
+                style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
         </div>
-        
-        <div class="compare-container" style="position: relative; width: 100%; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+
+        <div class="compare-container"
+            style="position: relative; width: 100%; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
             <!-- After Image (Background) -->
             <img id="compareImgAfter" style="display: block; width: 100%; height: 100%; object-fit: contain;">
-            
+
             <!-- Before Image (Clipped) -->
-            <div id="compareImgBeforeContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">
-                 <img id="compareImgBefore" style="display: block; width: 100%; height: 100%; object-fit: contain;">
+            <div id="compareImgBeforeContainer"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">
+                <img id="compareImgBefore" style="display: block; width: 100%; height: 100%; object-fit: contain;">
             </div>
-            
+
             <!-- Range Slider Overlay -->
-            <input type="range" min="0" max="100" value="50" id="compareSliderCtrl" style="position: absolute; top:0; left:0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; z-index: 10; margin: 0; -webkit-appearance: none;">
-            
+            <input type="range" min="0" max="100" value="50" id="compareSliderCtrl"
+                style="position: absolute; top:0; left:0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; z-index: 10; margin: 0; -webkit-appearance: none;">
+
             <!-- Visual Handle -->
-            <div id="compareSliderLine" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; pointer-events: none;">
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-                    </div>
+            <div id="compareSliderLine"
+                style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; pointer-events: none;">
+                <div
+                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8L22 12L18 16" />
+                        <path d="M6 8L2 12L6 16" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                    </svg>
+                </div>
             </div>
 
             <!-- Labels -->
             <!-- Left Side Select Dropdown (pointer-events: auto so it can be clicked) -->
-            <div style="z-index: 20; position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;">
-                <select id="compareDateSelect" onchange="window.onCompareDateChange(this.value)" style="background: transparent; color: #FFF; border: none; font-size: 13px; font-weight: 500; outline: none; cursor: pointer; padding-right: 4px;">
+            <div
+                style="z-index: 20; position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;">
+                <select id="compareDateSelect" onchange="window.onCompareDateChange(this.value)"
+                    style="background: transparent; color: #FFF; border: none; font-size: 13px; font-weight: 500; outline: none; cursor: pointer; padding-right: 4px;">
                     <!-- Options populated via JS -->
                 </select>
                 <span> (আগের)</span>
             </div>
-            
+
             <!-- Right Side Static Date -->
-            <div style="position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
+            <div
+                style="position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
                 <span id="compareDateNew"></span> (বর্তমান)
             </div>
         </div>
 
         <div style="padding: 24px 20px; background: #FFF; text-align: center;">
-             <p style="margin: 0; color: #475569; font-size: 14px;">মাঝখানের স্লাইডারটি ডানে-বামে সরিয়ে দেখুন।</p>
+            <p style="margin: 0; color: #475569; font-size: 14px;">মাঝখানের স্লাইডারটি ডানে-বামে সরিয়ে দেখুন।</p>
         </div>
     </div>
 
@@ -521,56 +576,97 @@
                     style="width: 100%; background: #F1F5F9; color: #475569; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600;">বাতিল
                     করুন</button>
             </div>
-            </div>
         </div>
+    </div>
     </div>
 
     <!-- Smart Relocation Modal -->
     <div class="center-modal" id="relocateModal" style="z-index: 99999;">
         <div class="center-modal-content"
             style="max-width: 340px; padding: 32px 24px; border-radius: 24px; background: white; margin: 0 auto; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
-            
-            <button onclick="window.closeRelocateModal()" style="position: absolute; top: 16px; right: 16px; background: #F8FAFC; border: none; font-size: 20px; color: #64748B; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F8FAFC'">&times;</button>
-            
+
+            <button onclick="window.closeRelocateModal()"
+                style="position: absolute; top: 16px; right: 16px; background: #F8FAFC; border: none; font-size: 20px; color: #64748B; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;"
+                onmouseover="this.style.background='#E2E8F0'"
+                onmouseout="this.style.background='#F8FAFC'">&times;</button>
+
             <!-- Sleek Icon Group -->
-            <div style="width: 56px; height: 56px; background: #ECFDF5; border: 1px solid #D1FAE5; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div
+                style="width: 56px; height: 56px; background: #ECFDF5; border: 1px solid #D1FAE5; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path>
                 </svg>
             </div>
-            
-            <h3 style="font-size: 20px; margin-bottom: 6px; font-weight: 700; color: #0F172A; text-align: center; letter-spacing: -0.01em;">ডেটা স্থানান্তর</h3>
+
+            <h3
+                style="font-size: 20px; margin-bottom: 6px; font-weight: 700; color: #0F172A; text-align: center; letter-spacing: -0.01em;">
+                ডেটা স্থানান্তর</h3>
             <p style="color: #64748B; font-size: 14px; line-height: 1.5; margin-bottom: 24px; text-align: center;">
                 এই গাছের সকল ডেটা অন্য কোনো গাছে ট্রান্সফার বা অদলবদল (Swap) করুন।
             </p>
-            
+
             <div style="margin-bottom: 24px;" id="relocateSelectContainer">
-                <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 8px;">কোথায় স্থানান্তর করবেন?</label>
+                <label
+                    style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 8px;">কোথায়
+                    স্থানান্তর করবেন?</label>
                 <div class="custom-select-wrapper" style="position: relative;">
-                    <div id="customSelectDisplay" onclick="window.toggleCustomSelect()" style="width: 100%; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px 14px; font-size: 15px; background: #FFF; color: #0F172A; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s;" onfocus="this.style.borderColor='#94A3B8'" onblur="this.style.borderColor='#E2E8F0'">
+                    <div id="customSelectDisplay" onclick="window.toggleCustomSelect()"
+                        style="width: 100%; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px 14px; font-size: 15px; background: #FFF; color: #0F172A; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#94A3B8'" onblur="this.style.borderColor='#E2E8F0'">
                         <span id="customSelectText">গাছ নির্বাচন করুন</span>
-                        <svg id="customSelectIcon" style="pointer-events: none; color: #94A3B8;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg id="customSelectIcon" style="pointer-events: none; color: #94A3B8;" width="16" height="16"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </div>
-                    <div id="customSelectDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: #FFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 10; max-height: 200px; overflow-y: auto;">
+                    <div id="customSelectDropdown"
+                        style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: #FFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 10; max-height: 200px; overflow-y: auto;">
                         <!-- Options populated by JS -->
                     </div>
                     <input type="hidden" id="relocateTargetSelect" value="">
                 </div>
             </div>
-            
+
             <div style="display: flex; gap: 12px; flex-direction: column;">
-                <button onclick="window.executeRelocation('shift_insert')" style="width: 100%; background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" title="এই সিরিয়ালে নতুন গর্ত যোগ করুন এবং অন্য সব গাছ ডানে সরিয়ে দিন">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                <button onclick="window.executeRelocation('shift_insert')"
+                    style="width: 100%; background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;"
+                    onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'"
+                    onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'"
+                    title="এই সিরিয়ালে নতুন গর্ত যোগ করুন এবং অন্য সব গাছ ডানে সরিয়ে দিন">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
                     এই গাছের আগে নতুন গর্ত যোগ করুন (শিফট)
                 </button>
-                <button onclick="window.executeRelocation('swap')" style="width: 100%; background: #059669; color: white; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <button onclick="window.executeRelocation('swap')"
+                    style="width: 100%; background: #059669; color: white; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;"
+                    onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'"
+                    onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
                     অদলবদল
                 </button>
-                <button onclick="window.executeRelocation('overwrite')" style="width: 100%; background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                <button onclick="window.executeRelocation('overwrite')"
+                    style="width: 100%; background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, background 0.2s;"
+                    onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'"
+                    onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2">
+                        </polygon>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
                     ওভাররাইট
                 </button>
             </div>
@@ -581,15 +677,16 @@
 
 
     <!-- Navigation Bar for Mobile -->
-    
+
     <!-- Calendar Bottom Sheet Modal -->
-    <div class="method-sheet-overlay" id="datePickerOverlay" style="z-index: 1050;" onclick="window.closeDatePicker(event)"></div>
+    <div class="method-sheet-overlay" id="datePickerOverlay" style="z-index: 1050;"
+        onclick="window.closeDatePicker(event)"></div>
     <div class="method-sheet" id="datePickerContent" style="padding-bottom: 24px; z-index: 1055;">
         <div class="method-sheet-header">
             <h3>তারিখ নির্বাচন করুন</h3>
             <button class="close-sheet" onclick="window.closeDatePicker(event)">✕</button>
         </div>
-        
+
         <div class="calendar-body" style="margin-bottom: 24px; padding: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div class="calendar-month" id="calendarMonthLabel"
@@ -614,10 +711,12 @@
                     </button>
                 </div>
             </div>
-            <div class="calendar-weekdays" style="margin-bottom: 12px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; font-weight: 600; color: #64748B;">
+            <div class="calendar-weekdays"
+                style="margin-bottom: 12px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; font-weight: 600; color: #64748B;">
                 <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
             </div>
-            <div class="calendar-days" id="calendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 0;">
+            <div class="calendar-days" id="calendarDays"
+                style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 0;">
                 <!-- JS will populate -->
             </div>
         </div>

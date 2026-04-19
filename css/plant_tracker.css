@@ -210,9 +210,8 @@ body {
     background-size: cover;
     background-position: center;
     position: relative;
-    border: 3px solid transparent;
-    background-color: #f1f5f9;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    background-color: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -225,16 +224,17 @@ body {
 }
 
 .chip-id {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-main);
     line-height: 1;
     text-align: center;
+    margin-top: 4px;
 }
 
 .chip-variety {
     font-size: 11px;
-    color: var(--text-dim);
+    color: #94a3b8;
     line-height: 1.1;
     text-align: center;
     display: -webkit-box;
@@ -246,119 +246,76 @@ body {
     word-break: break-word;
 }
 
-/* Status Colors on the Ring */
-.plant-chip.healthy .avatar-ring {
-    border-color: var(--healthy-color);
-    background-color: var(--healthy-bg);
-    color: var(--healthy-color);
+/* Status Dots (Sleek Avatar Style) */
+.status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2.5px solid white;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.plant-chip.sick .avatar-ring {
-    border-color: var(--sick-color);
-    background-color: var(--sick-bg);
-    color: var(--sick-color);
+.plant-chip.healthy .status-dot {
+    background-color: var(--healthy-color);
 }
 
-.plant-chip.critical .avatar-ring {
-    border-color: var(--critical-color);
-    background-color: var(--critical-bg);
-    color: var(--critical-color);
+.plant-chip.sick .status-dot {
+    background-color: var(--sick-color);
+}
+
+.plant-chip.critical .status-dot {
+    background-color: var(--critical-color);
+}
+
+.plant-chip.dead .status-dot {
+    background-color: #94a3b8;
 }
 
 .plant-chip.dead .avatar-ring {
-    border-color: #94a3b8;
-    background-color: #cbd5e1;
-    color: #475569;
     filter: grayscale(100%);
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 /* Empty State / Photo Needed */
 .avatar-ring.empty-state {
-    border-style: dashed;
-    border-width: 2.5px;
-}
-
-.plant-chip.sick .avatar-ring::after {
-    content: '!';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: var(--sick-color);
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-    font-weight: bold;
-}
-
-.plant-chip.critical .avatar-ring::after {
-    content: '✖';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: var(--critical-color);
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-}
-
-.plant-chip.dead .avatar-ring::after {
-    content: '✖';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #64748b;
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
+    border: 2px dashed #cbd5e1;
 }
 
 .replant-badge {
     position: absolute;
-    top: -2px;
-    left: -2px;
-    background: #d1fae5;
-    color: #059669;
-    width: 20px;
-    height: 20px;
+    top: -4px;
+    left: -4px;
+    background: #10b981;
+    color: white;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid white;
+    border: 2.5px solid white;
     z-index: 2;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.replant-badge svg {
+    width: 12px;
+    height: 12px;
 }
 
 /* Batch Mode Styles */
 .batch-mode .avatar-ring {
-    border-color: var(--border-color);
+    border: 3px solid transparent;
 }
 
 .batch-mode .plant-chip.selected .avatar-ring {
-    border-color: var(--primary);
-    border-width: 4px;
+    border-color: transparent;
+    outline: 3px dashed var(--primary);
+    outline-offset: 2px;
 }
 
 .batch-mode .plant-chip.selected .avatar-ring::before {
@@ -381,11 +338,15 @@ body {
 
 /* Dead plant styles in batch mode */
 .batch-mode .plant-chip.dead .avatar-ring {
-    border-color: #94A3B8; /* Ash color for unselected */
+    border-color: transparent;
+    /* Ash color for unselected */
 }
+
 .batch-mode .plant-chip.dead.selected .avatar-ring {
-    border-color: #64748B; /* Darker ash for selected */
+    outline-color: #64748B;
+    /* Darker ash for selected */
 }
+
 .batch-mode .plant-chip.dead.selected .avatar-ring::before {
     background: #64748B;
 }
@@ -393,20 +354,26 @@ body {
 .batch-action-bar {
     position: fixed;
     bottom: -100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    padding: 16px;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 450px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 14px;
+    border-radius: 100px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 90;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .batch-action-bar.visible {
-    bottom: 0;
+    bottom: 24px;
 }
 
 .batch-actions {
