@@ -76,9 +76,23 @@ body {
     right: 0;
     top: 0;
     bottom: 0;
-    width: 30px;
-    background: linear-gradient(to left, #F8FAFC, transparent);
+    width: 50px;
+    background: linear-gradient(to left, #F8FAFC 10%, transparent);
     pointer-events: none;
+    z-index: 10;
+}
+
+/* Optional left fade when scrolled (using JS later if needed, but right fade is more critical) */
+.tracker-tabs-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, #F8FAFC, transparent);
+    pointer-events: none;
+    z-index: 10;
 }
 
 .ld-tabs {
@@ -86,11 +100,14 @@ body {
     gap: 8px;
     background: #F8FAFC;
     /* Different color from Top Bar */
-    padding: 16px 16px 12px 16px;
+    padding: 16px 36px 12px 16px; /* Added right padding so last item doesn't stick to edge */
     border-radius: 0;
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
     scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-right: 20px;
+    scroll-padding-left: 20px;
 }
 
 .ld-tabs::-webkit-scrollbar {
@@ -99,25 +116,48 @@ body {
 
 .ld-tab {
     flex: 0 0 auto;
-    padding: 10px 16px;
+    padding: 8px 16px;
     text-align: center;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dim);
-    border: none;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #475569;
+    border: 1px solid transparent;
     background: transparent;
-    /* Transparent to blend with the tabs bar */
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ld-tab:active {
+    background: #E2E8F0;
+    transform: scale(0.97);
 }
 
 .ld-tab.active {
     background: var(--primary) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
-    transform: translateY(-2px);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.ld-tab span {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #E2E8F0;
+    color: #64748B;
+    transition: all 0.2s;
+}
+
+.ld-tab.active span {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
 /* Removed old FAB Settings as it is moved to top bar */
@@ -132,10 +172,10 @@ body {
 
 .bed-card {
     background: var(--card-bg);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    border: none;
     overflow: hidden;
     transition: all 0.3s;
 }
@@ -144,9 +184,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
+    padding: 16px 20px;
     cursor: pointer;
     background: var(--card-bg);
+    transition: background 0.2s;
+}
+
+.bed-header:active {
+    background: #F8FAFC;
 }
 
 .bed-header h2 {
@@ -154,20 +199,77 @@ body {
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    font-weight: 600;
 }
 
-.bed-stats {
+.sleek-edit-btn {
+    background: #F1F5F9;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    color: #64748B;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.sleek-edit-btn:hover, .sleek-edit-btn:active {
+    background: #E2E8F0;
+    color: #334155;
+    transform: scale(0.95);
+}
+
+.bed-stats-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.bed-stats-badges .badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font-size: 12px;
-    color: var(--text-dim);
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: #F8FAFC;
+    color: #475569;
+}
+
+.bed-stats-badges .badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.bed-stats-badges .badge.healthy .dot { background: #10B981; }
+.bed-stats-badges .badge.sick .dot { background: #F59E0B; }
+.bed-stats-badges .badge.critical .dot { background: #EF4444; }
+.bed-stats-badges .badge.dead .dot { background: #64748B; }
+
+.bed-stats-badges .badge.zero {
+    opacity: 0.4;
+    font-weight: 500;
+}
+
+.accordion-chevron {
+    color: #94A3B8;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bed-card.open .accordion-chevron {
+    transform: rotate(180deg);
 }
 
 .bed-content {
     display: none;
     padding: 0 16px 16px;
-    border-top: 1px dashed var(--border-color);
-    margin-top: -1px;
-    /* overlap border */
+    border-top: 1px solid #F1F5F9;
+    margin-top: 0;
 }
 
 .bed-card.open .bed-content {
@@ -180,8 +282,8 @@ body {
 
 .plant-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 16px 8px;
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 16px 12px;
     /* Extra row gap for text */
     margin-top: 16px;
     align-items: start;
@@ -194,7 +296,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     cursor: pointer;
     position: relative;
     transition: transform 0.1s;
@@ -224,37 +326,38 @@ body {
 }
 
 .chip-id {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-main);
     line-height: 1;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .chip-variety {
     font-size: 11px;
     color: #94a3b8;
-    line-height: 1.1;
+    line-height: 1.2;
     text-align: center;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
     max-width: 100%;
-    word-break: break-word;
 }
 
 /* Status Dots (Sleek Avatar Style) */
 .status-dot {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 16px;
-    height: 16px;
+    bottom: 0px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 2.5px solid white;
+    border: 3px solid white;
     z-index: 2;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -285,20 +388,25 @@ body {
 
 /* Empty State / Photo Needed */
 .avatar-ring.empty-state {
-    border: 2px dashed #cbd5e1;
+    border: none;
+    background-color: #F1F5F9;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
 }
 
+/* Replant Badge (Leaf) */
 .status-dot.is-replant {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     bottom: -2px;
     right: -2px;
+    border: 3px solid white;
+    background-color: #3B82F6; /* Premium Blue for replant */
     color: white; /* SVG stroke color */
 }
 
 .status-dot.is-replant svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
 }
 
 /* Batch Mode Styles */
@@ -463,27 +571,27 @@ body {
 }
 
 .healthy-btn.active {
-    background: var(--healthy-color);
-    color: white;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+    background: var(--healthy-bg);
+    color: var(--healthy-color);
+    box-shadow: inset 0 0 0 1.5px var(--healthy-color), 0 4px 10px rgba(16, 185, 129, 0.25);
 }
 
 .sick-btn.active {
-    background: var(--sick-color);
-    color: white;
-    box-shadow: 0 4px 10px rgba(234, 179, 8, 0.25);
+    background: var(--sick-bg);
+    color: var(--sick-color);
+    box-shadow: inset 0 0 0 1.5px var(--sick-color), 0 4px 10px rgba(234, 179, 8, 0.25);
 }
 
 .critical-btn.active {
-    background: var(--critical-color);
-    color: white;
-    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.25);
+    background: var(--critical-bg);
+    color: var(--critical-color);
+    box-shadow: inset 0 0 0 1.5px var(--critical-color), 0 4px 10px rgba(249, 115, 22, 0.25);
 }
 
 .dead-btn.active {
-    background: var(--dead-color);
-    color: white;
-    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+    background: #f1f5f9;
+    color: #475569;
+    box-shadow: inset 0 0 0 1.5px #64748b, 0 4px 10px rgba(100, 116, 139, 0.25);
 }
 
 .smart-agronomy-form {
@@ -593,6 +701,8 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
@@ -612,10 +722,11 @@ body {
     background: var(--bg-color);
     width: 90%;
     max-width: 400px;
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 24px;
     transform: translateY(20px);
     transition: transform 0.3s;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
 .modal-close {
@@ -642,11 +753,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 8px;
+    background: transparent;
+    padding: 12px 0;
+    border-bottom: 1px solid #F1F5F9;
+    margin-bottom: 0;
+}
+
+.bed-editor-row:last-child {
+    border-bottom: none;
 }
 
 .bed-editor-row button {
@@ -721,76 +835,8 @@ body {
     border-color: var(--primary);
 }
 
-/* Status Toggles */
-.status-toggles {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-}
 
-.status-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s;
-    font-size: 14px;
-}
 
-.healthy-btn {
-    background: white;
-    color: var(--healthy-color);
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
-.sick-btn {
-    background: white;
-    color: var(--sick-color);
-    border-color: rgba(217, 119, 6, 0.3);
-}
-
-.critical-btn {
-    background: white;
-    color: var(--critical-color);
-    border-color: rgba(239, 68, 68, 0.3);
-}
-
-.dead-btn {
-    background: white;
-    color: #64748b;
-    border-color: rgba(100, 116, 139, 0.3);
-}
-
-.status-btn.active {
-    outline: 2px solid;
-    background: #f8fafc;
-}
-
-.healthy-btn.active {
-    outline-color: var(--healthy-color);
-    background: var(--healthy-bg);
-}
-
-.sick-btn.active {
-    outline-color: var(--sick-color);
-    background: var(--sick-bg);
-}
-
-.critical-btn.active {
-    outline-color: var(--critical-color);
-    background: var(--critical-bg);
-}
-
-.dead-btn.active {
-    outline-color: #64748b;
-    background: #f1f5f9;
-}
 
 /* Avatar Styles */
 .plant-avatar-wrapper {

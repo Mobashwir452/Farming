@@ -209,7 +209,7 @@ function renderBeds() {
             `;
 
             if (node.variety) {
-                innerContent += `<div class="chip-variety">${node.variety}</div>`;
+                innerContent += `<div class="chip-variety" title="${node.variety}">${node.variety}</div>`;
             }
 
             chip.innerHTML = innerContent;
@@ -283,16 +283,21 @@ function renderBeds() {
 
             bedCard.innerHTML = `
                 <div class="bed-header" onclick="toggleAccordion(this, ${bIndex})">
-                    <h2 style="display:flex; align-items:center; gap:6px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> 
+                    <h2 style="display:flex; align-items:center; gap:8px;">
                         <span class="bed-title-text">${displayBedName}</span>
-                        <button onclick="renameBed(event, ${bIndex})" style="background:transparent; border:none; padding:4px; color:#94a3b8; cursor:pointer;" title="নাম পরিবর্তন করুন">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <button class="sleek-edit-btn" onclick="renameBed(event, ${bIndex})" title="নাম পরিবর্তন করুন">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                     </h2>
-                    <div style="display:flex; align-items:center;">
-                        <div class="bed-stats">সু: ${bedHealthy} | অ: ${bedSick} | বি: ${bedCritical} | মৃত: ${bedDead}</div>
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        <div class="bed-stats-badges">
+                            <span class="badge healthy ${bedHealthy === 0 ? 'zero' : ''}"><span class="dot"></span>${bedHealthy}</span>
+                            <span class="badge sick ${bedSick === 0 ? 'zero' : ''}"><span class="dot"></span>${bedSick}</span>
+                            <span class="badge critical ${bedCritical === 0 ? 'zero' : ''}"><span class="dot"></span>${bedCritical}</span>
+                            <span class="badge dead ${bedDead === 0 ? 'zero' : ''}"><span class="dot"></span>${bedDead}</span>
+                        </div>
                         ${selectAllCheckHtml}
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </div>
                 </div>
                 <div class="bed-content"></div>
@@ -650,7 +655,7 @@ async function markSelectedAreaStatus(status) {
 function openBottomSheet(bed, node, bIndex, pIndex) {
     currentlyEditingPlant = { bed, node, bIndex, pIndex };
 
-    let titleTxt = `গাছ: ${node.id}`;
+    let titleTxt = `${node.id}`;
     document.getElementById('bsPlantTitle').innerText = titleTxt;
 
     document.getElementById('bsPlantLocation').innerText = `বেড ${bIndex + 1}`;
@@ -701,41 +706,25 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
             const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
             const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
             const formattedDate = `${toBngDigits(dObj.getDate())} ${EN_TO_BN_MONTHS[dObj.getMonth()]} ${toBngDigits(dObj.getFullYear())}`;
-            dateTextEl.innerText = isReplanted ? `🌱 পুনরায় রোপণ: ${formattedDate}` : `🌱 রোপণের তারিখ: ${formattedDate}`;
+            dateTextEl.innerText = isReplanted ? `🌱 পুনরায়: ${formattedDate}` : `🌱 রোপণ: ${formattedDate}`;
         } else {
-            dateTextEl.innerText = isReplanted ? `🌱 পুনরায় রোপণ: ${displayDateStr}` : `🌱 রোপণের তারিখ: ${displayDateStr}`;
+            dateTextEl.innerText = isReplanted ? `🌱 পুনরায়: ${displayDateStr}` : `🌱 রোপণ: ${displayDateStr}`;
         }
         dateInputEl.value = displayDateStr;
     } else {
-        dateTextEl.innerText = `🌱 রোপণের তারিখ: সেট করুন`;
+        dateTextEl.innerText = `🌱 রোপণ: সেট করুন`;
         dateInputEl.value = '';
     }
 
     // Active toggles state
     const state = node.state || 'H';
-    document.getElementById('btnSetHealthy').classList.remove('active');
-    document.getElementById('btnSetSick').classList.remove('active');
-    document.getElementById('btnSetCritical').classList.remove('active');
-    document.getElementById('btnSetDead').classList.remove('active');
-
-    if (state === 'H') document.getElementById('btnSetHealthy').classList.add('active');
-    else if (state === 'S') document.getElementById('btnSetSick').classList.add('active');
-    else if (state === 'C') document.getElementById('btnSetCritical').classList.add('active');
-    else if (state === 'D') document.getElementById('btnSetDead').classList.add('active');
-
-    // Show/Hide Replant logic
-    if (state === 'D') {
-        document.getElementById('deadStateContainer').style.display = 'flex';
-        document.getElementById('normalUpdateFormContainer').style.display = 'none';
-        document.getElementById('replantFormContainer').style.display = 'none';
-        document.getElementById('replantDate').value = new Date().toISOString().split('T')[0];
-
-        document.getElementById('markDeadSection').style.display = 'none';
-        document.getElementById('replantSection').style.display = 'block';
-    } else {
-        document.getElementById('deadStateContainer').style.display = 'none';
-        document.getElementById('normalUpdateFormContainer').style.display = 'block';
-    }
+    
+    // Call the dedicated UI sync function
+    setPlantProfileStatusUI(state);
+    
+    // Reset Replant form
+    document.getElementById('replantFormContainer').style.display = 'none';
+    document.getElementById('replantDate').value = new Date().toISOString().split('T')[0];
 
     // Prepare inputs
     document.getElementById('bsHeight').value = node.height || '';
@@ -824,14 +813,14 @@ window.switchBsTab = function (tabName, btnEl) {
     sheet.querySelectorAll('.bs-tab').forEach(b => {
         b.classList.remove('active');
         b.style.background = 'transparent';
-        b.style.color = '#64748B';
+        b.style.color = '#475569';
         b.style.boxShadow = 'none';
     });
     if (btnEl) {
         btnEl.classList.add('active');
-        btnEl.style.background = 'var(--primary)';
-        btnEl.style.color = '#FFFFFF';
-        btnEl.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+        btnEl.style.background = '#FFFFFF';
+        btnEl.style.color = 'var(--primary)';
+        btnEl.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     }
 
     if (tabName === 'form') {
@@ -849,26 +838,110 @@ window.setPlantProfileStatusUI = function (status) {
     document.getElementById('btnSetCritical').classList.remove('active');
     document.getElementById('btnSetDead').classList.remove('active');
 
-    if (status === 'H') document.getElementById('btnSetHealthy').classList.add('active');
-    else if (status === 'S') document.getElementById('btnSetSick').classList.add('active');
-    else if (status === 'C') document.getElementById('btnSetCritical').classList.add('active');
-    else if (status === 'D') document.getElementById('btnSetDead').classList.add('active');
+    const badgeEl = document.getElementById('bsPlantStatusBadge');
+    if (badgeEl) {
+        badgeEl.style.display = 'inline-block';
+    }
+
+    if (status === 'H') {
+        document.getElementById('btnSetHealthy').classList.add('active');
+        if (badgeEl) {
+            badgeEl.innerText = '🟢 সুস্থ';
+            badgeEl.style.background = '#D1FAE5';
+            badgeEl.style.color = '#065F46';
+            badgeEl.style.border = '1px solid #A7F3D0';
+        }
+    }
+    else if (status === 'S') {
+        document.getElementById('btnSetSick').classList.add('active');
+        if (badgeEl) {
+            badgeEl.innerText = '🟡 অসুস্থ';
+            badgeEl.style.background = '#FEF3C7';
+            badgeEl.style.color = '#92400E';
+            badgeEl.style.border = '1px solid #FDE68A';
+        }
+    }
+    else if (status === 'C') {
+        document.getElementById('btnSetCritical').classList.add('active');
+        if (badgeEl) {
+            badgeEl.innerText = '🔴 বিপজ.';
+            badgeEl.style.background = '#FEE2E2';
+            badgeEl.style.color = '#991B1B';
+            badgeEl.style.border = '1px solid #FECACA';
+        }
+    }
+    else if (status === 'D') {
+        document.getElementById('btnSetDead').classList.add('active');
+        if (badgeEl) {
+            badgeEl.innerText = '⚫ মৃত';
+            badgeEl.style.background = '#F1F5F9';
+            badgeEl.style.color = '#475569';
+            badgeEl.style.border = '1px solid #E2E8F0';
+        }
+    }
 
     if (status === 'D') {
-        document.getElementById('deadStateContainer').style.display = 'flex';
-        document.getElementById('normalUpdateFormContainer').style.display = 'none';
-
         if (currentlyEditingPlant && currentlyEditingPlant.node.state === 'D') {
-            document.getElementById('markDeadSection').style.display = 'none';
+            // Already dead terminal state
+            document.getElementById('deadStateContainer').style.display = 'flex';
+            document.getElementById('normalUpdateFormContainer').style.display = 'none';
+            
+            // Replant section inside deadStateContainer is visible
             document.getElementById('replantSection').style.display = 'block';
+            
+            const latestLog = currentlyEditingPlant.node.logs ? currentlyEditingPlant.node.logs[currentlyEditingPlant.node.logs.length - 1] : null;
+            let reasonStr = 'কারণ উল্লেখ করা হয়নি।';
+            // Accommodate both .note (new save logic) and .notes (any older records)
+            if (latestLog && (latestLog.note || latestLog.notes)) {
+                reasonStr = latestLog.note || latestLog.notes;
+            }
+            
+            const reasonContainer = document.getElementById('deadStateReasonText');
+            reasonContainer.innerHTML = '';
+            
+            if (reasonStr.includes(' - কারণ: ')) {
+                const parts = reasonStr.split(' - কারণ: ');
+                const line1 = document.createElement('div');
+                line1.innerText = parts[0];
+                reasonContainer.appendChild(line1);
+                
+                const line2 = document.createElement('div');
+                line2.style.marginTop = '6px';
+                
+                const boldKaron = document.createElement('strong');
+                boldKaron.style.color = '#475569';
+                boldKaron.innerText = 'কারণ: ';
+                line2.appendChild(boldKaron);
+                
+                const reasonNode = document.createTextNode(parts[1]);
+                line2.appendChild(reasonNode);
+                
+                reasonContainer.appendChild(line2);
+            } else {
+                reasonContainer.innerText = reasonStr;
+            }
+            
         } else {
-            document.getElementById('markDeadSection').style.display = 'block';
-            document.getElementById('replantSection').style.display = 'none';
+            // Transitioning to dead
+            document.getElementById('deadStateContainer').style.display = 'none';
+            document.getElementById('normalUpdateFormContainer').style.display = 'block';
+            
+            document.getElementById('regularUpdateFields').style.display = 'none';
+            document.getElementById('bsSaveBtn').style.display = 'none';
+            
+            document.getElementById('markDeadFields').style.display = 'block';
+            document.getElementById('bsSaveDeadBtn').style.display = 'block';
             document.getElementById('deadReason').value = '';
         }
     } else {
         document.getElementById('deadStateContainer').style.display = 'none';
         document.getElementById('normalUpdateFormContainer').style.display = 'block';
+        
+        document.getElementById('regularUpdateFields').style.display = 'block';
+        document.getElementById('bsSaveBtn').style.display = 'block';
+        
+        document.getElementById('markDeadFields').style.display = 'none';
+        document.getElementById('bsSaveDeadBtn').style.display = 'none';
     }
 };
 
@@ -930,11 +1003,13 @@ window.showReplantForm = function () {
         inputEl.dataset.value = todayStr;
         inputEl.value = `${toBngDigits(today.getDate())} ${EN_TO_BN_MONTHS[today.getMonth()]} ${toBngDigits(today.getFullYear())}`;
     }
+    document.getElementById('replantSection').style.display = 'none';
     document.getElementById('replantFormContainer').style.display = 'block';
 };
 
 window.hideReplantForm = function () {
     document.getElementById('replantFormContainer').style.display = 'none';
+    document.getElementById('replantSection').style.display = 'block';
 };
 
 window.saveReplantDetails = async function () {
@@ -1022,11 +1097,14 @@ window.previewPlantAvatar = function (input) {
 
 window.removePlantAvatar = function (event) {
     event.stopPropagation();
-    const preview = document.getElementById('bsAvatarPreview');
-    preview.src = 'https://placehold.co/100x100?text=Plant';
-    preview.dataset.base64 = '';
-    document.getElementById('bsImageInput').value = '';
-    document.getElementById('bsAvatarRemove').style.display = 'none';
+    
+    showConfirmModal('ছবি মুছুন', 'আপনি কি নিশ্চিত যে এই ছবিটি মুছে ফেলতে চান?', () => {
+        const preview = document.getElementById('bsAvatarPreview');
+        preview.src = 'https://placehold.co/100x100?text=Plant';
+        preview.dataset.base64 = '';
+        document.getElementById('bsImageInput').value = '';
+        document.getElementById('bsAvatarRemove').style.display = 'none';
+    });
 };
 
 async function uploadImageToR2(base64Data, filename) {
@@ -1292,13 +1370,19 @@ window.openGridSetupModal = function () {
 
         row.innerHTML = `
             <div>
-                <strong style="font-size:14px; display:block;">বেড ${bIndex + 1}</strong>
+                <strong style="font-size:15px; color:#1E293B; display:block; font-weight:600;">বেড ${bIndex + 1}</strong>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <button onclick="changeBedPlants(${bIndex}, -1)" style="width:30px;height:30px;border-radius:50%;border:1px solid #ccc;background:#f8fafc;cursor:pointer;">-</button>
-                <span id="bedSetupCount_${bIndex}" style="font-weight:bold; min-width:24px; text-align:center; font-size:16px;">${numPlants}</span>
-                <button onclick="changeBedPlants(${bIndex}, 1)" style="width:30px;height:30px;border-radius:50%;border:1px solid #ccc;background:#f8fafc;cursor:pointer;">+</button>
-                <button class="del-btn" style="margin-left:5px;width:30px;height:30px;border-radius:50%;border:none;background:#fef2f2;color:#ef4444;font-size:18px;cursor:pointer;line-height:1;" onclick="removeBedFromGrid(${bIndex})">&times;</button>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <!-- Pill Stepper -->
+                <div style="display: flex; align-items: center; background: #F1F5F9; border-radius: 100px; padding: 4px;">
+                    <button onclick="changeBedPlants(${bIndex}, -1)" style="width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:#475569;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='transparent'">&minus;</button>
+                    <span id="bedSetupCount_${bIndex}" style="font-weight:700; color: #0F172A; min-width:32px; text-align:center; font-size:15px;">${numPlants}</span>
+                    <button onclick="changeBedPlants(${bIndex}, 1)" style="width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:#475569;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='transparent'">+</button>
+                </div>
+                <!-- Soft Trash Button -->
+                <button class="del-btn" style="margin-left:4px;width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:#94A3B8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#FFF1F2'; this.style.color='#E11D48'" onmouseout="this.style.background='transparent'; this.style.color='#94A3B8'" onclick="removeBedFromGrid(${bIndex})" title="বেড মুছুন">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
             </div>
         `;
         list.appendChild(row);
@@ -1343,6 +1427,14 @@ window.addNewBedToGrid = function () {
         plants_nodes_json: []
     });
     openGridSetupModal(); // redraw
+    
+    // Auto-scroll to newly added bed
+    setTimeout(() => {
+        const list = document.getElementById('gridSetupBedList');
+        if (list) {
+            list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+        }
+    }, 50);
 };
 
 window.removeBedFromGrid = function (bIndex) {
@@ -1641,18 +1733,28 @@ window.openImageCompare = function (encodedLogsParams) {
         document.getElementById('compareImgBefore').src = oldLog.image_url;
         document.getElementById('compareDateNew').innerText = newLog.date;
 
-        // Populate Select Dropdown
-        const selectEl = document.getElementById('compareDateSelect');
-        selectEl.innerHTML = ''; // clear options
+        // Populate Custom Dropdown
+        const menuEl = document.getElementById('compareDateMenu');
+        menuEl.innerHTML = ''; // clear options
+        document.getElementById('compareDateTriggerText').innerText = oldLog.date;
 
         // Add all historical images except the very last one to the dropdown
         for (let i = 0; i < logsWithImages.length - 1; i++) {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = logsWithImages[i].date;
-            opt.style.color = "#000"; // for dropdown visibility on mobile
-            if (i === previousLogIndex) opt.selected = true;
-            selectEl.appendChild(opt);
+            const btn = document.createElement('button');
+            btn.textContent = logsWithImages[i].date;
+            btn.style.cssText = `
+                display: block; width: 100%; text-align: left; padding: 10px 16px; border: none; background: transparent; color: #FFF; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: 0.2s;
+            `;
+            if (i === previousLogIndex) {
+                btn.style.background = 'rgba(255,255,255,0.1)';
+            }
+            btn.onmouseover = () => btn.style.background = 'rgba(255,255,255,0.15)';
+            btn.onmouseout = () => btn.style.background = (i === previousLogIndex) ? 'rgba(255,255,255,0.1)' : 'transparent';
+            
+            btn.onclick = () => {
+                window.onCompareDateChange(i, logsWithImages[i].date, btn);
+            };
+            menuEl.appendChild(btn);
         }
 
         // Reset slider
@@ -1679,9 +1781,51 @@ window.openImageCompare = function (encodedLogsParams) {
     }
 };
 
-window.onCompareDateChange = function (index) {
+window.toggleCompareDropdown = function() {
+    const menu = document.getElementById('compareDateMenu');
+    if(menu.style.display === 'none' || menu.style.opacity === '0') {
+        menu.style.display = 'flex';
+        // Trigger animation
+        setTimeout(() => {
+            menu.style.opacity = '1';
+            menu.style.transform = 'translateY(0) scale(1)';
+        }, 10);
+    } else {
+        menu.style.opacity = '0';
+        menu.style.transform = 'translateY(10px) scale(0.95)';
+        setTimeout(() => menu.style.display = 'none', 200);
+    }
+};
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('compareDateDropdownWrapper');
+    const menu = document.getElementById('compareDateMenu');
+    if (wrapper && menu && menu.style.display === 'flex' && !wrapper.contains(e.target)) {
+        menu.style.opacity = '0';
+        menu.style.transform = 'translateY(10px) scale(0.95)';
+        setTimeout(() => menu.style.display = 'none', 200);
+    }
+});
+
+window.onCompareDateChange = function (index, dateStr, btnEl) {
     if (globalCompareLogs[index] && globalCompareLogs[index].image_url) {
         document.getElementById('compareImgBefore').src = globalCompareLogs[index].image_url;
+        document.getElementById('compareDateTriggerText').innerText = dateStr;
+        
+        // Update selection styling
+        const menu = document.getElementById('compareDateMenu');
+        Array.from(menu.children).forEach(child => {
+            child.style.background = 'transparent';
+            child.onmouseout = () => child.style.background = 'transparent';
+        });
+        if (btnEl) {
+            btnEl.style.background = 'rgba(255,255,255,0.1)';
+            btnEl.onmouseout = () => btnEl.style.background = 'rgba(255,255,255,0.1)';
+        }
+        
+        // Close menu
+        window.toggleCompareDropdown();
     }
 };
 
@@ -2019,26 +2163,34 @@ window.executeRelocation = function (type) {
     }
 
     if (type === 'swap') {
-        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
+        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার জন্য নির্দিষ্ট কোনো গাছ নির্বাচন করুন।', null);
+        
         const targetNode = plants[targetIndex];
+        let targetDisplayId = String(targetNode.id || '').includes('-') ? targetNode.id.split('-')[1] : targetNode.id;
+        let currentDisplayId = String(node.id || '').includes('-') ? node.id.split('-')[1] : node.id;
 
-        const tempId1 = node.id;
-        const tempId2 = targetNode.id;
+        showConfirmModal('অদলবদল নিশ্চিত করুন', `আপনি কি নিশ্চিত যে গাছ ${currentDisplayId} এবং গাছ ${targetDisplayId} এর তথ্য নিজেদের মধ্যে জায়গা পরিবর্তন (Swap) করবে?`, () => {
+            const tempId1 = node.id;
+            const tempId2 = targetNode.id;
 
-        const clone1 = JSON.parse(JSON.stringify(node));
-        const clone2 = JSON.parse(JSON.stringify(targetNode));
+            const clone1 = JSON.parse(JSON.stringify(node));
+            const clone2 = JSON.parse(JSON.stringify(targetNode));
 
-        clone1.id = tempId2;
-        clone2.id = tempId1;
+            clone1.id = tempId2;
+            clone2.id = tempId1;
 
-        plants[pIndex] = clone2;
-        plants[targetIndex] = clone1;
+            plants[pIndex] = clone2;
+            plants[targetIndex] = clone1;
 
-        finalizeAndSave(plants);
+            finalizeAndSave(plants);
+        });
     } else if (type === 'overwrite') {
-        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার মতো নির্দিষ্ট কোনো গাছ পাওয়া যায়নি।', null);
-        showConfirmModal('আপনি কি নিশ্চিত?', 'এই অপশনের ফলে টার্গেট গাছের আগের সব ডেটা সম্পূর্ণ মুছে যাবে। আপনি কি সত্যিই ওভাররাইট করতে চান?', () => {
-            const targetNode = plants[targetIndex];
+        if (targetIndex === -1) return showConfirmModal('সতর্কতা', 'স্থানান্তর করার জন্য নির্দিষ্ট কোনো গাছ নির্বাচন করুন।', null);
+        
+        const targetNode = plants[targetIndex];
+        let targetDisplayId = String(targetNode.id || '').includes('-') ? targetNode.id.split('-')[1] : targetNode.id;
+
+        showConfirmModal('প্রতিস্থাপন নিশ্চিত করুন', `সতর্কতা: গাছ ${targetDisplayId} এর আগের সব ডেটা পুরোপুরি মুছে যাবে। আপনি কি নিশ্চিত যে আপনি এটি প্রতিস্থাপন (Overwrite) করতে চান?`, () => {
             const targetId = targetNode.id;
 
             const clone = JSON.parse(JSON.stringify(node));
