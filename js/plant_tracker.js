@@ -201,16 +201,12 @@ function renderBeds() {
             let innerContent = `
                 <div class="avatar-ring ${emptyClass}" style="${bgStyle}">
                     ${emptyIcon}
-                    <div class="status-dot"></div>
+                    <div class="status-dot${node.replanted_date ? ' is-replant' : ''}">
+                        ${node.replanted_date ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>' : ''}
+                    </div>
                 </div>
                 <div class="chip-id">${String(node.id || '').includes('-') ? String(node.id).split('-')[1] : String(node.id)}</div>
             `;
-
-            if (node.replanted_date) {
-                innerContent += `<div class="replant-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-                </div>`;
-            }
 
             if (node.variety) {
                 innerContent += `<div class="chip-variety">${node.variety}</div>`;
@@ -781,7 +777,7 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     populateTimeline(node.logs);
 
     // Reset bottom sheet view to 'form' tab by default
-    const bsTabs = document.getElementById('plantBottomSheet').querySelectorAll('.ld-tab');
+    const bsTabs = document.getElementById('plantBottomSheet').querySelectorAll('.bs-tab');
     if (bsTabs.length > 0) switchBsTab('form', bsTabs[0]);
 
     document.getElementById('plantBottomSheet').classList.add('active');
@@ -825,8 +821,18 @@ window.updatePlantingDate = async function(newDate) {
 
 window.switchBsTab = function (tabName, btnEl) {
     const sheet = document.getElementById('plantBottomSheet');
-    sheet.querySelectorAll('.ld-tab').forEach(b => b.classList.remove('active'));
-    if (btnEl) btnEl.classList.add('active');
+    sheet.querySelectorAll('.bs-tab').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'transparent';
+        b.style.color = '#64748B';
+        b.style.boxShadow = 'none';
+    });
+    if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.style.background = 'var(--primary)';
+        btnEl.style.color = '#FFFFFF';
+        btnEl.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+    }
 
     if (tabName === 'form') {
         document.getElementById('bsTabForm').style.display = 'block';
@@ -1167,27 +1173,37 @@ function populateTimeline(logs) {
     [...logs].reverse().forEach((log, i) => {
         const actualIndex = logs.length - 1 - i;
         html += `
-        <div style="position:relative; padding-left:14px; margin-bottom:12px; border-left:1px solid var(--border-color);">
-            <div style="position:absolute; left:-6px; top:0; width:10px; height:10px; border-radius:50%; background:var(--primary);"></div>
-            <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="font-size:12px; color:var(--text-dim); margin:0;">${log.date}</p>
-                    <button onclick="deletePlantLog(${actualIndex})" style="border:none; background:transparent; color:#ef4444; cursor:pointer; font-size:12px; padding:0;">ডিলিট</button>
+        <div style="position:relative; padding-left:24px; margin-bottom:24px;">
+            <!-- Timeline Line -->
+            <div style="position:absolute; left:7px; top:0; bottom:-24px; width:2px; background:#E2E8F0; z-index:0;"></div>
+            <!-- Timeline Dot -->
+            <div style="position:absolute; left:0; top:4px; width:16px; height:16px; border-radius:50%; background:var(--primary); border:3px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:1;"></div>
+            
+            <div style="background:white; padding:16px; border-radius:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02); position:relative; z-index:1; border: 1px solid #F1F5F9;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                    <span style="font-size:12px; color:#64748B; font-weight: 600; display:flex; align-items:center; gap:4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        ${log.date}
+                    </span>
+                    <button onclick="deletePlantLog(${actualIndex})" style="border:none; background:#FFF1F2; color:#E11D48; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:14px; padding:0; transition: background 0.2s;" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'" title="ডিলিট">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                 </div>
-                <div style="background:#f1f5f9; padding:8px; border-radius:6px; margin-top:5px; border:1px solid #e2e8f0;">
-                    ${log.image_url ? `<img src="${log.image_url}" onclick="openFullScreenImage('${log.image_url}')" style="width:100%; height:80px; object-fit:cover; border-radius:4px; margin-bottom:6px; cursor:pointer;">` : ''}
-                    <p style="font-size:13px; margin:0; font-weight:500;">${log.note}</p>
-                    <p style="font-size:12px; margin:0; margin-top:4px; opacity:0.8;">
-                        ${log.height ? `<b>উচ্চতা:</b> ${log.height}" ` : ''}
-                        ${log.leaves ? `<b>পাতা:</b> ${log.leaves} ` : ''}
-                        ${log.fruits ? `<b>ফল:</b> ${log.fruits}` : ''}
-                    </p>
-                    ${(log.is_fertilized || log.is_pesticide) ? `
-                    <div style="display:flex; gap:5px; margin-top:6px;">
-                        ${log.is_fertilized ? '<span style="font-size:10px; background:#d1fae5; color:#10b981; padding:2px 6px; border-radius:4px;">সার</span>' : ''}
-                        ${log.is_pesticide ? '<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px;">ওষুধ</span>' : ''}
-                    </div>` : ''}
+                
+                ${log.image_url ? `<img src="${log.image_url}" onclick="openFullScreenImage('${log.image_url}')" style="width:100%; height:120px; object-fit:cover; border-radius:12px; margin-bottom:12px; cursor:zoom-in; border: 1px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">` : ''}
+                
+                ${log.note ? `<p style="font-size:14px; margin:0 0 12px 0; font-weight:500; color: #1E293B; line-height: 1.5;">${log.note}</p>` : ''}
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${log.height ? `<div style="background:#F1F5F9; color:#475569; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M8 6h8"></path><path d="M8 18h8"></path></svg>${log.height}"</div>` : ''}
+                    ${log.leaves ? `<div style="background:#ECFDF5; color:#059669; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 14 6V4h-2a7 7 0 0 0-7 7v9h6z"></path><path d="M11 20a7 7 0 0 0 7-7v-9h-6v2a7 7 0 0 1-7 7"></path></svg>${log.leaves}</div>` : ''}
+                    ${log.fruits ? `<div style="background:#FEF3C7; color:#D97706; padding:4px 10px; border-radius:100px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10"></path></svg>${log.fruits}</div>` : ''}
                 </div>
+                ${(log.is_fertilized || log.is_pesticide) ? `
+                <div style="display:flex; flex-wrap: wrap; gap:8px; margin-top:12px; padding-top:12px; border-top: 1px solid #F1F5F9;">
+                    ${log.is_fertilized ? '<span style="font-size:11px; background:#D1FAE5; color:#059669; padding:4px 10px; border-radius:100px; font-weight:700; display:flex; align-items:center; gap:4px;">🌱 সার দেওয়া হয়েছে</span>' : ''}
+                    ${log.is_pesticide ? '<span style="font-size:11px; background:#E0F2FE; color:#0284C7; padding:4px 10px; border-radius:100px; font-weight:700; display:flex; align-items:center; gap:4px;">💧 ওষুধ দেওয়া হয়েছে</span>' : ''}
+                </div>` : ''}
             </div>
         </div>
         `;
@@ -1243,15 +1259,15 @@ window.openFullScreenImage = function (src) {
         toolbar: {
             zoomIn: 1,
             zoomOut: 1,
-            oneToOne: 1,
-            reset: 1,
+            oneToOne: 0,
+            reset: 0,
             play: 0,
             prev: 0,
             next: 0,
-            rotateLeft: 1,
-            rotateRight: 1,
-            flipHorizontal: 1,
-            flipVertical: 1
+            rotateLeft: 0,
+            rotateRight: 0,
+            flipHorizontal: 0,
+            flipVertical: 0
         },
         navbar: false,
         title: false,

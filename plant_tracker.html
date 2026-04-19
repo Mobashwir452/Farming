@@ -223,17 +223,18 @@
 
     <!-- Bottom Sheet for Plant Profile -->
     <div id="plantBottomSheet" class="bottom-sheet-overlay">
-        <div class="bottom-sheet" style="padding-bottom: 80px; max-height: 95vh; overflow-y: auto;">
-            <div class="sheet-header" style="margin-top: 15px;">
-                <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="bottom-sheet" style="padding-bottom: 0; max-height: 95vh; overflow-y: auto;">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header" style="margin-top: 10px; margin-bottom: 24px; align-items: flex-start;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
                     <div class="plant-avatar-wrapper" style="position: relative; display: inline-block;">
                         <img id="bsAvatarPreview" src="https://placehold.co/100x100?text=Plant" alt="Plant Avatar"
                             onclick="openFullScreenImage(this.src)"
-                            style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; cursor: zoom-in; display: block; border: 2px solid #E2E8F0;">
+                            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; cursor: zoom-in; display: block; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
 
                         <!-- Upload Camera Icon at bottom right -->
                         <button onclick="document.getElementById('bsImageInput').click()"
-                            style="position: absolute; bottom: -2px; right: -2px; background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; padding: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transform: translate(10%, 10%);">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path
@@ -244,28 +245,28 @@
                         </button>
 
                         <button id="bsAvatarRemove" onclick="removePlantAvatar(event)"
-                            style="position: absolute; top: -5px; right: -5px; display:none;"
+                            style="position: absolute; top: -2px; right: -2px; display:none; background: #FFF1F2; border: none; color: #E11D48; border-radius: 50%; width: 22px; height: 22px; font-size: 14px; font-weight: bold; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(225,29,72,0.2);"
                             title="ছবি মুছে দিন">&times;</button>
                         <input type="file" id="bsImageInput" accept="image/*" style="display:none;"
                             onchange="previewPlantAvatar(this)">
                     </div>
                     <div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <h2 id="bsPlantTitle" style="margin: 0; font-size: 20px;">গাছ: T1</h2>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <h2 id="bsPlantTitle" style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #0F172A;">গাছ: T1</h2>
                             <button onclick="window.openRelocateModal()"
-                                style="background: #F1F5F9; border: 1px solid #CBD5E1; cursor: pointer; color: #475569; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                style="background: #F8FAFC; border: none; cursor: pointer; color: #475569; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'"
                                 title="ডেটা স্থানান্তর">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path
                                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </button>
                             <button onclick="window.deleteShiftPlantSerial()"
-                                style="background: #FFF1F2; border: 1px solid #FECDD3; cursor: pointer; color: #E11D48; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                style="background: #FFF1F2; border: none; cursor: pointer; color: #E11D48; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(225,29,72,0.1);" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'"
                                 title="এই গর্তটি মুছে ফেলুন">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path
                                         d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
@@ -273,11 +274,11 @@
                                 </svg>
                             </button>
                         </div>
-                        <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
+                        <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 0 0 8px 0; color: #64748B; font-weight: 500;">Bed 1</p>
                         <div id="bsPlantingDateContainer"
-                            style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;">
+                            style="display:inline-flex; align-items:center; gap:6px; background:#F1F5F9; color:#475569; font-size:12px; padding:6px 12px; border-radius:100px; font-weight:600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'" onclick="document.getElementById('bsPlantingDateInput').showPicker ? document.getElementById('bsPlantingDateInput').showPicker() : document.getElementById('bsPlantingDateInput').click()">
                             <span id="bsPlantingDateText">🌱 রোপণের তারিখ: -</span>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -289,9 +290,8 @@
                     </div>
                 </div>
                 <div class="ai-score-ring"
-                    style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;">
-                    <button onclick="closeBottomSheet()"
-                        style="border:none; background:transparent; font-size:24px; color:#64748b; cursor:pointer; line-height: 1;">&times;</button>
+                    style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #F8FAFC; cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F8FAFC'" onclick="closeBottomSheet()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </div>
             </div>
 
@@ -336,10 +336,10 @@
                 </button>
             </div>
 
-            <!-- Bottom Sheet Tabs -->
-            <div class="ld-tabs" style="margin-top: 15px; margin-bottom: 15px;">
-                <button class="ld-tab active" onclick="switchBsTab('form', this)">নতুন আপডেট</button>
-                <button class="ld-tab" onclick="switchBsTab('history', this)">হিস্ট্রি</button>
+            <!-- Bottom Sheet Tabs (Segmented Control) -->
+            <div class="bs-segmented-tabs" style="display: flex; background: #F1F5F9; border-radius: 12px; padding: 4px; margin: 15px 0;">
+                <button class="bs-tab active" onclick="switchBsTab('form', this)" style="flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; background: var(--primary); color: #FFFFFF; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">নতুন আপডেট</button>
+                <button class="bs-tab" onclick="switchBsTab('history', this)" style="flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; background: transparent; color: #64748B;">হিস্ট্রি</button>
             </div>
 
             <!-- Agronomy Smart Update Form -->
@@ -433,16 +433,20 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
+                    <div class="input-group" style="margin-bottom: 20px;">
                         <label>লক্ষণ বা নোট</label>
                         <textarea id="bsNote" rows="3" placeholder="রোগের লক্ষণ বা অন্যান্য নোট..."
-                            style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                            style="width:100%; border:1px solid transparent; border-radius:12px; padding:12px 14px; background:#F1F5F9; font-size:14px; box-sizing:border-box; outline:none; transition:all 0.2s;" onfocus="this.style.background='white'; this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(16,185,129,0.1)'" onblur="this.style.background='#F1F5F9'; this.style.borderColor='transparent'; this.style.boxShadow='none'"></textarea>
                     </div>
 
-                    <button id="bsSaveBtn" class="btn-primary w-full" style="margin-top: 10px;"
-                        onclick="savePlantDetails()">
-                        আপডেট সেভ করুন
-                    </button>
+                    <!-- Sticky Floating Save Button -->
+                    <div style="position: sticky; bottom: 0; left: 0; right: 0; padding: 16px 0 10px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 30%, #fff 100%); z-index: 10;">
+                        <button id="bsSaveBtn" class="btn-primary w-full" style="padding: 16px; border-radius: 100px; font-size: 15px; font-weight: 700; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25); background: var(--primary); transform: translateY(0); transition: transform 0.2s;"
+                            onmousedown="this.style.transform='translateY(2px)'" onmouseup="this.style.transform='translateY(0)'"
+                            onclick="savePlantDetails()">
+                            আপডেট সেভ করুন
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -457,19 +461,20 @@
     </div>
 
     <!-- Image Comparison Modal -->
-    <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none;"
+    <div class="method-sheet-overlay" id="compareModalOverlay" style="z-index: 1050; display:none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,0.6);"
         onclick="window.closeCompareModal()"></div>
     <div class="method-sheet" id="compareModalContent"
-        style="padding: 0; z-index: 1055; display:none; background: var(--primary-color, #10b981); max-height: 90vh; overflow: hidden; border-top-left-radius: 20px; border-top-right-radius: 20px; position: fixed; bottom: -100%; left: 0; right: 0;">
+        style="padding: 0; z-index: 1055; display:none; background: var(--primary); max-height: 90vh; overflow: hidden; border-radius: 32px 32px 0 0; position: fixed; bottom: -100%; left: 0; right: 0;">
+        <div class="sheet-handle" style="background: rgba(255,255,255,0.4); margin-top: 12px; margin-bottom: 0;"></div>
         <div
             style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <h3 style="color: #FFF; font-size: 16px; margin: 0; font-weight: 600;">গাছের পরিবর্তন দেখুন</h3>
+            <h3 style="color: #FFF; font-size: 18px; margin: 0; font-weight: 700; letter-spacing: -0.5px;">গাছের পরিবর্তন</h3>
             <button onclick="window.closeCompareModal()"
-                style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
+                style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; color: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
         </div>
 
         <div class="compare-container"
-            style="position: relative; width: 100%; flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+            style="position: relative; width: 100%; flex: 1; min-height: 50vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
             <!-- After Image (Background) -->
             <img id="compareImgAfter" style="display: block; width: 100%; height: 100%; object-fit: contain;">
 
@@ -485,10 +490,10 @@
 
             <!-- Visual Handle -->
             <div id="compareSliderLine"
-                style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; pointer-events: none;">
+                style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(255,255,255,0.8); pointer-events: none; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
                 <div
-                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); border: 4px solid rgba(255,255,255,0.5); backdrop-filter: blur(4px);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8L22 12L18 16" />
                         <path d="M6 8L2 12L6 16" />
@@ -498,20 +503,22 @@
             </div>
 
             <!-- Labels -->
-            <!-- Left Side Select Dropdown (pointer-events: auto so it can be clicked) -->
+            <!-- Left Side Select Dropdown -->
             <div
-                style="z-index: 20; position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;">
+                style="z-index: 20; position: absolute; bottom: 20px; left: 16px; background: rgba(16, 185, 129, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #FFF; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); pointer-events: auto; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <select id="compareDateSelect" onchange="window.onCompareDateChange(this.value)"
-                    style="background: transparent; color: #FFF; border: none; font-size: 13px; font-weight: 500; outline: none; cursor: pointer; padding-right: 4px;">
+                    style="background: transparent; color: #FFF; border: none; font-size: 13px; font-weight: 700; outline: none; cursor: pointer; appearance: none; padding-right: 16px;">
                     <!-- Options populated via JS -->
                 </select>
-                <span> (আগের)</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 12px; pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <span style="opacity: 0.9; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 6px; margin-left: 4px;">আগে</span>
             </div>
 
             <!-- Right Side Static Date -->
             <div
-                style="position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #FFF; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
-                <span id="compareDateNew"></span> (বর্তমান)
+                style="position: absolute; bottom: 20px; right: 16px; background: rgba(59, 130, 246, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #FFF; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; pointer-events: none; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <span id="compareDateNew" style="color: #FFF; font-weight: 700;"></span>
+                <span style="opacity: 0.9; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 6px;">বর্তমান</span>
             </div>
         </div>
 

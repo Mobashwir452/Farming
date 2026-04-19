@@ -257,6 +257,9 @@ body {
     border: 2.5px solid white;
     z-index: 2;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .plant-chip.healthy .status-dot {
@@ -285,24 +288,15 @@ body {
     border: 2px dashed #cbd5e1;
 }
 
-.replant-badge {
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    background: #10b981;
-    color: white;
+.status-dot.is-replant {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2.5px solid white;
-    z-index: 2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    bottom: -2px;
+    right: -2px;
+    color: white; /* SVG stroke color */
 }
 
-.replant-badge svg {
+.status-dot.is-replant svg {
     width: 12px;
     height: 12px;
 }
@@ -394,6 +388,8 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
@@ -411,8 +407,8 @@ body {
     left: 0;
     width: 100%;
     background: var(--bg-color);
-    border-radius: 24px 24px 0 0;
-    padding: 20px;
+    border-radius: 32px 32px 0 0;
+    padding: 24px 20px 20px;
     transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     max-height: 85vh;
     overflow-y: auto;
@@ -423,11 +419,11 @@ body {
 }
 
 .sheet-handle {
-    width: 40px;
-    height: 5px;
-    background: #cbd5e1;
-    border-radius: 3px;
-    margin: 0 auto 20px;
+    width: 48px;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 100px;
+    margin: -10px auto 20px;
 }
 
 .sheet-header {
@@ -453,29 +449,47 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px;
+    gap: 6px;
+    padding: 10px 4px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 13px;
     cursor: pointer;
-    border: 1px solid var(--border-color);
+    border: none;
+    background: white;
+    color: #94A3B8;
+    box-shadow: inset 0 0 0 1.5px #E2E8F0;
+    transition: all 0.2s;
 }
 
-.healthy-btn {
-    background: white;
-    color: var(--healthy-color);
+.healthy-btn.active {
+    background: var(--healthy-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
 }
 
-.sick-btn {
-    background: white;
-    color: var(--sick-color);
+.sick-btn.active {
+    background: var(--sick-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(234, 179, 8, 0.25);
+}
+
+.critical-btn.active {
+    background: var(--critical-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.25);
+}
+
+.dead-btn.active {
+    background: var(--dead-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
 }
 
 .smart-agronomy-form {
     background: white;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+    padding: 0;
+    margin-bottom: 80px; /* Space for fixed pill button */
 }
 
 .form-grid-2 {
@@ -496,11 +510,26 @@ body {
 }
 
 .input-group input,
-.input-group select {
+.input-group select,
+.input-group textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 12px 14px;
+    background: #F1F5F9;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #0F172A;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 .w-full {
@@ -853,4 +882,40 @@ body {
 .center-modal.active .center-modal-content {
     transform: scale(1);
     opacity: 1;
+}
+
+/* =========================================
+   Viewer.js Sleek Overrides
+   ========================================= */
+.viewer-backdrop {
+    background-color: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.viewer-toolbar > li {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 50% !important;
+    margin: 0 6px !important;
+    transition: all 0.2s !important;
+}
+
+.viewer-toolbar > li:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1);
+}
+
+.viewer-button.viewer-close {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 50% !important;
+    top: 24px !important;
+    right: 24px !important;
+    width: 44px !important;
+    height: 44px !important;
+    transition: all 0.2s !important;
+}
+
+.viewer-button.viewer-close:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1);
 }
