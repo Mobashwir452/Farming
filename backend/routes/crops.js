@@ -99,7 +99,7 @@ export const getCropById = async (request, env) => {
     try {
         const cropId = request.params.id;
         const query = `
-            SELECT c.id, c.farm_id, c.crop_name, c.status, c.planted_date, f.name as farm_name 
+            SELECT c.id, c.farm_id, c.crop_name, c.status, c.planted_date, c.tasks_state_json, f.name as farm_name 
             FROM crops c
             JOIN farms f ON c.farm_id = f.id
             WHERE c.id = ?

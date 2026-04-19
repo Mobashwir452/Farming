@@ -67,22 +67,39 @@ body {
 .tracker-tabs-container {
     padding: 0;
     /* Full width */
+    position: relative;
+}
 
+.tracker-tabs-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, #F8FAFC, transparent);
+    pointer-events: none;
 }
 
 .ld-tabs {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     background: #F8FAFC;
     /* Different color from Top Bar */
-    padding: 16px 16px 12px 12px;
+    padding: 16px 16px 12px 16px;
     border-radius: 0;
     border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.ld-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .ld-tab {
-    flex: 1;
-    padding: 10px 0;
+    flex: 0 0 auto;
+    padding: 10px 16px;
     text-align: center;
     border-radius: 10px;
     font-size: 13px;
@@ -360,6 +377,17 @@ body {
     justify-content: center;
     z-index: 2;
     border: 2px solid white;
+}
+
+/* Dead plant styles in batch mode */
+.batch-mode .plant-chip.dead .avatar-ring {
+    border-color: #94A3B8; /* Ash color for unselected */
+}
+.batch-mode .plant-chip.dead.selected .avatar-ring {
+    border-color: #64748B; /* Darker ash for selected */
+}
+.batch-mode .plant-chip.dead.selected .avatar-ring::before {
+    background: #64748B;
 }
 
 .batch-action-bar {

@@ -74,6 +74,7 @@
                 <button class="ld-tab" data-filter="H">সুস্থ (<span id="countHealthy">0</span>)</button>
                 <button class="ld-tab" data-filter="S">অসুস্থ (<span id="countSick">0</span>)</button>
                 <button class="ld-tab" data-filter="C">বিপজ্জনক (<span id="countCritical">0</span>)</button>
+                <button class="ld-tab" data-filter="R">পুনরায় (<span id="countReplanted">0</span>)</button>
                 <button class="ld-tab" data-filter="D">মৃত (<span id="countDead">0</span>)</button>
             </div>
         </div>
@@ -146,33 +147,52 @@
             <p class="text-dim" style="font-size:13px; margin-bottom:15px;">সিলেক্টেড <span
                     id="batchModalCount">0</span> টি গাছের ডাটা একসাথে আপডেট হবে।</p>
 
-            <div class="input-group">
-                <label>জাতের নাম (Variety)</label>
-                <input type="text" id="batchVariety" placeholder="উদা: হাইব্রিড, দেশি ইত্যাদি">
-            </div>
-
-            <div class="form-grid-2">
-                <div class="input-group">
-                    <label>পাতার সংখ্যা</label>
-                    <input type="number" id="batchLeaves" placeholder="উদা: ১৫">
+            <div id="batchReplantContainer" style="display:none; margin-bottom: 15px; padding: 15px; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC;">
+                <label style="font-weight: bold; color: #334155; margin-bottom: 8px; display: block;">🌱 চারা পুনরায় রোপণ (Replant)</label>
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>নতুন চারা রোপণের তারিখ</label>
+                    <input type="text" id="batchReplantDate" readonly onclick="window.openDatePicker('batchReplantDate')">
                 </div>
-                <div class="input-group">
-                    <label>ফলের সংখ্যা</label>
-                    <input type="number" id="batchFruits" placeholder="উদা: ৫">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>নতুন জাত (Variety)</label>
+                    <input type="text" id="batchReplantVariety" placeholder="উদা: রেড লেডি">
                 </div>
             </div>
 
-            <div class="care-checkboxes">
-                <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া
-                    হয়েছে</div>
-                <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ
-                    স্প্রে করা হয়েছে</div>
-            </div>
+            <div id="batchNormalFieldsContainer">
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>রোপণের তারিখ</label>
+                    <input type="text" id="batchPlantingDateInput" readonly onclick="window.openDatePicker('batchPlantingDateInput')" placeholder="পরিবর্তন না করতে চাইলে ফাঁকা রাখুন">
+                </div>
 
-            <div class="input-group">
-                <label>নোট / লক্ষণ</label>
-                <textarea id="batchNote" rows="2" placeholder="সাধারণ নোট লিখুন..."
-                    style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                <div class="input-group">
+                    <label>জাতের নাম (Variety)</label>
+                    <input type="text" id="batchVariety" placeholder="উদা: হাইব্রিড, দেশি ইত্যাদি">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <label>পাতার সংখ্যা</label>
+                        <input type="number" id="batchLeaves" placeholder="উদা: ১৫">
+                    </div>
+                    <div class="input-group">
+                        <label>ফলের সংখ্যা</label>
+                        <input type="number" id="batchFruits" placeholder="উদা: ৫">
+                    </div>
+                </div>
+
+                <div class="care-checkboxes">
+                    <div class="toggle-chip" id="batchFertilizerChip" onclick="this.classList.toggle('active')">🌿 সার দেওয়া
+                        হয়েছে</div>
+                    <div class="toggle-chip" id="batchPesticideChip" onclick="this.classList.toggle('active')">🧪 ওষুধ
+                        স্প্রে করা হয়েছে</div>
+                </div>
+
+                <div class="input-group">
+                    <label>নোট / লক্ষণ</label>
+                    <textarea id="batchNote" rows="2" placeholder="সাধারণ নোট লিখুন..."
+                        style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:10px;"></textarea>
+                </div>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -225,7 +245,11 @@
                             </button>
                         </div>
                         <p id="bsPlantLocation" class="text-sm text-dim" style="margin: 4px 0 0 0;">Bed 1</p>
-                        <div id="bsReplantStatus" style="display:none; margin-top:6px; background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;"></div>
+                        <div id="bsPlantingDateContainer" style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0; font-size:11px; padding:4px 8px; border-radius:6px; font-weight:600;">
+                            <span id="bsPlantingDateText">🌱 রোপণের তারিখ: -</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <input type="date" id="bsPlantingDateInput" style="position:absolute; opacity:0; width:0; height:0; border:none; padding:0; margin:0;" onchange="window.updatePlantingDate(this.value)">
+                        </div>
                     </div>
                 </div>
                 <div class="ai-score-ring"
