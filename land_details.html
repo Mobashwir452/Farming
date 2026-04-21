@@ -77,7 +77,7 @@
                 <div id="current-profit-display" style="display:none;"></div>
 
                 <!-- Minimalist Hero Crop Profile -->
-                <div class="ld-crop-profile" style="background: #F8FAFC; padding: 16px; border-radius: 12px; border: 1px solid #E2E8F0; border-left: 4px solid var(--primary); display: flex; flex-direction: column; gap: 12px; align-items: stretch;">
+                <div class="ld-crop-profile" style="background: #FFFFFF; padding: 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); border: 1px solid #F1F5F9; display: flex; flex-direction: column; gap: 12px; align-items: stretch;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
                         <div>
                             <h4 id="heroCropName" style="font-size: 16px; font-weight: 700; margin: 0; color: #0F172A; text-align: left;">ফসল লোড হচ্ছে...</h4>
@@ -101,7 +101,7 @@
                         </div>
                         
                         <!-- 3D Map & Tracking Button -->
-                        <button id="btn3DMap" onclick="handle3DMapClick()" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+                        <button id="btn3DMap" onclick="handle3DMapClick()" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" style="margin-top: 16px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25); transition: transform 0.2s ease;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                             <span>গাছের ম্যাপ ও আপডেট</span>
                         </button>
@@ -137,46 +137,46 @@
                 <!-- 3. Premium Bento Grid Actions (Moved inside Hero Card) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px;">
                     <!-- Action 1: AI Scan -->
-                    <div id="btnDisease" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
-                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <div id="btnDisease" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" style="background: #F8FAFC; border-radius: 14px; padding: 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: transform 0.2s ease;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0; margin-top: 2px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                         </div>
                         <div style="min-width: 0;">
-                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">এআই স্ক্যান</div>
-                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">রোগ নির্ণয় ও পরামর্শ</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #064E3B; margin-bottom: 4px;">এআই স্ক্যান</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">রোগ নির্ণয় ও পরামর্শ</div>
                         </div>
                     </div>
 
                     <!-- Action 2: Finance -->
-                    <div id="btnFinance" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
-                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <div id="btnFinance" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" style="background: #F8FAFC; border-radius: 14px; padding: 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: transform 0.2s ease;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0; margin-top: 2px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                         </div>
                         <div style="min-width: 0;">
-                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">আয়-ব্যয়</div>
-                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">সকল হিসাবপত্র</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #064E3B; margin-bottom: 4px;">আয়-ব্যয়</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">সকল হিসাবপত্র</div>
                         </div>
                     </div>
 
                     <!-- Action 3: Loss -->
-                    <div onclick="document.getElementById('lossModal').classList.add('active'); document.body.style.overflow='hidden';" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
-                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <div onclick="document.getElementById('lossModal').classList.add('active'); document.body.style.overflow='hidden';" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" style="background: #F8FAFC; border-radius: 14px; padding: 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: transform 0.2s ease;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0; margin-top: 2px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                         </div>
                         <div style="min-width: 0;">
-                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">ক্ষয়ক্ষতি</div>
-                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">লগ এন্ট্রি করুন</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #064E3B; margin-bottom: 4px;">ক্ষয়ক্ষতি</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">লগ এন্ট্রি করুন</div>
                         </div>
                     </div>
 
                     <!-- Action 4: Harvest -->
-                    <div id="btnHarvest" style="background: #F8FAFC; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #E2E8F0; cursor: pointer;">
-                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <div id="btnHarvest" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" style="background: #F8FAFC; border-radius: 14px; padding: 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: transform 0.2s ease;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0; margin-top: 2px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
                         </div>
                         <div style="min-width: 0;">
-                            <div style="font-size: 13px; font-weight: 700; color: #064E3B; margin-bottom: 2px;">ফসল কর্তন</div>
-                            <div style="font-size: 9px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">কাজ সমাপ্ত করুন</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #064E3B; margin-bottom: 4px;">ফসল কর্তন</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">কাজ সমাপ্ত করুন</div>
                         </div>
                     </div>
                 </div>
@@ -255,16 +255,16 @@
                         </button>
                     </div>
                     
-                    <div id="task-filter-chips" class="filter-chips-container" style="display: flex; gap: 4px; margin: 12px 12px 4px 12px; overflow-x: auto; padding: 4px; background: #F1F5F9; border-radius: 12px; scrollbar-width: none; -ms-overflow-style: none;">
+                    <div id="task-filter-chips" class="filter-chips-container" style="display: flex; gap: 4px; margin: 12px 12px 8px 12px; overflow-x: auto; padding: 4px; background: rgba(118, 118, 128, 0.12); border-radius: 10px; scrollbar-width: none; -ms-overflow-style: none;">
                         <style>
                             .filter-chips-container::-webkit-scrollbar { display: none; }
-                            .filter-chip { flex: 1; padding: 8px 6px; border: none; background: transparent; color: #475569; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; }
-                            .filter-chip.active { background: #FFFFFF; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                            .cnt-badge { display: inline-flex; align-items: center; justify-content: center; background: #E2E8F0; color: #475569; border-radius: 10px; padding: 0 4px; font-size: 10px; margin-left: 4px; font-weight: 700; min-width: 16px; height: 16px; transition: all 0.2s; }
-                            .filter-chip.active .cnt-badge { background: #ECFDF5; color: var(--primary); }
+                            .filter-chip { position: relative; flex: 1; padding: 6px 8px; border: none; background: transparent; color: #64748B; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; z-index: 1; min-width: 60px; }
+                            .filter-chip.active { color: #000000; font-weight: 700; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
+                            .cnt-badge { display: inline-flex; align-items: center; justify-content: center; background: #E2E8F0; color: #475569; border-radius: 10px; padding: 0 4px; font-size: 10px; margin-left: 4px; font-weight: 700; min-width: 16px; height: 16px; transition: all 0.3s; }
+                            .filter-chip.active .cnt-badge { background: #F1F5F9; color: #000; }
                             .cnt-badge.danger { background: #FEF2F2; color: #DC2626; animation: pulseBadge 2s infinite; }
                             .filter-chip.active .cnt-badge.danger { background: #FEF2F2; color: #DC2626; }
-                            @keyframes pulseBadge { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+                            @keyframes pulseBadge { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
                         </style>
                         <button class="filter-chip active" data-filter="pending" onclick="window.setTaskFilter('pending')">পেন্ডিং <span class="cnt-badge" style="display: none;">0</span></button>
                         <button class="filter-chip" data-filter="missed" onclick="window.setTaskFilter('missed')">মিসড <span class="cnt-badge danger" style="display: none;">0</span></button>
@@ -890,39 +890,30 @@
                 </div>
                 <div class="calendar-body" style="padding: 0;">
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px; font-weight: 500; font-size: 15px; color: var(--text-main);"
-                        onclick="document.getElementById('aiGuidelineModal').classList.add('active'); document.body.style.overflow='hidden'; closeCropActionModals();">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #ECFDF5; display: flex; align-items: center; justify-content: center; color: #10B981;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="sheet-action-item" onclick="document.getElementById('aiGuidelineModal').classList.add('active'); document.body.style.overflow='hidden'; closeCropActionModals();">
+                        <div class="sheet-action-icon" style="background: #ECFDF5; color: #10B981;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <path d="M12 16v-4"></path>
                                 <path d="M12 8h.01"></path>
                             </svg>
                         </div>
-                        এআই নির্দেশিকা (Smart AI Guidelines)
+                        <span class="sheet-action-text">এআই নির্দেশিকা</span>
                     </button>
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px; font-weight: 500; font-size: 15px; color: var(--text-main);"
-                        onclick="openStatusUpdateModal()">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #475569;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="sheet-action-item" onclick="openStatusUpdateModal()">
+                        <div class="sheet-action-icon" style="background: #F1F5F9; color: #475569;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
                         </div>
-                        অবস্থা আপডেট করুন (Update Status)
+                        <span class="sheet-action-text">অবস্থা আপডেট করুন</span>
                     </button>
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px; font-weight: 500; font-size: 15px; color: var(--text-main);"
-                        onclick="openAddNoteModal()">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #FEF3C7; display: flex; align-items: center; justify-content: center; color: #D97706;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="sheet-action-item" onclick="openAddNoteModal()">
+                        <div class="sheet-action-icon" style="background: #FEF3C7; color: #D97706;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -930,53 +921,114 @@
                                 <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
                         </div>
-                        নোট যোগ করুন (Add Note)
+                        <span class="sheet-action-text">নোট যোগ করুন</span>
                     </button>
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px; font-weight: 500; font-size: 15px; color: var(--text-main);"
-                        onclick="generateCropReport()">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #DBEAFE; display: flex; align-items: center; justify-content: center; color: #2563EB;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="sheet-action-item" onclick="generateCropReport()">
+                        <div class="sheet-action-icon" style="background: #DBEAFE; color: #2563EB;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
                         </div>
-                        রিপোর্ট ডাউনলোড (Share Report)
+                        <span class="sheet-action-text">রিপোর্ট ডাউনলোড</span>
                     </button>
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px; font-weight: 600; font-size: 15px; color: #10B981;"
-                        onclick="handleMarkCropCompleted()">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #10B981; display: flex; align-items: center; justify-content: center; color: white;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="sheet-action-item" onclick="handleMarkCropCompleted()">
+                        <div class="sheet-action-icon" style="background: #10B981; color: white;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="8 12 12 16 16 12"></polyline>
                                 <line x1="12" y1="8" x2="12" y2="16"></line>
                             </svg>
                         </div>
-                        ফিনিশ (Mark as Completed)
+                        <span class="sheet-action-text" style="color: #10B981;">ফিনিশ (সম্পন্ন)</span>
                     </button>
 
-                    <button class="ld-action-btn"
-                        style="width: 100%; text-align: left; padding: 16px 4px; background: none; border: none; display: flex; align-items: center; gap: 16px; font-weight: 600; font-size: 15px; color: #EF4444;"
-                        onclick="handleDeleteCrop()">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #EF4444;">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <div style="height: 1px; background: var(--border-color); margin: 8px 16px;"></div>
+
+                    <button class="sheet-action-item" onclick="handleDeleteCrop()">
+                        <div class="sheet-action-icon" style="background: #FEE2E2; color: #EF4444;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                             </svg>
                         </div>
-                        মুছে ফেলুন (Delete Crop)
+                        <span class="sheet-action-text" style="color: #EF4444;">মুছে ফেলুন</span>
                     </button>
 
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Task Modal -->
+        <div class="calendar-modal" id="editTaskModal">
+            <div class="calendar-content">
+                <div class="calendar-header" style="border-bottom: none; padding-bottom: 8px;">
+                    <h4 style="font-size: 18px; font-weight: 700; color: #0F172A;">কাজ সম্পাদনা করুন</h4>
+                    <button class="close-modal" aria-label="Close modal"
+                        onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow='';" style="background: #F1F5F9; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #64748B;">&times;</button>
+                </div>
+                <div class="calendar-body" style="padding: 12px 0 0;">
+                    <input type="hidden" id="editTaskId" value="">
+                    
+                    <div class="input-group" style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">কাজের নাম</label>
+                        <input id="editTaskTitle" type="text" placeholder="যেমন: প্রথম কিস্তি উপরি সার"
+                            style="width: 100%; box-sizing: border-box; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; outline: none; background: #F1F5F9; color: #1E293B; font-weight: 600; transition: box-shadow 0.2s;" onfocus="this.style.boxShadow='0 0 0 2px #3B82F6'" onblur="this.style.boxShadow='none'">
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">বিস্তারিত বিবরণ</label>
+                        <textarea id="editTaskDesc" rows="3" placeholder="কাজের বিস্তারিত বিবরণ..."
+                            style="width: 100%; box-sizing: border-box; padding: 14px 16px; border: none; border-radius: 12px; font-size: 15px; outline: none; background: #F1F5F9; color: #334155; resize: none; overflow: auto; transition: box-shadow 0.2s;" onfocus="this.style.boxShadow='0 0 0 2px #3B82F6'" onblur="this.style.boxShadow='none'"></textarea>
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">তারিখ নির্ধারণ</label>
+                        
+                        <!-- Sleek Date Toggle Button -->
+                        <button type="button" onclick="const cal = document.getElementById('editTaskCalendarCollapse'); cal.style.display = cal.style.display === 'none' ? 'block' : 'none';" style="width: 100%; box-sizing: border-box; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #E2E8F0; background: #fff; border-radius: 12px; cursor: pointer; color: #1E293B; font-size: 15px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: border-color 0.2s;" onmouseover="this.style.borderColor='#CBD5E1'" onmouseout="this.style.borderColor='#E2E8F0'">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </div>
+                                <span id="editTaskDateDisplayLabel">তারিখ লোড হচ্ছে...</span>
+                            </div>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94A3B8;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+
+                        <!-- Collapsible Calendar Wrapper -->
+                        <div id="editTaskCalendarCollapse" style="display: none; margin-top: 12px; animation: slideDown 0.3s ease-out;">
+                            <div class="calendar-wrapper" style="border: 1px solid #E2E8F0; border-radius: 16px; padding: 16px; background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div class="calendar-month" id="editCalendarMonthLabel" style="font-size: 15px; font-weight: 700; color: #1E293B;"></div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" onclick="changeEditCalendarMonth(-1)" style="border: 1px solid #E2E8F0; background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #475569;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                        </button>
+                                        <button type="button" onclick="changeEditCalendarMonth(1)" style="border: 1px solid #E2E8F0; background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #475569;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="calendar-weekdays" style="margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #94A3B8; text-align: center; display: grid; grid-template-columns: repeat(7, 1fr);">
+                                    <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+                                </div>
+                                <div class="calendar-days" id="editCalendarDays" style="text-align: center;">
+                                    <!-- JS will populate -->
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="editTaskSelectedDate" value="">
+                    </div>
+                </div>
+                <div class="calendar-footer" style="display: flex; gap: 12px; margin-top: 8px; border-top: none;">
+                    <button class="btn-tl-action" style="flex: 1; padding: 14px; background: transparent; color: #64748B; border: 1px solid #E2E8F0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-align: center; display: flex; justify-content: center; align-items: center;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" onclick="this.closest('.calendar-modal').classList.remove('active'); document.body.style.overflow='';">বাতিল</button>
+                    <button class="btn-primary" style="flex: 2; padding: 14px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); transition: transform 0.1s; text-align: center; display: flex; justify-content: center; align-items: center;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onclick="saveTaskEdit()">সেভ করুন</button>
                 </div>
             </div>
         </div>

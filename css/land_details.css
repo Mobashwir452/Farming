@@ -470,3 +470,45 @@ body.history-mode .page-top-header h2::after {
     border-radius: 8px;
     vertical-align: middle;
 }
+
+/* Bottom Sheet Action Menu Styles */
+.sheet-action-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    border-radius: 12px;
+    margin-bottom: 4px;
+}
+
+.sheet-action-item:last-child {
+    margin-bottom: 0;
+}
+
+.sheet-action-item:active {
+    background: #F1F5F9;
+    transform: scale(0.98);
+}
+
+.sheet-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sheet-action-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    text-align: left;
+    flex: 1;
+}

@@ -855,6 +855,167 @@ window.addCustomTask = async function () {
     }
 };
 
+window.currentEditCalendarViewDate = null;
+
+window.renderEditCalendar = function(initialDateStr) {
+    if (!window.currentEditCalendarViewDate) {
+        if (initialDateStr) {
+            window.currentEditCalendarViewDate = new Date(initialDateStr);
+        } else {
+            window.currentEditCalendarViewDate = new Date();
+        }
+    }
+    const calendarDays = document.getElementById('editCalendarDays');
+    const monthLabel = document.getElementById('editCalendarMonthLabel');
+    if (!calendarDays || !monthLabel) return;
+    calendarDays.innerHTML = '';
+
+    const EN_TO_BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+    const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+
+    const realToday = new Date();
+    let selectedDateStr = document.getElementById('editTaskSelectedDate').value;
+    if (!selectedDateStr) selectedDateStr = initialDateStr;
+
+    const currentMonth = window.currentEditCalendarViewDate.getMonth();
+    const currentYear = window.currentEditCalendarViewDate.getFullYear();
+
+    monthLabel.textContent = `${EN_TO_BN_MONTHS[currentMonth]} ${toBngDigits(currentYear)}`;
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyDiv = document.createElement('div');
+        calendarDays.appendChild(emptyDiv);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'cal-day';
+        dayEl.textContent = toBngDigits(i);
+
+        const thisDate = new Date(currentYear, currentMonth, i);
+        const thisDateStr = thisDate.toISOString().split('T')[0];
+
+        if (thisDate.getDate() === realToday.getDate() && thisDate.getMonth() === realToday.getMonth() && thisDate.getFullYear() === realToday.getFullYear()) {
+            dayEl.classList.add('today');
+        }
+
+        if (selectedDateStr && thisDateStr === selectedDateStr) {
+            dayEl.classList.add('selected');
+        }
+
+        dayEl.onclick = () => {
+            document.querySelectorAll('#editCalendarDays .cal-day').forEach(el => el.classList.remove('selected'));
+            dayEl.classList.add('selected');
+            document.getElementById('editTaskSelectedDate').value = thisDateStr;
+            
+            // Format Bengali Date for Label
+            const bngMonths = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+            const toBngDigitsLabel = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+            document.getElementById('editTaskDateDisplayLabel').textContent = `${toBngDigitsLabel(i)} ${bngMonths[currentMonth]} ${toBngDigitsLabel(currentYear)}`;
+
+            // Auto close calendar collapse
+            const calWrapper = document.getElementById('editTaskCalendarCollapse');
+            if(calWrapper) calWrapper.style.display = 'none';
+        };
+        calendarDays.appendChild(dayEl);
+    }
+};
+
+window.changeEditCalendarMonth = function (offset) {
+    if (!window.currentEditCalendarViewDate) window.currentEditCalendarViewDate = new Date();
+    window.currentEditCalendarViewDate.setMonth(window.currentEditCalendarViewDate.getMonth() + offset);
+    renderEditCalendar(document.getElementById('editTaskSelectedDate').value);
+};
+
+window.editTask = function(taskId) {
+    if (!activeCrop || !activeCrop.tasks_state_json) return;
+    try {
+        let tasks = JSON.parse(activeCrop.tasks_state_json);
+        let task = tasks.find(t => t.id === taskId);
+        if (task) {
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskTitle').value = task.title || '';
+            document.getElementById('editTaskDesc').value = task.description || '';
+            
+            const due_date = task.due_date || new Date().toISOString().split('T')[0];
+            document.getElementById('editTaskSelectedDate').value = due_date;
+            window.currentEditCalendarViewDate = new Date(due_date);
+            renderEditCalendar(due_date);
+            
+            // Format initial Label
+            const dp = new Date(due_date);
+            const bngMonths = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+            const toBngDigitsLabel = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+            document.getElementById('editTaskDateDisplayLabel').textContent = `${toBngDigitsLabel(dp.getDate())} ${bngMonths[dp.getMonth()]} ${toBngDigitsLabel(dp.getFullYear())}`;
+
+            // Reset Calendar Collapse
+            const calWrapper = document.getElementById('editTaskCalendarCollapse');
+            if(calWrapper) calWrapper.style.display = 'none';
+            
+            document.getElementById('editTaskModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    } catch(e) {
+        console.error("Error editing task", e);
+    }
+};
+
+window.saveTaskEdit = async function() {
+    const taskId = document.getElementById('editTaskId').value;
+    const title = document.getElementById('editTaskTitle').value;
+    const desc = document.getElementById('editTaskDesc').value;
+    const newDate = document.getElementById('editTaskSelectedDate').value;
+
+    if (!title.trim()) {
+        if(window.SmartDialog) await SmartDialog.alert('কাজের নাম আবশ্যক', 'ত্রুটি', 'warning');
+        return;
+    }
+
+    if (!activeCrop || !activeCrop.tasks_state_json) return;
+    try {
+        let tasks = JSON.parse(activeCrop.tasks_state_json);
+        const taskObj = tasks.find(t => t.id === taskId);
+        if (taskObj) {
+            taskObj.title = title.trim();
+            taskObj.description = desc.trim();
+            
+            if (newDate) {
+                const oldDate = taskObj.due_date;
+                taskObj.due_date = newDate;
+
+                // Adjust day_offset
+                if (activeCrop.sowing_date) {
+                    const sow = new Date(activeCrop.sowing_date);
+                    const due = new Date(newDate);
+                    const diffTime = due - sow;
+                    taskObj.day_offset = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                }
+
+                // Call biological dependency checker here just in case?
+                // Actually the user's manual biological chain recover from confirmDateSelection:
+                let bioChain = [...tasks].sort((a, b) => (a.day_offset || 0) - (b.day_offset || 0));
+                let bioIdx = bioChain.findIndex(t => t.id === taskObj.id);
+                // For a simpler edit, we might just update this one task. 
+                // However, they use day_offset extensively, which we updated above.
+            }
+            
+            activeCrop.tasks_state_json = JSON.stringify(tasks);
+            saveCropState();
+            renderTasksTab(activeCrop.tasks_state_json);
+            
+            document.getElementById('editTaskModal').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if(window.SmartDialog) await SmartDialog.alert('কাজের বিবরণ সফলভাবে আপডেট করা হয়েছে', 'সফল', 'success');
+        }
+    } catch(e) {
+        console.error("Error saving edited task", e);
+    }
+};
+
 window.currentTaskFilter = window.currentTaskFilter || 'pending';
 window.setTaskFilter = function (filterStr) {
     window.currentTaskFilter = filterStr;
@@ -933,13 +1094,13 @@ function renderTasksTab(tasksJsonStr) {
 
         if (firstMissed) {
             smartAlertHtml = `
-            <div style="background: #FEF2F2; border: none; border-left: 4px solid #F43F5E; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 12px; margin-bottom: 16px; margin-left: 12px; margin-right: 12px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
-                <div style="color: #F43F5E; margin-top: 2px;">
+            <div style="background: #FEF2F2; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08); padding: 14px; margin-bottom: 16px; margin-left: 12px; margin-right: 12px; display: flex; gap: 12px; align-items: flex-start; text-align: left;">
+                <div style="background: #FEE2E2; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; color: #DC2626; flex-shrink: 0;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
                 <div style="flex: 1;">
-                    <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;"><span style="color:#F43F5E;">সতর্কতা:</span> "${firstMissed.title}" মিস হয়েছে!</h4>
-                    <p style="margin: 0; color: #475569; font-size: 12px; line-height: 1.5;">অবিলম্বে নিচে থেকে কাজটি <b>সম্পন্ন</b> করুন অথবা <b>বাতিল</b> করুন!</p>
+                    <h4 style="margin: 0 0 4px 0; color: #991B1B; font-size: 14px; font-weight: 700;">সতর্কতা: "${firstMissed.title}" মিস হয়েছে!</h4>
+                    <p style="margin: 0; color: #B91C1C; font-size: 12px; line-height: 1.5;">অবিলম্বে নিচে থেকে কাজটি <b>সম্পন্ন</b> অথবা <b>বাতিল</b> করুন!</p>
                 </div>
             </div>
             `;
@@ -1125,52 +1286,59 @@ function renderTasksTab(tasksJsonStr) {
                     dateLabel = `মিস হয়েছে`;
                 } else {
                     itemClass = 'default';
-                    dateLabel = 'সামনের কাজ';
+                    dateLabel = '';
                 }
             }
 
             let actionsHtml = '';
             if (showActions) {
                 actionsHtml = `
-                <div class="task-item-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-                    <button class="btn-tl-action done" onclick="markTaskDone('${task.id || ''}', this)" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--border-color); background: #F1F5F9; border-radius: 8px; cursor: pointer; color: var(--text-main);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg> সম্পন্ন
+                <div class="task-item-actions" style="margin-top: 14px; display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-tl-action done" onclick="markTaskDone('${task.id || ''}', this)" style="flex: 1; padding: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: #10B981; color: white; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: transform 0.2s, box-shadow 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> সম্পন্ন
                     </button>
-                    <button class="btn-tl-action reschedule" onclick="rescheduleTask('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--border-color); background: #F1F5F9; border-radius: 8px; cursor: pointer; color: var(--text-main);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> সময় পরিবর্তন
+                    <button class="btn-tl-action edit" onclick="editTask('${task.id || ''}')" style="padding: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 10px; cursor: pointer; color: #475569; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" title="সম্পাদনা করুন">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
-                    <button class="btn-tl-action cancel" onclick="cancelTask('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--border-color); background: #FFF1F2; border-radius: 8px; cursor: pointer; color: #EF4444;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> বাতিল
+                    <button class="btn-tl-action cancel" onclick="cancelTask('${task.id || ''}')" style="padding: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 1px solid #FECACA; background: #FEF2F2; border-radius: 10px; cursor: pointer; color: #EF4444; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" title="বাতিল করুন">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                 </div>`;
             } else if (task.status === 'cancelled') {
                 actionsHtml = `
-                <div class="task-item-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-                    <button class="btn-tl-action reactivate" onclick="reactivateTask('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed var(--border-color); background: transparent; border-radius: 8px; cursor: pointer; color: var(--text-main);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="16 1 21 5 16 9"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><polyline points="8 23 3 19 8 15"></polyline></svg> পরিবর্তন করুন
+                <div class="task-item-actions" style="margin-top: 14px; display: flex; gap: 8px;">
+                    <button class="btn-tl-action reactivate" onclick="reactivateTask('${task.id || ''}')" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: #F1F5F9; border-radius: 10px; cursor: pointer; color: #475569; transition: transform 0.2s, background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="16 1 21 5 16 9"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><polyline points="8 23 3 19 8 15"></polyline></svg> আবার শুরু করুন
                     </button>
-                    <button class="btn-tl-action delete-perm" onclick="deleteTaskPermanently('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed #EF4444; background: #FEF2F2; border-radius: 8px; cursor: pointer; color: #EF4444;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> মুছে ফেলুন
+                    <button class="btn-tl-action delete-perm" onclick="deleteTaskPermanently('${task.id || ''}')" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: #FEF2F2; border-radius: 10px; cursor: pointer; color: #EF4444; transition: transform 0.2s, background 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> মুছে ফেলুন
                     </button>
                 </div>`;
             } else {
                 actionsHtml = `
-                <div class="task-item-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-                    <button class="btn-tl-action reactivate" onclick="reactivateTask('${task.id || ''}')" style="flex: 1; padding: 6px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed var(--border-color); background: transparent; border-radius: 8px; cursor: pointer; color: var(--text-main);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="16 1 21 5 16 9"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><polyline points="8 23 3 19 8 15"></polyline></svg> পরিবর্তন করুন
+                <div class="task-item-actions" style="margin-top: 14px; display: flex; gap: 8px;">
+                    <button class="btn-tl-action reactivate" onclick="reactivateTask('${task.id || ''}')" style="padding: 10px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: #F1F5F9; border-radius: 10px; cursor: pointer; color: #475569; transition: transform 0.2s, background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="16 1 21 5 16 9"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><polyline points="8 23 3 19 8 15"></polyline></svg> পরিবর্তন করুন
                     </button>
                 </div>`;
             }
 
+            let cardBg = task.is_skipped ? '#FAFAFA' : (itemClass === 'completed' ? '#F8FAFC' : '#fff');
+            let cardBorder = itemClass === 'completed' || task.is_skipped ? '1px solid #E2E8F0' : 'none';
+            let cardShadow = itemClass === 'completed' || task.is_skipped ? 'none' : '0 4px 20px rgba(0,0,0,0.04)';
+            let cardOpacity = itemClass === 'completed' ? '0.85' : (task.is_skipped ? '0.75' : '1');
+
             groupHtml += `
-                <div class="ld-task-item ${itemClass}" style="position: relative; padding-left: 0; display: block; background: ${task.is_skipped ? '#FAFAFA' : '#fff'}; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); ${task.is_skipped ? 'opacity: 0.75;' : ''}">
+                <div class="ld-task-item ${itemClass}" style="position: relative; padding-left: 0; display: block; background: ${cardBg}; border: ${cardBorder}; border-radius: 16px; padding: 16px; box-shadow: ${cardShadow}; margin-bottom: 12px; transition: transform 0.2s; opacity: ${cardOpacity};">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--text-main); ${task.is_skipped ? 'text-decoration: line-through;' : ''}">${task.title}</h4>
-                        <span style="font-size: 11px; padding: 4px 8px; border-radius: 8px; background: ${itemClass === 'completed' ? '#ECFDF5' : (itemClass === 'active' ? '#EEF2FF' : (itemClass === 'warning' ? '#FEF2F2' : (itemClass === 'skipped' ? '#FFFBEB' : '#F8FAFC')))}; color: ${itemClass === 'completed' ? '#059669' : (itemClass === 'active' ? '#4F46E5' : (itemClass === 'warning' ? '#DC2626' : (itemClass === 'skipped' ? '#D97706' : '#64748B')))}; font-weight: 600;">${dateLabel}</span>
+                        <div style="flex: 1; padding-right: 12px;">
+                            <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #1E293B; line-height: 1.3; ${task.is_skipped ? 'text-decoration: line-through;' : ''}">${task.title}</h4>
+                        </div>
+                        ${dateLabel ? `<div style="flex-shrink: 0;"><span style="font-size: 11px; padding: 4px 10px; border-radius: 20px; background: ${itemClass === 'completed' ? '#ECFDF5' : (itemClass === 'active' ? '#EEF2FF' : (itemClass === 'warning' ? '#FEF2F2' : (itemClass === 'skipped' ? '#FFFBEB' : '#F8FAFC')))}; color: ${itemClass === 'completed' ? '#059669' : (itemClass === 'active' ? '#4F46E5' : (itemClass === 'warning' ? '#DC2626' : (itemClass === 'skipped' ? '#D97706' : '#64748B')))}; font-weight: 700; white-space: nowrap; display: inline-block;">${dateLabel}</span></div>` : ''}
                     </div>
-                    ${task.description ? `<p style="margin: 0 0 ${task.is_skipped ? '8px' : '12px'} 0; font-size: 13px; color: var(--text-muted); line-height: 1.4;">${scaleTextQuantities(task.description)}</p>` : ''}
-                    ${task.is_skipped ? `<div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #C2410C; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    ${task.description ? `<p style="margin: 0 0 ${task.is_skipped ? '12px' : '0'}; font-size: 13px; color: #64748B; line-height: 1.5;">${scaleTextQuantities(task.description)}</p>` : ''}
+                    ${task.is_skipped ? `<div style="background: #FFF7ED; border: 1px solid #FFEDD5; padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #C2410C; margin-top: 12px; display: flex; align-items: flex-start; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                         <span>আপনি এই কাজটি এড়িয়ে গেছেন, যার ফলে কাঙ্ক্ষিত ফলন কিছুটা কমে যেতে পারে।</span>
                     </div>` : ''}
                     ${actionsHtml}

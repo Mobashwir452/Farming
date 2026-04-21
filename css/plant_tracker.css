@@ -28,8 +28,10 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Header Override */
@@ -77,7 +79,7 @@ body {
     top: 0;
     bottom: 0;
     width: 50px;
-    background: linear-gradient(to left, #F8FAFC 10%, transparent);
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.9) 10%, transparent);
     pointer-events: none;
     z-index: 10;
 }
@@ -90,7 +92,7 @@ body {
     top: 0;
     bottom: 0;
     width: 20px;
-    background: linear-gradient(to right, #F8FAFC, transparent);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.9), transparent);
     pointer-events: none;
     z-index: 10;
 }
@@ -98,11 +100,11 @@ body {
 .ld-tabs {
     display: flex;
     gap: 8px;
-    background: #F8FAFC;
-    /* Different color from Top Bar */
+    background: transparent;
+    /* Transparent so parent glassmorphism is visible */
     padding: 16px 36px 12px 16px; /* Added right padding so last item doesn't stick to edge */
     border-radius: 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     overflow-x: auto;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
@@ -385,6 +387,72 @@ body {
     filter: grayscale(100%);
     opacity: 0.7;
 }
+
+/* Sonar Pulse Animations */
+@keyframes sonar-pulse-sick {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+@keyframes sonar-pulse-critical {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(3.5);
+        opacity: 0;
+    }
+}
+
+.plant-chip.sick .status-dot::after,
+.badge-dot.sick::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: var(--sick-color);
+    animation: sonar-pulse-sick 2s infinite ease-out;
+    z-index: -1;
+}
+
+.plant-chip.critical .status-dot::after,
+.badge-dot.critical::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: var(--critical-color);
+    animation: sonar-pulse-critical 1s infinite ease-out;
+    z-index: -1;
+}
+
+/* Bottom Sheet Badge Dot */
+.badge-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    position: relative;
+    vertical-align: middle;
+}
+.badge-dot.healthy { background-color: var(--healthy-color); }
+.badge-dot.sick { background-color: var(--sick-color); }
+.badge-dot.critical { background-color: var(--critical-color); }
+.badge-dot.dead { background-color: #94a3b8; }
 
 /* Empty State / Photo Needed */
 .avatar-ring.empty-state {
@@ -965,3 +1033,18 @@ body {
     background-color: rgba(255, 255, 255, 0.3) !important;
     transform: scale(1.1);
 }
+/* --- Notes UX (Glance & Peek) --- */
+.note-indicator { position: absolute; top: 0px; right: 0px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; z-index: 5; cursor: pointer; color: #475569; transition: transform 0.2s; }
+.note-indicator:active, .note-indicator:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.9); }
+.note-popover { position: fixed; z-index: 200; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; padding: 12px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #0f172a; font-size: 13px; max-width: 250px; opacity: 0; pointer-events: none; transform: translateY(10px) scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.note-popover.visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+/* List View Styles */
+.plant-grid.list-view { display: flex; flex-direction: column; gap: 8px; }
+.plant-grid.list-view .plant-chip { flex-direction: row; align-items: center; padding: 10px 14px; background: #f8fafc; border-radius: 12px; width: 100%; box-sizing: border-box; text-align: left; gap: 12px; }
+.plant-grid.list-view .avatar-ring { width: 44px; height: 44px; flex-shrink: 0; }
+.plant-grid.list-view .status-dot { width: 16px; height: 16px; border-width: 2px; }
+.plant-grid.list-view .chip-info { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; flex: 1; min-width: 0; }
+.plant-grid.list-view .chip-id { font-size: 14px; margin-top: 0; }
+.plant-grid.list-view .chip-variety { font-size: 11px; }
+.plant-grid.list-view .chip-note-preview { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: right; background: #e2e8f0; padding: 4px 8px; border-radius: 12px; }
+.plant-grid.list-view .note-indicator { display: none; }

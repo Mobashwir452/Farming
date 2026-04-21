@@ -10,6 +10,7 @@ let isBatchMode = false;
 let selectedPlants = new Set(); // Stores objects like {bedId, plantId, pIndex, bIndex}
 let currentlyEditingPlant = null; // Stores {bedId, node, bIndex, pIndex}
 let globalCropData = null;
+let isListView = false;
 let expandedBedIndexes = new Set([0]); // Memory for open beds across rerenders
 let longPressTimer = null;
 let isLongPressTriggered = false;
@@ -140,6 +141,7 @@ function renderBeds() {
         // Create Grid container for chips
         const gridDiv = document.createElement('div');
         gridDiv.className = 'plant-grid';
+        if (isListView) gridDiv.classList.add('list-view');
 
         nodes.forEach((node, pIndex) => {
             const state = node.state || 'H';
@@ -198,21 +200,101 @@ function renderBeds() {
                 emptyIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
             }
 
+            // Check for notes
+            let hasNote = false;
+            let noteSnippet = '';
+            if (node.disease && node.disease.trim() !== '') {
+                hasNote = true;
+                noteSnippet = node.disease.trim();
+            } else if (node.logs && node.logs.length > 0) {
+                for (let i = node.logs.length - 1; i >= 0; i--) {
+                    if (node.logs[i].disease && node.logs[i].disease.trim() !== '') {
+                        hasNote = true;
+                        noteSnippet = node.logs[i].disease.trim();
+                        break;
+                    }
+                }
+            }
+
+            let noteIndicatorHtml = '';
+            let listNoteHtml = '';
+            if (hasNote) {
+                noteIndicatorHtml = `<div class="note-indicator" data-note="${noteSnippet.replace(/"/g, '&quot;')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>`;
+                listNoteHtml = `<div class="chip-note-preview" title="${noteSnippet.replace(/"/g, '&quot;')}">${noteSnippet}</div>`;
+            }
+
             let innerContent = `
                 <div class="avatar-ring ${emptyClass}" style="${bgStyle}">
                     ${emptyIcon}
                     <div class="status-dot${node.replanted_date ? ' is-replant' : ''}">
                         ${node.replanted_date ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>' : ''}
                     </div>
+                    ${noteIndicatorHtml}
                 </div>
-                <div class="chip-id">${String(node.id || '').includes('-') ? String(node.id).split('-')[1] : String(node.id)}</div>
+                <div class="chip-info">
+                    <div class="chip-id">${String(node.id || '').includes('-') ? String(node.id).split('-')[1] : String(node.id)}</div>
+                    ${node.variety ? `<div class="chip-variety" title="${node.variety}">${node.variety}</div>` : ''}
+                    ${isListView ? listNoteHtml : ''}
+                </div>
             `;
 
-            if (node.variety) {
-                innerContent += `<div class="chip-variety" title="${node.variety}">${node.variety}</div>`;
-            }
-
             chip.innerHTML = innerContent;
+
+            // Note Indicator interactions
+            const noteInd = chip.querySelector('.note-indicator');
+            if (noteInd) {
+                let uniqueId = `note-${bIndex}-${pIndex}`;
+                
+                const togglePopover = (e) => {
+                    e.stopPropagation(); // prevent opening bottom sheet
+                    e.preventDefault(); // prevent batch mode triggering
+                    const popover = document.getElementById('notePopover');
+                    if (popover) {
+                        // If clicking the same indicator and it's already visible, hide it
+                        if (popover.classList.contains('visible') && popover.dataset.currentId === uniqueId) {
+                            popover.classList.remove('visible');
+                            popover.dataset.currentId = '';
+                            return;
+                        }
+
+                        const noteText = noteInd.getAttribute('data-note');
+                        popover.dataset.currentId = uniqueId;
+                        popover.innerHTML = `<div style="font-weight:600; margin-bottom:4px; color:var(--text-dim); font-size:11px;">নোট / লক্ষণ</div><div>${noteText}</div>`;
+                        
+                        const rect = noteInd.getBoundingClientRect();
+                        popover.style.top = `${rect.bottom + 10}px`;
+                        // center horizontally relative to indicator
+                        let leftPos = rect.left + (rect.width / 2) - 125; // 250px max-width / 2
+                        if (leftPos < 10) leftPos = 10;
+                        if (leftPos + 250 > window.innerWidth) leftPos = window.innerWidth - 260;
+                        popover.style.left = `${leftPos}px`;
+                        
+                        popover.classList.add('visible');
+                    }
+                };
+
+                noteInd.addEventListener('click', togglePopover);
+                
+                // For desktop hover (only if it's an actual mouse)
+                noteInd.addEventListener('pointerenter', (e) => {
+                    if (e.pointerType === 'mouse') {
+                        const popover = document.getElementById('notePopover');
+                        if (popover && (!popover.classList.contains('visible') || popover.dataset.currentId !== uniqueId)) {
+                            togglePopover(e);
+                        }
+                    }
+                });
+                
+                noteInd.addEventListener('pointerleave', (e) => {
+                    if (e.pointerType === 'mouse') {
+                        const popover = document.getElementById('notePopover');
+                        if (popover && popover.dataset.currentId === uniqueId) {
+                            popover.classList.remove('visible');
+                            popover.dataset.currentId = '';
+                        }
+                    }
+                });
+            }
 
             // Reapply selection state if stored
             const plantKey = `${bIndex}-${pIndex}`;
@@ -612,9 +694,9 @@ async function markSelectedAreaStatus(status) {
     if (selectedPlants.size === 0) return alert('কোনো গাছ নির্বাচন করা হয়নি!');
 
     const token = localStorage.getItem('farmer_jwt');
-    const loadingBtn = document.querySelector(status === 'H' ? '.action-btn-sm.success' : '.action-btn-sm.danger');
-    const originalText = loadingBtn.innerText;
-    loadingBtn.innerText = 'সেভিং...';
+    const loadingIndicator = document.getElementById('selectedCountValue');
+    const originalText = loadingIndicator ? loadingIndicator.innerText : '';
+    if(loadingIndicator) loadingIndicator.innerText = 'সেভিং...';
 
     // Modify local data
     const bedsToUpdate = new Set();
@@ -645,7 +727,7 @@ async function markSelectedAreaStatus(status) {
     } catch (e) {
         alert('Server Error');
     } finally {
-        loadingBtn.innerText = originalText;
+        if(loadingIndicator) loadingIndicator.innerText = originalText;
     }
 }
 
@@ -707,13 +789,27 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
             const toBngDigits = (num) => String(num).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
             const formattedDate = `${toBngDigits(dObj.getDate())} ${EN_TO_BN_MONTHS[dObj.getMonth()]} ${toBngDigits(dObj.getFullYear())}`;
             dateTextEl.innerText = isReplanted ? `🌱 পুনরায়: ${formattedDate}` : `🌱 রোপণ: ${formattedDate}`;
+            
+            // Age calculation
+            const ageSpan = document.getElementById('bsPlantAgeText');
+            if (ageSpan) {
+                const now = new Date();
+                const diffTime = Math.abs(now - dObj);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                ageSpan.innerText = `বয়স: ${toBngDigits(diffDays)} দিন`;
+                ageSpan.style.display = 'inline';
+            }
         } else {
             dateTextEl.innerText = isReplanted ? `🌱 পুনরায়: ${displayDateStr}` : `🌱 রোপণ: ${displayDateStr}`;
+            const ageSpan = document.getElementById('bsPlantAgeText');
+            if (ageSpan) ageSpan.style.display = 'none';
         }
         dateInputEl.value = displayDateStr;
     } else {
         dateTextEl.innerText = `🌱 রোপণ: সেট করুন`;
         dateInputEl.value = '';
+        const ageSpan = document.getElementById('bsPlantAgeText');
+        if (ageSpan) ageSpan.style.display = 'none';
     }
 
     // Active toggles state
@@ -772,8 +868,31 @@ function openBottomSheet(bed, node, bIndex, pIndex) {
     document.getElementById('plantBottomSheet').classList.add('active');
 }
 
+function toggleBsActionMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('bsActionMenu');
+    if (menu.style.display === 'none' || !menu.style.display) {
+        menu.style.display = 'block';
+        
+        const closeMenu = (evt) => {
+            if (!menu.contains(evt.target) && !evt.target.closest('#bsActionMenuTrigger')) {
+                menu.style.display = 'none';
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        // Use a slight delay to avoid immediate closure if the event bubbles weirdly
+        setTimeout(() => {
+            document.addEventListener('click', closeMenu);
+        }, 10);
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
 function closeBottomSheet() {
     document.getElementById('plantBottomSheet').classList.remove('active');
+    const menu = document.getElementById('bsActionMenu');
+    if (menu) menu.style.display = 'none';
     currentlyEditingPlant = null;
 }
 
@@ -846,7 +965,7 @@ window.setPlantProfileStatusUI = function (status) {
     if (status === 'H') {
         document.getElementById('btnSetHealthy').classList.add('active');
         if (badgeEl) {
-            badgeEl.innerText = '🟢 সুস্থ';
+            badgeEl.innerHTML = '<span class="badge-dot healthy"></span> সুস্থ';
             badgeEl.style.background = '#D1FAE5';
             badgeEl.style.color = '#065F46';
             badgeEl.style.border = '1px solid #A7F3D0';
@@ -855,7 +974,7 @@ window.setPlantProfileStatusUI = function (status) {
     else if (status === 'S') {
         document.getElementById('btnSetSick').classList.add('active');
         if (badgeEl) {
-            badgeEl.innerText = '🟡 অসুস্থ';
+            badgeEl.innerHTML = '<span class="badge-dot sick"></span> অসুস্থ';
             badgeEl.style.background = '#FEF3C7';
             badgeEl.style.color = '#92400E';
             badgeEl.style.border = '1px solid #FDE68A';
@@ -864,7 +983,7 @@ window.setPlantProfileStatusUI = function (status) {
     else if (status === 'C') {
         document.getElementById('btnSetCritical').classList.add('active');
         if (badgeEl) {
-            badgeEl.innerText = '🔴 বিপজ.';
+            badgeEl.innerHTML = '<span class="badge-dot critical"></span> বিপজ.';
             badgeEl.style.background = '#FEE2E2';
             badgeEl.style.color = '#991B1B';
             badgeEl.style.border = '1px solid #FECACA';
@@ -873,7 +992,7 @@ window.setPlantProfileStatusUI = function (status) {
     else if (status === 'D') {
         document.getElementById('btnSetDead').classList.add('active');
         if (badgeEl) {
-            badgeEl.innerText = '⚫ মৃত';
+            badgeEl.innerHTML = '<span class="badge-dot dead"></span> মৃত';
             badgeEl.style.background = '#F1F5F9';
             badgeEl.style.color = '#475569';
             badgeEl.style.border = '1px solid #E2E8F0';
@@ -2240,3 +2359,28 @@ window.deleteShiftPlantSerial = function () {
         }
     });
 };
+
+// ========================
+// View Mode & Note Popover Logic
+// ========================
+window.toggleViewMode = function() {
+    isListView = !isListView;
+    const iconEl = document.getElementById('iconViewMode');
+    if (iconEl) {
+        if (isListView) {
+            iconEl.innerHTML = '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>';
+        } else {
+            iconEl.innerHTML = '<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>';
+        }
+    }
+    renderBeds();
+};
+
+document.addEventListener('click', (e) => {
+    const popover = document.getElementById('notePopover');
+    if (popover && popover.classList.contains('visible')) {
+        if (!e.target.closest('.note-indicator') && !e.target.closest('.note-popover')) {
+            popover.classList.remove('visible');
+        }
+    }
+});
