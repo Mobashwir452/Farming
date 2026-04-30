@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 
 <head>
@@ -41,32 +41,23 @@
     <main class="land-details-wrapper">
 
         <!-- Top Navigation Header -->
-        <div class="page-top-header"
-            style="justify-content: space-between; align-items: center; padding: 12px 16px; flex-wrap: nowrap; gap: 8px;">
-            <!-- Left: Back Button & Title -->
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
-                <button class="back-btn" onclick="window.location.href='khamar.html'" aria-label="Go Back"
-                    style="flex-shrink: 0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
+        <app-page-header back-url="khamar.html">
+            <div slot="title" class="skeleton-header-wrapper" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px;">
+                <h2 id="farmNamePill" class="skeleton" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; font-size: 15px; font-weight: 700; color: #1E293B; line-height: 1.4; padding-top: 3px; letter-spacing: -0.1px; width: 120px; border-radius: 4px;"></h2>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     </svg>
-                </button>
-                <div style="min-width: 0;">
-                    <h2 id="farmNamePill" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; font-size: 16px; margin: 0; font-weight: 700; color: var(--text-dark);">লোড হচ্ছে...</h2>
-                    <span id="farmAreaPill" style="display: block; font-size: 11px; font-weight: 500; color: #64748B; margin-top: 2px;">-- শতাংশ</span>
+                    <span id="farmAreaPill" class="skeleton" style="font-size: 12px; font-weight: 600; color: #64748B; width: 60px; height: 12px; border-radius: 4px;"></span>
                 </div>
             </div>
-            
-            <!-- Right: History Button -->
-            <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-                <button id="btnLandHistory" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F8FAFC; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+            <div slot="action">
+                <button id="btnLandHistory" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: #F1F5F9; color: #0F172A; border-radius: 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; border: none;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     <span>ইতিহাস</span>
                 </button>
             </div>
-        </div>
+        </app-page-header>
 
         <div class="ld-sections land-details-container">
             <!-- 1. Overview Card -->
@@ -80,7 +71,7 @@
                 <div class="ld-crop-profile" style="background: #FFFFFF; padding: 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); border: 1px solid #F1F5F9; display: flex; flex-direction: column; gap: 12px; align-items: stretch;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
                         <div>
-                            <h4 id="heroCropName" style="font-size: 16px; font-weight: 700; margin: 0; color: #0F172A; text-align: left;">ফসল লোড হচ্ছে...</h4>
+                            <h4 id="heroCropName" class="skeleton" style="width: 140px; height: 20px; border-radius: 4px; margin: 0;"></h4>
                             <div style="margin-top: 8px;" id="statusPillContainer">
                                 <!-- JS will inject Pill here -->
                             </div>
@@ -94,10 +85,24 @@
 
                         <div style="display: flex; justify-content: space-between; align-items: center;" id="plantCountRow">
                             <span style="font-weight: 500;">চারার সংখ্যা:</span>
-                            <span id="plantCountDisplay" style="font-weight: 600; color: #0F172A;">...</span>
+                            <span id="plantCountDisplay" class="skeleton" style="width: 40px; height: 16px; border-radius: 4px;"></span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="crop-status-display" style="font-weight: 600; color: #059669;">...</span>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap;">
+                            <div id="heroHealthBadge" style="display: flex; align-items: center; gap: 6px; font-weight: 700; color: #059669; background: #ECFDF5; padding: 4px 10px; border-radius: 8px; font-size: 13px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span id="heroHealthText">৯৮%</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #475569; font-size: 13px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <span id="heroHarvestText">লোড হচ্ছে...</span>
+                            </div>
+                            <a id="ldWeatherBtn" class="unified-weather-badge" style="display: none; margin-left: auto; height: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <span id="ldWeatherIcon" class="weather-icon">☁️</span>
+                                <span id="ldWeatherTemp" class="weather-temp">--&deg;</span>
+                            </a>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                            <span class="crop-status-display" style="font-weight: 600; color: #D97706; font-size: 14px;">...</span>
                         </div>
                         
                         <!-- 3D Map & Tracking Button -->
@@ -274,7 +279,11 @@
                     </div>
 
                     <div class="tasks-content" id="render-tasks" style="padding-top: 8px;">
-                        <div style="text-align:center; padding: 20px; color: var(--text-muted);">ডাটা লোড হচ্ছে...</div>
+                        <div class="skeleton-list" style="display: flex; flex-direction: column; gap: 12px; padding: 12px;">
+                            <div class="skeleton" style="width: 100%; height: 60px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="width: 100%; height: 60px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="width: 100%; height: 60px; border-radius: 12px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -306,7 +315,10 @@
                     </div>
 
                     <div id="render-resources">
-                        <div style="text-align:center; padding: 20px; color: var(--text-muted);">ডাটা লোড হচ্ছে...</div>
+                        <div class="skeleton-list" style="display: flex; flex-direction: column; gap: 12px; padding: 12px;">
+                            <div class="skeleton" style="width: 100%; height: 50px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="width: 100%; height: 50px; border-radius: 12px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -338,8 +350,10 @@
                     </div>
 
                     <div id="render-finance">
-                        <div style="text-align:center; padding: 20px; color: var(--text-muted);">আর্থিক ডাটা লোড
-                            হচ্ছে...</div>
+                        <div class="skeleton-list" style="display: flex; flex-direction: column; gap: 12px; padding: 12px;">
+                            <div class="skeleton" style="width: 100%; height: 70px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="width: 100%; height: 70px; border-radius: 12px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1339,3 +1353,6 @@
 </body>
 
 </html>
+
+
+

@@ -53,44 +53,36 @@
     </div>
 
     <main class="dashboard-container">
-        <!-- Weather / Tips Banner -->
-        <section class="tips-banner">
-            <div class="banner-icon">💡</div>
-            <div class="banner-text">
-                <strong>আজকের টিপস:</strong> আগামী দুই দিন বৃষ্টির সম্ভাবনা আছে, সেচ দেওয়া থেকে বিরত থাকুন।
+        <!-- Dashboard Sleek Hero -->
+        <div class="dashboard-hero-section" id="dashHeroSection">
+            <div class="dhero-bg-shapes">
+                <div class="dhero-shape-1"></div>
+                <div class="dhero-shape-2"></div>
             </div>
-        </section>
-
-        <!-- Daily Greeting & Task Card -->
-        <section class="task-card">
-            <div class="greeting">
-                <h2>শুভ সকাল, রহিম! 👋</h2>
-                <p>আপনার আজকের প্রধান কাজ</p>
-            </div>
-            <div class="task-content">
-                <div class="task-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 20A7 7 0 0 1 4 13V4h9a7 7 0 0 1 7 7v9h-9Z"></path>
-                        <path d="M4 20L11 13"></path>
-                    </svg>
+            
+            <div class="dhero-content" id="dashHeroContent">
+                <div class="dhero-text">
+                    <p class="dhero-greeting" id="dashGreetingHero">শুভ সকাল! 👋</p>
+                    <h2 class="dhero-title skeleton skeleton-text" id="dashHeroTitle" style="width: 150px; display: inline-block;"></h2>
+                    <p class="dhero-subtitle skeleton skeleton-text" id="dashHeroSubtitle" style="width: 200px; display: inline-block; margin-top: 8px;"></p>
+                    <div id="dashHeroActions" style="margin-top: 12px; display: none; gap: 8px; align-items: center; flex-wrap: wrap;"></div>
                 </div>
-                <div class="task-details">
-                    <h3>বোরো ধানে ইউরিয়া প্রয়োগ</h3>
-                    <p>জমি: উত্তরের বিল (৪০ শতাংশ)</p>
-                </div>
+                
+                <a href="weather_details.html" class="dhero-widget-glass" style="text-decoration:none;">
+                    <div class="dhero-weather-icon skeleton skeleton-circle" id="dashWeatherIcon" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 16px;"></div>
+                    <div class="dhero-weather-info" style="display: flex; flex-direction: column; gap: 4px;">
+                        <span class="dhero-temp skeleton skeleton-text" id="dashWeatherTemp" style="width: 30px; height: 14px; border-radius: 4px;"></span>
+                        <span class="dhero-cond skeleton skeleton-text" id="dashWeatherCond" style="width: 50px; height: 12px; border-radius: 4px;"></span>
+                    </div>
+                </a>
             </div>
-            <div class="task-actions">
-                <button class="btn-task success">সম্পন্ন করেছি</button>
-                <button class="btn-task outline">পরে করবো</button>
-            </div>
-        </section>
+        </div>
 
         <h3 class="section-title">কুইক অ্যাকশন</h3>
 
         <!-- Quick Action Grid -->
         <section class="quick-grid">
-            <a href="#" class="q-card">
+            <a href="khamar.html" class="q-card">
                 <div class="q-icon crops">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -99,9 +91,9 @@
                     </svg>
                 </div>
                 <span>আমার খামার</span>
-                <small>২ টি খামার</small>
+                <small id="dashFarmCount" class="skeleton skeleton-text" style="width: 50px; display: inline-block; margin-top: 4px;"></small>
             </a>
-            <a href="#" class="q-card">
+            <a href="transactions.html" class="q-card">
                 <div class="q-icon ledger">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -110,7 +102,7 @@
                     </svg>
                 </div>
                 <span>আয়-ব্যয়</span>
-                <small>৳ লাভ-ক্ষতি</small>
+                <small id="dashIncomeExpense" class="skeleton skeleton-text" style="width: 70px; display: inline-block; margin-top: 4px;"></small>
             </a>
             <a href="crop_doctor.html" class="q-card">
                 <div class="q-icon subsidy">
@@ -145,95 +137,21 @@
             <h3 class="section-title">কাজের টাইমলাইন</h3>
             <a href="tasks.html" class="view-all">সব দেখুন</a>
         </div>
-        <!-- Vertical Task Timeline (From Variant 1) -->
-        <section class="timeline-container">
-            <div class="timeline-item completed">
-                <div class="tl-node">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
+        <!-- Vertical Task Timeline -->
+        <section class="timeline-container" id="dashTimelineContainer">
+            <!-- Skeleton items -->
+            <div class="timeline-item pending" id="tl-skeleton-1">
+                <div class="tl-node"><div class="skeleton skeleton-circle" style="width: 16px; height: 16px;"></div></div>
                 <div class="tl-content">
-                    <p class="tl-time">আজ, সকাল ১০:০০</p>
-                    <p class="tl-title">উত্তরের বিলে ইউরিয়া প্রয়োগ</p>
+                    <p class="tl-time skeleton skeleton-text" style="width: 120px;"></p>
+                    <p class="tl-title skeleton skeleton-text" style="width: 180px; height: 18px;"></p>
                 </div>
             </div>
-            <div class="timeline-item pending">
-                <div class="tl-node">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
+            <div class="timeline-item pending" id="tl-skeleton-2">
+                <div class="tl-node"><div class="skeleton skeleton-circle" style="width: 16px; height: 16px;"></div></div>
                 <div class="tl-content">
-                    <p class="tl-time">আগামীকাল, সকাল ০৮:০০</p>
-                    <p class="tl-title">মাঠে সেচ প্রদান</p>
-                    <div class="task-item-actions">
-                        <button class="btn-tl-action done">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 6L9 17l-5-5"></path>
-                            </svg>
-                            সম্পন্ন
-                        </button>
-                        <button class="btn-tl-action reschedule">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            সময় পরিবর্তন
-                        </button>
-                        <button class="btn-tl-action cancel">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                            বাতিল
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="timeline-item alert">
-                <div class="tl-node">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                </div>
-                <div class="tl-content">
-                    <p class="tl-time">বুধবার, সকাল ০৯:০০</p>
-                    <p class="tl-title">কীটনাশক স্প্রে</p>
-                    <div class="task-item-actions">
-                        <button class="btn-tl-action done">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 6L9 17l-5-5"></path>
-                            </svg>
-                            সম্পন্ন
-                        </button>
-                        <button class="btn-tl-action reschedule">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            সময় পরিবর্তন
-                        </button>
-                        <button class="btn-tl-action cancel">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                            বাতিল
-                        </button>
-                    </div>
+                    <p class="tl-time skeleton skeleton-text" style="width: 100px;"></p>
+                    <p class="tl-title skeleton skeleton-text" style="width: 150px; height: 18px;"></p>
                 </div>
             </div>
         </section>
@@ -242,35 +160,23 @@
             <h3 class="section-title">সাম্প্রতিক লেনদেন</h3>
             <a href="transactions.html" class="view-all">সব দেখুন</a>
         </div>
-        <!-- Recent Transactions (From Variant 2) -->
-        <section class="transactions-container">
-            <div class="transaction-item">
-                <div class="tr-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
+        <!-- Recent Transactions -->
+        <section class="transactions-container" id="dashTransactionsContainer">
+            <div class="transaction-item" id="tr-skeleton-1">
+                <div class="tr-icon skeleton skeleton-circle" style="width: 40px; height: 40px; border-radius: 50%; border: none;"></div>
+                <div class="tr-info" style="flex: 1;">
+                    <h4 class="skeleton skeleton-text" style="width: 120px; margin-bottom: 4px;"></h4>
+                    <p class="skeleton skeleton-text" style="width: 80px;"></p>
                 </div>
-                <div class="tr-info">
-                    <h4>ইউরিয়া সার ক্রয়</h4>
-                    <p>আজ দুপুর ১২:৩০</p>
-                </div>
-                <div class="tr-amount negative">- ৳ ৮৫০</div>
+                <div class="tr-amount skeleton skeleton-text" style="width: 60px;"></div>
             </div>
-            <div class="transaction-item">
-                <div class="tr-icon income">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                    </svg>
+            <div class="transaction-item" id="tr-skeleton-2">
+                <div class="tr-icon skeleton skeleton-circle" style="width: 40px; height: 40px; border-radius: 50%; border: none;"></div>
+                <div class="tr-info" style="flex: 1;">
+                    <h4 class="skeleton skeleton-text" style="width: 100px; margin-bottom: 4px;"></h4>
+                    <p class="skeleton skeleton-text" style="width: 90px;"></p>
                 </div>
-                <div class="tr-info">
-                    <h4>টমেটো বিক্রয়</h4>
-                    <p>গতকাল বিকেল ০৪:১৫</p>
-                </div>
-                <div class="tr-amount positive">+ ৳ ৩,২০০</div>
+                <div class="tr-amount skeleton skeleton-text" style="width: 60px;"></div>
             </div>
         </section>
 

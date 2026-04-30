@@ -24,22 +24,12 @@
     <main class="land-details-wrapper">
 
         <!-- Top Navigation Header -->
-        <div class="page-top-header" style="justify-content: space-between; align-items: center; padding-right: 16px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <button class="back-btn" onclick="window.history.back()" aria-label="Go Back">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                </button>
-                <h2>জমির ইতিহাস</h2>
-            </div>
-            <div class="weather-widget">
+        <app-page-header page-title="জমির ইতিহাস">
+            <div slot="action" class="weather-widget">
                 <span class="weather-icon">☀️</span>
                 <span class="weather-temp">৩২°</span>
             </div>
-        </div>
+        </app-page-header>
 
         <div class="lh-container">
 

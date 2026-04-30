@@ -1,5 +1,25 @@
 // backend/routes/transactions.js
 
+export const getAllTransactions = async (request, env) => {
+    try {
+        const farmerId = request.user.id;
+
+        const query = `
+            SELECT t.*, c.crop_name as crop_name, f.name as farm_name 
+            FROM transactions t
+            INNER JOIN crops c ON t.crop_id = c.id
+            INNER JOIN farms f ON t.farm_id = f.id
+            WHERE t.farmer_id = ?
+            ORDER BY t.transaction_date DESC
+        `;
+        const { results } = await env.DB.prepare(query).bind(farmerId).all();
+
+        return Response.json({ success: true, transactions: results });
+    } catch (e) {
+        return Response.json({ success: false, error: e.message }, { status: 500 });
+    }
+};
+
 export const getTransactions = async (request, env) => {
     try {
         const cropId = request.params.id;

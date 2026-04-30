@@ -13,8 +13,21 @@ window.onload = async () => {
     window.currentPlantingMethod = params.get('planting_method') || '';
     window.isForceAi = params.get('force_ai') === 'true';
 
-    document.getElementById('crop-name-display').textContent = currentCropName || 'অজানা ফসল';
-    document.getElementById('variety-name-display').textContent = currentVarietyName || 'অজানা জাত';
+    const cropDisplay = document.getElementById('crop-name-display');
+    const varietyDisplay = document.getElementById('variety-name-display');
+    
+    if (cropDisplay) {
+        cropDisplay.textContent = currentCropName || 'অজানা ফসল';
+        cropDisplay.classList.remove('skeleton');
+        cropDisplay.style.width = 'auto';
+        cropDisplay.style.height = 'auto';
+    }
+    if (varietyDisplay) {
+        varietyDisplay.textContent = currentVarietyName || 'অজানা জাত';
+        varietyDisplay.classList.remove('skeleton');
+        varietyDisplay.style.width = 'auto';
+        varietyDisplay.style.height = 'auto';
+    }
 
     if (!currentFarmId || !currentCropName) {
         alert("দুঃখিত, জমির তথ্য বা ফসলের নাম পাওয়া যায়নি। গাইডলাইন লোড করা সম্ভব নয়।");
@@ -41,13 +54,25 @@ async function fetchFarmName(token, farmId) {
         if (farmData.success) {
             const theFarm = farmData.farms.find(f => f.id == farmId);
             if (theFarm) {
-                document.getElementById('farm-name-display').textContent = `${theFarm.name} (${theFarm.area_shotangsho} শতাংশ)`;
+                const farmDisplay = document.getElementById('farm-name-display');
+                farmDisplay.textContent = `${theFarm.name} (${theFarm.area_shotangsho} শতাংশ)`;
+                farmDisplay.classList.remove('skeleton');
+                farmDisplay.style.width = 'auto';
+                farmDisplay.style.height = 'auto';
             } else {
-                document.getElementById('farm-name-display').textContent = 'অজ্ঞাত জমি';
+                const farmDisplay = document.getElementById('farm-name-display');
+                farmDisplay.textContent = 'অজ্ঞাত জমি';
+                farmDisplay.classList.remove('skeleton');
+                farmDisplay.style.width = 'auto';
+                farmDisplay.style.height = 'auto';
             }
         }
     } catch (e) {
-        document.getElementById('farm-name-display').textContent = 'অজ্ঞাত জমি';
+        const farmDisplay = document.getElementById('farm-name-display');
+        farmDisplay.textContent = 'অজ্ঞাত জমি';
+        farmDisplay.classList.remove('skeleton');
+        farmDisplay.style.width = 'auto';
+        farmDisplay.style.height = 'auto';
     }
 }
 

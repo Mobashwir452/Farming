@@ -1,7 +1,7 @@
-/* Tasks Inner Page Specific Styles */
+﻿/* Tasks Inner Page Specific Styles */
 body.tasks-body {
     background: #F8FAFC;
-    padding-top: 60px;
+    padding-top: 0px;
     /* Space for inner header */
     padding-bottom: 90px;
     /* Space for bottom nav */
@@ -142,3 +142,31 @@ body.tasks-body {
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
     }
 }
+
+/* Skeleton UI Styles */
+.skeleton-loader {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.skeleton-item {
+    background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-header { height: 16px; width: 60%; margin-bottom: 12px; }
+.skeleton-badge { height: 20px; width: 30%; border-radius: 20px; float: right; margin-top: -28px; }
+.skeleton-desc { height: 12px; width: 40%; margin-bottom: 16px; }
+.skeleton-buttons { display: flex; gap: 8px; margin-top: 14px; }
+.skeleton-btn { height: 42px; border-radius: 10px; flex: 1; }
+.skeleton-btn.small { width: 42px; flex: none; }

@@ -114,14 +114,74 @@ async function fetchFarmAndCropDetails() {
             const farmNamePill = document.getElementById('farmNamePill');
             const farmAreaPill = document.getElementById('farmAreaPill');
 
-            if (farmNamePill) farmNamePill.textContent = resData.farm.name;
-            if (farmAreaPill) farmAreaPill.textContent = `${resData.farm.area_shotangsho} শতাংশ`;
+            if (farmNamePill) {
+                farmNamePill.textContent = resData.farm.name;
+                farmNamePill.classList.remove('skeleton');
+                farmNamePill.style.width = 'auto';
+                farmNamePill.style.height = 'auto';
+            }
+            if (farmAreaPill) {
+                farmAreaPill.textContent = `${resData.farm.area_shotangsho} শতাংশ`;
+                farmAreaPill.classList.remove('skeleton');
+                farmAreaPill.style.width = 'auto';
+                farmAreaPill.style.height = 'auto';
+            }
             window.currentFarmArea = parseFloat(resData.farm.area_shotangsho) || 1;
 
             // Connect land history button
             const btnHistory = document.getElementById('btnLandHistory');
             if (btnHistory) {
                 btnHistory.onclick = () => window.location.href = `land_history.html?id=${currentFarmId}`;
+            }
+
+            // Weather Widget Setup
+            const lat = resData.farm.lat;
+            const lng = resData.farm.lng;
+            if (lat && lng) {
+                const weatherBtn = document.getElementById('ldWeatherBtn');
+                if (weatherBtn) {
+                    weatherBtn.style.display = 'flex';
+                    weatherBtn.href = `weather_details.html?lat=${lat}&lon=${lng}&loc=${encodeURIComponent(resData.farm.name)}`;
+                    
+                    // Fetch simple weather data
+                    const cacheKey = `agritech_weather_v2_${lat}_${lng}`;
+                    let weatherData = null;
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Date.now() - parsed.timestamp < 3600000) {
+                            weatherData = parsed.data;
+                        }
+                    }
+
+                    const updateWeatherUI = (data) => {
+                        if (data && data.success && data.current) {
+                            const tempEl = document.getElementById('ldWeatherTemp');
+                            const iconEl = document.getElementById('ldWeatherIcon');
+                            if (tempEl) tempEl.innerHTML = Math.round(data.current.temp) + '&deg;';
+                            if (iconEl) {
+                                const iconCode = data.current.icon;
+                                if (iconCode.includes('n')) iconEl.textContent = '🌙';
+                                else if (['01d', '02d'].includes(iconCode)) iconEl.textContent = '☀️';
+                                else if (['09d', '10d', '11d'].includes(iconCode)) iconEl.textContent = '🌧️';
+                                else iconEl.textContent = '☁️';
+                            }
+                        }
+                    };
+
+                    if (weatherData) {
+                        updateWeatherUI(weatherData);
+                    } else {
+                        fetch(`${API_URL}/api/weather?lat=${lat}&lon=${lng}`)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success && data.current) {
+                                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
+                                    updateWeatherUI(data);
+                                }
+                            }).catch(console.error);
+                    }
+                }
             }
 
             // Connect Crop Doctor UI with explicit scope mapping
@@ -192,7 +252,49 @@ async function fetchFarmAndCropDetails() {
                 // Set Crop Profile
                 const cropNameEl = document.getElementById('heroCropName');
                 const cropStatusEl = document.querySelector('.crop-status-display');
-                const plantingAgeContainer = document.querySelector('.crop-age-display');
+                const heroHealthText = document.getElementById('heroHealthText');
+                const heroHarvestText = document.getElementById('heroHarvestText');
+
+                // Health & Harvest Logic
+                let healthScore = 100;
+                let harvestText = 'লোড হচ্ছে...';
+
+                try {
+                    const tasks = JSON.parse(activeCrop.tasks_state_json || '[]');
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const missedTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled' && t.due_date < todayStr).length;
+                    
+                    healthScore = 100 - (missedTasks * 5);
+                    if (activeCrop.status === 'Diseased') healthScore -= 30;
+                    if (activeCrop.status === 'Warning') healthScore -= 15;
+                    healthScore = Math.min(100, Math.max(0, healthScore));
+
+                    let sowingDate = activeCrop.planted_date ? activeCrop.planted_date.split('T')[0] : null;
+                    let maxDay = 0;
+                    tasks.forEach(t => {
+                        const day = parseInt(t.day_offset) || 0;
+                        if (day > maxDay) maxDay = day;
+                        if (t.title.includes('রোপণ') || t.title.includes('বপন')) {
+                            if (!sowingDate && t.due_date) sowingDate = t.due_date;
+                        }
+                    });
+
+                    if (sowingDate && maxDay > 0) {
+                        const sDate = new Date(sowingDate);
+                        sDate.setDate(sDate.getDate() + maxDay);
+                        const diffTime = sDate - new Date();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        if (diffDays > 0) harvestText = `আর ${diffDays} দিন`;
+                        else harvestText = 'কর্তনের সময়';
+                    } else {
+                        harvestText = 'নির্ধারিত নয়';
+                    }
+                } catch (e) {
+                    console.error("Health/Harvest calculation error:", e);
+                }
+
+                if (heroHealthText) heroHealthText.textContent = `${healthScore}%`;
+                if (heroHarvestText) heroHarvestText.textContent = harvestText;
 
                 if (cropNameEl) {
                     let displayName = activeCrop.crop_name;
@@ -205,6 +307,9 @@ async function fetchFarmAndCropDetails() {
                         }
                     }
                     cropNameEl.textContent = displayName;
+                    cropNameEl.classList.remove('skeleton');
+                    cropNameEl.style.width = 'auto';
+                    cropNameEl.style.height = 'auto';
                 }
                 // Populate Plant/Seed Counts
                 const initialCount = parseInt(activeCrop.initial_plant_count) || 0;
@@ -320,6 +425,9 @@ async function fetchFarmAndCropDetails() {
                     } else {
                         plantCountRow.style.display = 'flex';
                         plantCountDisplay.textContent = `${initialCount.toLocaleString('bn-BD')} টি`;
+                        plantCountDisplay.classList.remove('skeleton');
+                        plantCountDisplay.style.width = 'auto';
+                        plantCountDisplay.style.height = 'auto';
                     }
                 }
                 // Update Current Phase Span instead of Hero Farm Area

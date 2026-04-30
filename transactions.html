@@ -26,16 +26,7 @@
 <body class="transactions-body">
 
     <!-- Fixed Header specific to inner scroll view -->
-    <header class="inner-header">
-        <button class="btn-back" onclick="window.history.back()" aria-label="Go back">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-        </button>
-        <h1>সকল লেনদেন</h1>
-    </header>
+    <app-page-header page-title="সকল লেনদেন"></app-page-header>
 
     <!-- Content Area -->
     <main class="transactions-content">
@@ -65,65 +56,17 @@
             <button class="tab-btn" data-tab="expense">ব্যয়</button>
         </div>
 
-        <section class="transactions-container" style="margin-top: 20px;">
-            <div class="transaction-item">
-                <div class="tr-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
+        <section class="transactions-container" id="transactionsList" style="margin-top: 20px;">
+            <!-- Skeleton Loading -->
+            <div id="tr-skeleton" style="display: none;">
+                <div class="transaction-item" style="opacity: 0.7;">
+                    <div class="tr-icon" style="background: #E2E8F0; width: 40px; height: 40px; border-radius: 12px;"></div>
+                    <div class="tr-info" style="flex: 1;">
+                        <div style="height: 16px; background: #E2E8F0; border-radius: 4px; width: 60%; margin-bottom: 8px;"></div>
+                        <div style="height: 12px; background: #E2E8F0; border-radius: 4px; width: 40%;"></div>
+                    </div>
+                    <div style="height: 16px; background: #E2E8F0; border-radius: 4px; width: 20%;"></div>
                 </div>
-                <div class="tr-info">
-                    <h4>ইউরিয়া সার ক্রয়</h4>
-                    <p>আজ দুপুর ১২:৩০</p>
-                </div>
-                <div class="tr-amount negative">- ৳ ৮৫০</div>
-            </div>
-
-            <div class="transaction-item">
-                <div class="tr-icon income">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                    </svg>
-                </div>
-                <div class="tr-info">
-                    <h4>টমেটো বিক্রয়</h4>
-                    <p>গতকাল বিকেল ০৪:১৫</p>
-                </div>
-                <div class="tr-amount positive">+ ৳ ৩,২০০</div>
-            </div>
-
-            <div class="transaction-item">
-                <div class="tr-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </div>
-                <div class="tr-info">
-                    <h4>কীটনাশক ক্রয়</h4>
-                    <p>২০ মার্চ, সকাল ১০:০০</p>
-                </div>
-                <div class="tr-amount negative">- ৳ ৫০০</div>
-            </div>
-
-            <div class="transaction-item">
-                <div class="tr-icon income">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                    </svg>
-                </div>
-                <div class="tr-info">
-                    <h4>সরকারি ভর্তুকি প্রাপ্তি</h4>
-                    <p>১৫ মার্চ, দুপুর ০১:২০</p>
-                </div>
-                <div class="tr-amount positive">+ ৳ ২,০০০</div>
             </div>
 
             <!-- Empty State -->
@@ -152,7 +95,7 @@
     <div class="calendar-modal" id="addTransactionModal">
         <div class="calendar-content">
             <div class="calendar-header">
-                <h4>নতুন হিসাব যোগ করুন</h4>
+                <h4 id="transactionModalTitle">নতুন হিসাব যোগ করুন</h4>
                 <button class="close-modal" id="closeAddModal" aria-label="Close modal">&times;</button>
             </div>
             <div class="calendar-body">
@@ -178,17 +121,17 @@
                     <label
                         style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">ক্যাটাগরি</label>
                     <div style="position: relative;">
-                        <select
+                        <select id="tr-category"
                             style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; appearance: none; background: white; color: var(--text-main); font-family: inherit;">
-                            <option value="seed">বীজ/চারা</option>
-                            <option value="fertilizer">সার</option>
-                            <option value="pesticide">কীটনাশক</option>
-                            <option value="irrigation">সেচ</option>
-                            <option value="labor">দিনমজুর/শ্রমিক</option>
-                            <option value="transport">পরিবহন</option>
-                            <option value="sales">ফসল বিক্রয়</option>
-                            <option value="subsidy">ভর্তুকি</option>
-                            <option value="other">অন্যান্য</option>
+                            <option value="বীজ/চারা">বীজ/চারা</option>
+                            <option value="সার">সার</option>
+                            <option value="কীটনাশক">কীটনাশক</option>
+                            <option value="সেচ">সেচ</option>
+                            <option value="দিনমজুর/শ্রমিক">দিনমজুর/শ্রমিক</option>
+                            <option value="পরিবহন">পরিবহন</option>
+                            <option value="ফসল বিক্রয়">ফসল বিক্রয়</option>
+                            <option value="ভর্তুকি">ভর্তুকি</option>
+                            <option value="অন্যান্য">অন্যান্য</option>
                         </select>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -202,7 +145,7 @@
                     <label
                         style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">পরিমাণ
                         (৳)</label>
-                    <input type="number" placeholder="0"
+                    <input type="number" id="tr-amount" placeholder="0"
                         style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
                 </div>
 
@@ -210,21 +153,19 @@
                     <label
                         style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">তারিখ</label>
                     <div style="position: relative;">
-                        <input type="date" id="tr-date" value="2026-03-20"
-                            style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; color: var(--text-main); font-family: inherit;">
+                        <input type="text" id="tr-date" readonly placeholder="তারিখ নির্বাচন করুন"
+                            style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; color: var(--text-main); font-family: inherit; background: white; cursor: pointer;">
                     </div>
                 </div>
 
                 <div class="input-group" style="margin-bottom: 16px;">
                     <label
                         style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">লিংকড
-                        ফসল (ঐচ্ছিক)</label>
+                        ফসল (বাধ্যতামূলক)</label>
                     <div style="position: relative;">
-                        <select
+                        <select id="tr-crop" required
                             style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; appearance: none; background: white; color: var(--text-main); font-family: inherit;">
                             <option value="">কোনো ফসল সিলেক্ট করুন</option>
-                            <option value="1">বোরো ধান (ব্রি-২৮)</option>
-                            <option value="2">শীতকালীন টমেটো</option>
                         </select>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -237,13 +178,64 @@
                 <div class="input-group" style="margin-bottom: 24px;">
                     <label
                         style="display: block; font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">বিবরণ/নোট</label>
-                    <input type="text" placeholder="যেমন: ইউরিয়া ২ বস্তা"
+                    <input type="text" id="tr-desc" placeholder="যেমন: ইউরিয়া ২ বস্তা"
                         style="width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none;">
                 </div>
             </div>
-            <div class="calendar-footer">
+            <div class="calendar-footer" style="display: flex; gap: 12px;">
                 <button class="btn-primary w-100" id="saveTransaction">যোগ করুন</button>
+                <button class="btn-primary" id="deleteTransactionBtn" style="background-color: var(--danger); border-color: var(--danger); display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Date Selection Custom Calendar Bottom Sheet -->
+    <div class="calendar-modal" id="dateSelectionModal" style="z-index: 1055;" onclick="if(event.target === this) { this.classList.remove('active'); document.body.style.overflow=''; }">
+        <div class="calendar-content" style="padding-bottom: 24px;">
+            <div class="calendar-header">
+                <h3>তারিখ নির্বাচন করুন</h3>
+                <button class="close-modal" onclick="document.getElementById('dateSelectionModal').classList.remove('active'); document.body.style.overflow='';">&times;</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">লেনদেনের জন্য একটি তারিখ নির্ধারণ করুন।</p>
+
+            <div class="calendar-body" style="margin-bottom: 24px; padding: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="calendar-month" id="dsMonth"
+                        style="text-align: left; font-size: 16px; font-family: 'Noto Sans Bengali', sans-serif; font-weight: 700;">
+                        --</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="changeTransactionMonth(-1)"
+                            style="border: 1px solid var(--border-color); background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s;"
+                            onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <button onclick="changeTransactionMonth(1)"
+                            style="border: 1px solid var(--border-color); background: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s;"
+                            onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='#F8FAFC'">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 8px;">
+                    <span>রবি</span><span>সোম</span><span>মঙ্গল</span><span>বুধ</span><span>বৃহ</span><span>শুক্র</span><span>শনি</span>
+                </div>
+                <div class="calendar-days" id="dsDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                    <!-- JS injects days -->
+                </div>
+            </div>
+
+            <button class="btn-primary w-100" id="confirmDateSelection" style="box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px;">তারিখ নির্ধারণ করুন</button>
         </div>
     </div>
 

@@ -45,14 +45,40 @@ export const getFarms = async (request, env) => {
 
         // Fetch farms and current active crop if any
         const farmsWithCropsQuery = `
-            SELECT f.id, f.name, f.area_shotangsho, f.created_at, 
-                   c.crop_name, c.status as crop_status 
+            SELECT f.id, f.name, f.area_shotangsho, f.created_at, f.lat, f.lng, 
+                   c.id as crop_id, c.crop_name, c.status as crop_status,
+                   c.tasks_state_json
             FROM farms f
             LEFT JOIN crops c ON c.farm_id = f.id AND c.status != 'Harvested'
             WHERE f.farmer_id = ? 
             ORDER BY f.created_at DESC
         `;
-        const { results: farms } = await env.DB.prepare(farmsWithCropsQuery).bind(farmerId).all();
+        const { results: rawFarms } = await env.DB.prepare(farmsWithCropsQuery).bind(farmerId).all();
+
+        const farmMap = new Map();
+        rawFarms.forEach(row => {
+            if (!farmMap.has(row.id)) {
+                farmMap.set(row.id, {
+                    id: row.id,
+                    name: row.name,
+                    area_shotangsho: row.area_shotangsho,
+                    created_at: row.created_at,
+                    lat: row.lat,
+                    lng: row.lng,
+                    crops: []
+                });
+            }
+            if (row.crop_id) {
+                farmMap.get(row.id).crops.push({
+                    id: row.crop_id,
+                    crop_name: row.crop_name,
+                    status: row.crop_status,
+                    tasks_state_json: row.tasks_state_json
+                });
+            }
+        });
+
+        const farms = Array.from(farmMap.values());
 
         return json({
             success: true,
@@ -76,7 +102,13 @@ export const getFarmDetails = async (request, env) => {
         const cropsQuery = `SELECT * FROM crops WHERE farm_id = ? ORDER BY created_at DESC`;
         const { results: crops } = await env.DB.prepare(cropsQuery).bind(farmId).all();
 
-        const txQuery = `SELECT * FROM transactions WHERE farm_id = ? AND farmer_id = ? ORDER BY transaction_date DESC`;
+        const txQuery = `
+            SELECT t.* 
+            FROM transactions t
+            INNER JOIN crops c ON c.id = t.crop_id
+            WHERE t.farm_id = ? AND t.farmer_id = ? 
+            ORDER BY t.transaction_date DESC
+        `;
         const { results: transactions } = await env.DB.prepare(txQuery).bind(farmId, farmerId).all();
 
         return json({
@@ -123,7 +155,15 @@ export const deleteFarm = async (request, env) => {
             }
         }
 
-        // 2. Delete crops first to satisfy FOREIGN KEY constraint!
+        // 2. Delete transactions related to this farm to satisfy FOREIGN KEY constraint!
+        await env.DB.prepare(`DELETE FROM transactions WHERE farm_id = ?`).bind(farmId).run();
+
+        // 3. Delete dependent crop records
+        await env.DB.prepare(`DELETE FROM plant_logs WHERE bed_id IN (SELECT id FROM crop_beds WHERE crop_id IN (SELECT id FROM crops WHERE farm_id = ?))`).bind(farmId).run();
+        await env.DB.prepare(`DELETE FROM crop_beds WHERE crop_id IN (SELECT id FROM crops WHERE farm_id = ?)`).bind(farmId).run();
+        await env.DB.prepare(`DELETE FROM tasks WHERE crop_id IN (SELECT id FROM crops WHERE farm_id = ?)`).bind(farmId).run();
+
+        // 4. Delete crops to satisfy FOREIGN KEY constraint!
         await env.DB.prepare(`DELETE FROM crops WHERE farm_id = ?`).bind(farmId).run();
 
         const deleteQuery = `DELETE FROM farms WHERE id = ? AND farmer_id = ?`;

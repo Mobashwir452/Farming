@@ -48,7 +48,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeRadio) activeRadio.dispatchEvent(new Event('change'));
 
     renderCalendar();
+    fetchAiAdvice();
 });
+
+async function fetchAiAdvice() {
+    const textEl = document.getElementById('ai-suggestion-text');
+    if (!textEl || !currentCropName) return;
+
+    try {
+        const token = localStorage.getItem('farmer_jwt');
+        const response = await fetch(`${API_URL}/api/public/crop-chat`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: `আমি "${currentCropName}" চাষ করছি। এটি সফলভাবে করার জন্য আমাকে খুব সংক্ষেপে একটি সেরা টিপস বা পরামর্শ দিন (এক থেকে দুই বাক্যে)।`,
+                cropTitle: currentCropName
+            })
+        });
+
+        const data = await response.json();
+        if (data.success && data.answer) {
+            textEl.innerHTML = `<strong>AI পরামর্শ:</strong> ${data.answer}`;
+            textEl.classList.remove('skeleton'); // Though skeletons are children, we can remove potential wrapper class if any
+        } else {
+            textEl.innerHTML = `<strong>AI পরামর্শ:</strong> আপনার ${currentCropName} চাষের জন্য শুভকামনা। সঠিক সময়ে সেচ ও সার প্রয়োগ নিশ্চিত করুন।`;
+        }
+    } catch (e) {
+        textEl.innerHTML = `<strong>AI পরামর্শ:</strong> আধুনিক পদ্ধতিতে ${currentCropName} চাষ করে অধিক লাভবান হোন।`;
+    }
+}
 
 // Populate Custom Calendar
 function renderCalendar() {

@@ -111,9 +111,9 @@ class AppDashHeader extends HTMLElement {
                 </div>
             </div>
             <div class="dh-right">
-                <a href="weather_details.html" class="weather-widget" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:4px;">
-                    <span class="weather-icon">☀️</span>
-                    <span class="weather-temp">৩২°</span>
+                <a href="weather_details.html" class="unified-weather-badge">
+                    <span class="weather-icon">--</span>
+                    <span class="weather-temp">--°</span>
                 </a>
                 <button class="notification-btn">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -132,32 +132,8 @@ class AppDashHeader extends HTMLElement {
                     <h4>আগামী ৫ দিনের আবহাওয়া</h4>
                     <button class="close-modal" id="closeWeatherModal" aria-label="Close modal">&times;</button>
                 </div>
-                <div class="calendar-body" style="padding: 0;">
-                    <div class="weather-day-item">
-                        <span class="w-day">আজ</span>
-                        <span class="w-icon">☀️</span>
-                        <span class="w-temp">৩২° / ২৪°</span>
-                    </div>
-                    <div class="weather-day-item">
-                        <span class="w-day">আগামীকাল</span>
-                        <span class="w-icon">🌤️</span>
-                        <span class="w-temp">৩১° / ২৩°</span>
-                    </div>
-                    <div class="weather-day-item">
-                        <span class="w-day">শনিবার</span>
-                        <span class="w-icon">🌧️</span>
-                        <span class="w-temp">২৮° / ২২°</span>
-                    </div>
-                    <div class="weather-day-item">
-                        <span class="w-day">রবিবার</span>
-                        <span class="w-icon">🌦️</span>
-                        <span class="w-temp">২৯° / ২৩°</span>
-                    </div>
-                    <div class="weather-day-item">
-                        <span class="w-day">সোমবার</span>
-                        <span class="w-icon">☀️</span>
-                        <span class="w-temp">৩৩° / ২৫°</span>
-                    </div>
+                <div class="calendar-body" id="weatherModalBody" style="padding: 0;">
+                    <div style="text-align: center; padding: 20px; color: #64748b;">লোড হচ্ছে...</div>
                 </div>
             </div>
         </div>
@@ -250,6 +226,104 @@ class AppDashHeader extends HTMLElement {
         // Ensure overlay can close notification drawer too
         // Since overlay is outside this component, we can use a small hack or let AppSidebar handle it.
         // Let's add an event listener to overlay generically in AppSidebar to close all modals.
+
+        // --- Fetch Weather Logic ---
+        this.fetchWeather();
+    }
+
+    async fetchWeather() {
+        const topIcon = this.querySelector('.weather-icon');
+        const topTemp = this.querySelector('.weather-temp');
+        const modalBody = this.querySelector('#weatherModalBody');
+
+        const updateUI = (data) => {
+            if (data && data.success && data.current && data.forecast) {
+                const iconCode = data.current.icon;
+                let emojiIcon = '☁️';
+                if (iconCode.includes('n')) emojiIcon = '🌙';
+                else if (['01d', '02d'].includes(iconCode)) emojiIcon = '☀️';
+                else if (['09d', '10d', '11d'].includes(iconCode)) emojiIcon = '🌧️';
+
+                topIcon.innerHTML = emojiIcon;
+                topTemp.textContent = Math.round(data.current.temp) + '°';
+
+                // Update modal
+                let html = '';
+                const daysOfWeek = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+
+                data.forecast.forEach((day, index) => {
+                    const dateObj = new Date(day.date);
+                    let dayName = daysOfWeek[dateObj.getDay()];
+                    if (index === 0) dayName = 'আজ';
+                    else if (index === 1) dayName = 'আগামীকাল';
+
+                    html += `
+                        <div class="weather-day-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f1f5f9;">
+                            <span class="w-day" style="font-weight: 500; color: #334155;">${dayName}</span>
+                            <span class="w-icon" style="display: flex; align-items: center; justify-content: center;"><img src="https://openweathermap.org/img/wn/${day.icon}.png" width="30" height="30" alt="icon"></span>
+                            <span class="w-temp" style="font-weight: 600; color: #0f172a;">${day.max_temp}° / <span style="color: #64748b; font-weight: 400;">${day.min_temp}°</span></span>
+                        </div>
+                    `;
+                });
+                if (modalBody) modalBody.innerHTML = html;
+            }
+        };
+
+        const loadWeatherFromAPI = async (lat, lon) => {
+            try {
+                const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+                const response = await fetch(`${API_URL}/api/weather?lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Cache the result for 1 hour to prevent excessive API calls
+                    localStorage.setItem('agritech_weather_cache_v2', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: data
+                    }));
+                    updateUI(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch weather", err);
+            }
+        };
+
+        // Check Cache First
+        const cache = localStorage.getItem('agritech_weather_cache');
+        if (cache) {
+            try {
+                const parsed = JSON.parse(cache);
+                // 1 hour expiry (3600000 ms)
+                if (Date.now() - parsed.timestamp < 3600000) {
+                    updateUI(parsed.data);
+                    return; // Skip fetching if valid cache
+                }
+            } catch (e) { }
+        }
+
+        // Determine default location from saved farm or fallback to Dhaka
+        const getFallbackLocation = () => {
+            const defLat = localStorage.getItem('default_lat') || '23.8103';
+            const defLon = localStorage.getItem('default_lon') || '90.4125';
+            return { lat: parseFloat(defLat), lon: parseFloat(defLon) };
+        };
+
+        // Fetch location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    loadWeatherFromAPI(position.coords.latitude, position.coords.longitude);
+                },
+                (error) => {
+                    console.log("Geolocation denied or error, using default farm location", error);
+                    const fallback = getFallbackLocation();
+                    loadWeatherFromAPI(fallback.lat, fallback.lon);
+                }
+            );
+        } else {
+            const fallback = getFallbackLocation();
+            loadWeatherFromAPI(fallback.lat, fallback.lon);
+        }
     }
 }
 
@@ -261,77 +335,62 @@ class AppSidebar extends HTMLElement {
         <aside class="dashboard-sidebar" id="dashboardSidebar">
             <div class="sidebar-header">
                 <a href="profile.html" class="user-profile" style="text-decoration: none; color: inherit;">
-                    <div class="user-avatar">
+                    <div class="user-avatar" id="sidebarUserAvatar" style="overflow: hidden;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
                     <div class="user-info">
-                        <h3>রহিম মিয়া</h3>
-                        <p>বগুড়া, রাজশাহী</p>
+                        <h3 id="sidebarUserName">লোডিং...</h3>
+                        <p id="sidebarUserLocation" style="opacity: 0.8;">অপেক্ষা করুন...</p>
                     </div>
                 </a>
                 <button class="close-sidebar" id="closeSidebar">✕</button>
             </div>
             <div class="sidebar-menu">
-                <a href="crop_doctor.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
-                            <circle cx="12" cy="13" r="3"></circle>
-                        </svg>
-                    </span>
-                    <span>কৃষি স্ক্যানার (Pest Scouting)</span>
-                </a>
-                <a href="community.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </span>
-                    <span>কমিউনিটি ও হেল্পডেস্ক</span>
-                </a>
-                <a href="tasks.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                    </span>
-                    <span>কাজের টাইমলাইন</span>
-                </a>
-                <a href="transactions.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                            <line x1="2" y1="10" x2="22" y2="10"></line>
-                        </svg>
-                    </span>
-                    <span>লেনদেন ও হিসাব</span>
-                </a>
-                <a href="settings.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-                    </span>
-                    <span>অফলাইন সিঙ্ক ও সেটিংস</span>
-                    <span class="status-badge green">অনলাইন</span>
-                </a>
-                <a href="settings.html" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                    </span>
-                    <span>ভাষা (Language)</span>
-                    <span class="status-badge">BN</span>
-                </a>
-                <a href="#" class="s-menu-item">
-                    <span class="s-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
-                    </span>
-                    <span>হেল্পলাইন: ১৬১৬২</span>
-                </a>
-            </div>
-            <div class="sidebar-footer">
+                  <div class="s-section-title">সহায়তা ও সাপোর্ট</div>
+                  <a href="community.html" class="s-menu-item">
+                      <span class="s-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="9" cy="7" r="4"></circle>
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                      </span>
+                      <span>কমিউনিটি ও হেল্পডেস্ক</span>
+                  </a>
+                  <a href="tel:16162" class="s-menu-item">
+                      <span class="s-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                          </svg>
+                      </span>
+                      <span>হেল্পলাইন: ১৬১৬২</span>
+                  </a>
+
+                  <div class="s-section-title" style="margin-top: 8px;">সেটিংস</div>
+                  <a href="settings.html" class="s-menu-item">
+                      <span class="s-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+                      </span>
+                      <span>অফলাইন সিঙ্ক ও সেটিংস</span>
+                      <span class="status-badge green">অনলাইন</span>
+                  </a>
+                  <a href="settings.html" class="s-menu-item">
+                      <span class="s-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                      </span>
+                      <span>ভাষা (Language)</span>
+                      <span class="status-badge">BN</span>
+                  </a>
+                  <a href="#" class="s-menu-item">
+                      <span class="s-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                      </span>
+                      <span>থিম (Theme)</span>
+                  </a>
+              </div>
+              <div class="sidebar-footer">
                 <a href="index.html" class="s-menu-item text-danger">
                     <span class="s-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -368,6 +427,54 @@ class AppSidebar extends HTMLElement {
                 // Hide overlay
                 overlay.classList.remove('open');
             });
+        }
+
+        // Load User Profile dynamically
+        this.loadUserProfile();
+    }
+
+    loadUserProfile() {
+        try {
+            const profileStr = localStorage.getItem('farmer_profile');
+            if (profileStr) {
+                const profile = JSON.parse(profileStr);
+                const nameEl = this.querySelector('#sidebarUserName');
+                const locEl = this.querySelector('#sidebarUserLocation');
+                const avatarEl = this.querySelector('#sidebarUserAvatar');
+                
+                if (nameEl && profile.name) {
+                    nameEl.textContent = profile.name;
+                }
+                
+                if (locEl) {
+                    let locationParts = [];
+                    if (profile.village) locationParts.push(profile.village);
+                    if (profile.union_name) locationParts.push(profile.union_name);
+                    else if (profile.upazila) locationParts.push(profile.upazila);
+                    
+                    if (locationParts.length > 0) {
+                        locEl.textContent = locationParts.join(', ');
+                    } else {
+                        locEl.textContent = "ঠিকানা আপডেট করুন";
+                    }
+                }
+                
+                if (avatarEl && profile.profile_image) {
+                    const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+                    let imageUrl = profile.profile_image;
+                    if (!imageUrl.startsWith('http')) {
+                        imageUrl = API_URL + imageUrl;
+                    }
+                    avatarEl.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+            } else {
+                const nameEl = this.querySelector('#sidebarUserName');
+                const locEl = this.querySelector('#sidebarUserLocation');
+                if (nameEl) nameEl.textContent = "গেস্ট ইউজার";
+                if (locEl) locEl.textContent = "প্রোফাইল সেটআপ করুন";
+            }
+        } catch (e) {
+            console.error("Error loading profile for sidebar", e);
         }
     }
 }
@@ -460,6 +567,119 @@ class AppBottomNav extends HTMLElement {
     }
 }
 
+class AppPageHeader extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    connectedCallback() {
+        const titleText = this.getAttribute('page-title') || '';
+
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    position: sticky;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    z-index: 100;
+                    background: white;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                }
+                .page-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    height: 60px;
+                    padding: 0 16px;
+                    box-sizing: border-box;
+                }
+                .header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                .btn-back {
+                    background: none;
+                    border: none;
+                    padding: 8px;
+                    margin-left: -8px;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #0F172A;
+                    flex-shrink: 0;
+                    transition: background 0.2s;
+                }
+                .btn-back:hover {
+                    background: #F1F5F9;
+                }
+                .header-title-wrapper {
+                    min-width: 0;
+                    display: flex;
+                    align-items: center;
+                }
+                .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+                h1.default-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin: 0;
+                    color: #0F172A;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                ::slotted(h1), ::slotted(h2), ::slotted(h3), ::slotted(h4) {
+                    margin: 0 !important;
+                    font-size: 18px !important;
+                    font-weight: 700 !important;
+                    color: #0F172A !important;
+                    line-height: 1.2 !important;
+                }
+            </style>
+            <header class="page-header">
+                <div class="header-left">
+                    <button class="btn-back" aria-label="Go Back">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </button>
+                    <div class="header-title-wrapper">
+                        <slot name="title">
+                            <h1 class="default-title">${titleText}</h1>
+                        </slot>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <slot name="action"></slot>
+                </div>
+            </header>
+        `;
+
+        const btnBack = this.shadowRoot.querySelector('.btn-back');
+        btnBack.addEventListener('click', () => {
+            const backUrl = this.getAttribute('back-url');
+            if (backUrl) {
+                window.location.href = backUrl;
+            } else {
+                window.history.back();
+            }
+        });
+    }
+}
+
 // Export custom elements definition function
 export function registerComponents() {
     if (!customElements.get('app-header')) {
@@ -471,6 +691,9 @@ export function registerComponents() {
     if (!customElements.get('app-dash-header')) {
         customElements.define('app-dash-header', AppDashHeader);
     }
+    if (!customElements.get('app-page-header')) {
+        customElements.define('app-page-header', AppPageHeader);
+    }
     if (!customElements.get('app-sidebar')) {
         customElements.define('app-sidebar', AppSidebar);
     }
@@ -478,6 +701,9 @@ export function registerComponents() {
         customElements.define('app-bottom-nav', AppBottomNav);
     }
 }
+
+// Auto-register components when script is loaded
+registerComponents();
 
 // Global Toast System for UX
 window.showToast = function (message) {
@@ -528,7 +754,7 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
         modal.id = 'global-paywall-modal';
         modal.className = 'calendar-modal active'; // utilizing existing modal styles
         modal.style.zIndex = '10005';
-        
+
         modal.innerHTML = `
             <div class="calendar-content" style="max-height: 90vh; overflow-y: auto; padding: 0; border-radius: 20px; overflow: hidden; background: white;">
                 <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; position: relative;">
@@ -572,7 +798,7 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         // Form Logic
         setTimeout(() => {
             const submitBtn = document.getElementById('btnSubmitGlobalPayment');
@@ -584,14 +810,14 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
                     submitBtn.textContent = 'আপনার রিকোয়েস্ট পেন্ডিং আছে';
                     submitBtn.style.background = '#d97706';
                     submitBtn.disabled = true;
-                    if(methodSelect) methodSelect.disabled = true;
-                    if(trxInput) trxInput.disabled = true;
+                    if (methodSelect) methodSelect.disabled = true;
+                    if (trxInput) trxInput.disabled = true;
                 } else {
                     submitBtn.textContent = 'পেমেন্ট সাবমিট করুন';
                     submitBtn.style.background = '#10b981';
                     submitBtn.disabled = false;
-                    if(methodSelect) methodSelect.disabled = false;
-                    if(trxInput) trxInput.disabled = false;
+                    if (methodSelect) methodSelect.disabled = false;
+                    if (trxInput) trxInput.disabled = false;
                 }
             }
 
@@ -604,10 +830,10 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
                     const method = document.getElementById('globalPayMethod').value;
                     const trxId = document.getElementById('globalPayTrxId').value;
                     const token = localStorage.getItem('farmer_jwt');
-                    
+
                     btn.textContent = 'সাবমিট হচ্ছে...'; btn.disabled = true;
                     msg.textContent = ''; msg.style.color = '#10b981';
-                    
+
                     const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
                     try {
                         const res = await fetch(API_URL + '/api/auth/submit-payment', {
@@ -624,7 +850,7 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
                             msg.style.color = '#e2136e';
                             msg.textContent = data.error || 'পেমেন্ট সাবমিট করতে সমস্যা হয়েছে';
                         }
-                    } catch(err) {
+                    } catch (err) {
                         msg.style.color = '#e2136e';
                         msg.textContent = 'নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।';
                     } finally {
@@ -632,7 +858,7 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
                     }
                 });
             }
-            
+
             // Fetch Payment Settings
             const API_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
             fetch(API_URL + '/api/payment-settings')
@@ -651,11 +877,11 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
                     }
                 })
                 .catch(e => console.error('Failed to fetch payment settings:', e));
-                
+
         }, 100);
 
         // Add minimal CSS for active state just in case
-        if(!document.getElementById('paywall-css')){
+        if (!document.getElementById('paywall-css')) {
             const style = document.createElement('style');
             style.id = 'paywall-css';
             style.innerHTML = `
@@ -666,7 +892,7 @@ window.showPaywallModal = function (featureName = 'এই ফিচারটি'
         }
     }
 
-    
+
     document.getElementById('paywallFeatureName').innerText = featureName;
     modal.classList.add('active');
 }
@@ -684,3 +910,6 @@ window.handleApiError = function (errorData, featureName) {
         window.showToast(errorData.error || 'একটি ত্রুটি হয়েছে। আবার চেষ্টা করুন।');
     }
 }
+
+
+

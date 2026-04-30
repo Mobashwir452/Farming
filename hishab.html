@@ -19,36 +19,28 @@
     <link rel="stylesheet" href="css/hishab.css">
 
     <!-- Web Components & Modules -->
+    <script type="module" src="js/components.js" defer></script>
     <script type="module" src="js/hishab.js" defer></script>
 </head>
 
 <body class="hishab-body">
 
     <!-- Fixed Header -->
-    <header class="inner-header">
-        <button class="btn-back" onclick="window.history.back()" aria-label="Go back">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-        </button>
-        <h1>বিস্তারিত হিসাব খাতা</h1>
-        <button class="header-action" onclick="alert('ফিল্টার অপশন খুব শীঘ্রই আসছে!')">
+    <app-page-header page-title="বিস্তারিত হিসাব খাতা">
+        <button slot="action" class="header-action" onclick="alert('ফিল্টার অপশন খুব শীঘ্রই আসছে!')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
             </svg>
         </button>
-    </header>
+    </app-page-header>
 
     <!-- Top Summary -->
     <section class="hishab-summary-section">
         <!-- Net Balance -->
-        <!-- Use 'negative' class if balance is negative -->
-        <div class="net-balance-card">
+        <div class="net-balance-card" id="netBalanceCard">
             <div class="net-label">বর্তমান ব্যালেন্স</div>
-            <div class="net-amount">৳ ১৮,৫০০</div>
+            <div class="net-amount" id="netBalanceAmount">৳ ০</div>
         </div>
 
         <div class="summary-stats-grid">
@@ -61,7 +53,7 @@
                     </svg>
                     মোট আয়
                 </div>
-                <div class="stat-val">৳ ২৮,০০০</div>
+                <div class="stat-val" id="totalIncomeAmount">৳ ০</div>
             </div>
             <div class="stat-box expense">
                 <div class="stat-title">
@@ -72,112 +64,56 @@
                     </svg>
                     মোট ব্যয়
                 </div>
-                <div class="stat-val">৳ ৯,৫০০</div>
+                <div class="stat-val" id="totalExpenseAmount">৳ ০</div>
             </div>
         </div>
     </section>
 
     <!-- Filters Row -->
     <div class="filter-row">
-        <select class="filter-select">
-            <option>মাস: মার্চ ২০২৬</option>
-            <option>মাস: ফেব্রুয়ারি ২০২৬</option>
-            <option>চলতি বছর (২০২৬)</option>
+        <select class="filter-select" id="monthFilter">
+            <option value="all">সব সময়</option>
+            <option value="this_month">চলতি মাস</option>
+            <option value="last_month">গত মাস</option>
+            <option value="this_year">চলতি বছর</option>
         </select>
-        <select class="filter-select">
-            <option>সকল জমি</option>
-            <option>বাড়ির পেছনের জমি</option>
-            <option>খালের ধারের জমি</option>
+        <select class="filter-select" id="farmFilter">
+            <option value="all">সকল জমি</option>
         </select>
-        <select class="filter-select">
-            <option>সকল ফসল</option>
-            <option>বোরো ধান</option>
-            <option>টমেটো</option>
+        <select class="filter-select" id="cropFilter">
+            <option value="all">সকল ফসল</option>
         </select>
     </div>
 
     <!-- Ledger Content -->
-    <section class="ledger-container">
-        <!-- Ledger Group (By Date) -->
-        <div class="ledger-group">
-            <div class="ledger-group-header">
-                <span>২০ মার্চ, ২০২৬</span>
-                <span>মোট: -৳ ১,৩৫০</span>
-            </div>
-
-            <div class="ledger-item">
-                <div class="ledger-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
+    <section class="ledger-container" id="ledgerContainer">
+        <!-- Skeleton Loading -->
+        <div id="ledger-skeleton" style="display: none; padding: 20px;">
+            <div style="height: 20px; background: #E2E8F0; border-radius: 4px; width: 40%; margin-bottom: 16px;"></div>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px; opacity: 0.7;">
+                <div style="background: #E2E8F0; width: 40px; height: 40px; border-radius: 12px;"></div>
+                <div style="flex: 1;">
+                    <div style="height: 16px; background: #E2E8F0; border-radius: 4px; width: 60%; margin-bottom: 8px;"></div>
+                    <div style="height: 12px; background: #E2E8F0; border-radius: 4px; width: 40%;"></div>
                 </div>
-                <div class="ledger-info">
-                    <h4>ইউরিয়া সার ক্রয়</h4>
-                    <span class="ledger-badge">খালের ধারের জমি</span>
-                </div>
-                <div class="ledger-amount expense">- ৳ ৮৫০</div>
-            </div>
-
-            <div class="ledger-item">
-                <div class="ledger-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </div>
-                <div class="ledger-info">
-                    <h4>কীটনাশক ক্রয়</h4>
-                    <span class="ledger-badge">বাড়ির পেছনের জমি</span>
-                </div>
-                <div class="ledger-amount expense">- ৳ ৫০০</div>
+                <div style="height: 16px; background: #E2E8F0; border-radius: 4px; width: 20%;"></div>
             </div>
         </div>
 
-        <!-- Ledger Group -->
-        <div class="ledger-group">
-            <div class="ledger-group-header">
-                <span>১৯ মার্চ, ২০২৬</span>
-                <span>মোট: +৳ ১৭,৫০০</span>
-            </div>
-
-            <div class="ledger-item">
-                <div class="ledger-icon income">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                    </svg>
-                </div>
-                <div class="ledger-info">
-                    <h4>টমেটো বিক্রয়</h4>
-                    <span class="ledger-badge">খদের জমি</span>
-                </div>
-                <div class="ledger-amount income">+ ৳ ২০,০০০</div>
-            </div>
-
-            <div class="ledger-item">
-                <div class="ledger-icon expense">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </div>
-                <div class="ledger-info">
-                    <h4>শ্রমিক মজুরি (৩ জন)</h4>
-                    <span class="ledger-badge">সাধারণ হিসাব</span>
-                </div>
-                <div class="ledger-amount expense">- ৳ ২,৫০০</div>
-            </div>
+        <!-- Empty State -->
+        <div id="ledger-empty-state" class="empty-state" style="display: none; text-align: center; padding: 60px 20px; color: #94A3B8;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px; opacity: 0.5;">
+                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="M2 15h10"></path>
+                <path d="M5 12l-3 3 3 3"></path>
+            </svg>
+            <p style="font-size: 14px; font-weight: 500;">কোনো হিসাব পাওয়া যায়নি</p>
         </div>
-
     </section>
 
     <!-- Export Report FAB -->
-    <button class="fab-report" onclick="alert('রিপোর্ট ডাউনলোড শুরু হচ্ছে...')" aria-label="Download Report">
+    <button class="fab-report" onclick="alert('রিপোর্ট ডাউনলোড খুব শীঘ্রই আসছে...')" aria-label="Download Report">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium AeroStep Ad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .ad-container {
+            width: 1280px; 
+            height: 720px;
+            background-color: #050505;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+
+        /* Giant Background Text */
+        .bg-text {
+            font-family: 'Anton', sans-serif;
+            font-size: 280px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.05); /* Ghost/Outline effect */
+            z-index: 1;
+            letter-spacing: 10px;
+        }
+
+        /* Subtle Center Glow */
+        .center-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(57, 255, 20, 0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: 2;
+        }
+
+        /* Top Hook/Catchphrase */
+        .hook-text {
+            position: absolute;
+            top: 50px;
+            left: 60px;
+            font-size: 48px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            z-index: 10;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+        
+        .hook-text span {
+            color: #39FF14; /* Neon Green Highlight */
+        }
+
+        /* Dynamic Shoe Placement (Z-index layering) */
+        .shoe-group {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        .shoe {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 2px;
+        }
+
+        /* Red Shoe (Background Left) */
+        .shoe-red {
+            width: 300px;
+            height: 200px;
+            top: 25%;
+            left: 15%;
+            transform: rotate(-10deg) scale(0.8);
+            filter: brightness(0.6) blur(2px); /* Depth of field effect */
+            z-index: 3;
+            background: linear-gradient(135deg, rgba(255,0,63,0.2), transparent);
+            border-radius: 20px;
+        }
+
+        /* Blue Shoe (Background Right) */
+        .shoe-blue {
+            width: 300px;
+            height: 200px;
+            top: 15%;
+            right: 15%;
+            transform: rotate(15deg) scale(0.85);
+            filter: brightness(0.6) blur(1px);
+            z-index: 4;
+            background: linear-gradient(135deg, rgba(0,255,255,0.2), transparent);
+            border-radius: 20px;
+        }
+
+        /* Green Shoe (Hero Front) */
+        .shoe-green {
+            width: 500px;
+            height: 300px;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -20%) rotate(-5deg);
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(57,255,20,0.1), transparent);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid rgba(57,255,20,0.2);
+        }
+
+        /* Technical Specs Pointers */
+        .tech-pointer {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 12;
+        }
+
+        .pointer-line {
+            width: 60px;
+            height: 1px;
+            background-color: #39FF14;
+        }
+
+        .pointer-text {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .ptr-1 { top: 40%; left: 25%; }
+        .ptr-2 { top: 60%; right: 28%; flex-direction: row-reverse; }
+
+        /* Bottom Footer Area */
+        .footer {
+            position: absolute;
+            bottom: 40px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 15;
+        }
+
+        /* Pricing Area */
+        .pricing-area {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .collection-text {
+            font-size: 14px;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .price-text {
+            font-size: 32px;
+            font-weight: 900;
+        }
+
+        /* Minimal CTA */
+        .cta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .cta-wrap:hover {
+            transform: translateX(10px);
+        }
+
+        .cta-text {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #39FF14;
+            padding-bottom: 5px;
+        }
+
+        .cta-arrow {
+            font-size: 24px;
+            color: #39FF14;
+        }
+
+        /* Minimal QR */
+        .qr-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .qr-label {
+            font-size: 10px;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .qr-placeholder {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-size: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ad-container">
+        <div class="bg-text">AEROSTEP</div>
+        
+        <div class="center-glow"></div>
+
+        <div class="hook-text">
+            DEFY <br>
+            <span>GRAVITY.</span>
+        </div>
+
+        <div class="shoe-group">
+            <div class="shoe shoe-red">[ RED SNEAKER ]</div>
+            <div class="shoe shoe-blue">[ BLUE SNEAKER ]</div>
+            
+            <div class="shoe shoe-green">
+                [ HERO NEON SNEAKER ]
+            </div>
+            
+            <div class="tech-pointer ptr-1">
+                <div class="pointer-line"></div>
+                <div class="pointer-text">Aero-Foam Sole</div>
+            </div>
+            <div class="tech-pointer ptr-2">
+                <div class="pointer-line"></div>
+                <div class="pointer-text">Breathable Mesh</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="pricing-area">
+                <div class="collection-text">Collection Starting At</div>
+                <div class="price-text">$59.99</div>
+            </div>
+
+            <div class="cta-wrap">
+                <div class="cta-text">Explore The Collection</div>
+                <div class="cta-arrow">→</div>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-label">Scan To<br>Unlock Offer</div>
+                <div class="qr-placeholder">[ QR ]</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

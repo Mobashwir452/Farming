@@ -8,6 +8,7 @@ import { getAdminCache, saveAdminCache, deleteAdminCache, generateAdminCacheAI }
 import { getAdminSettings, saveAdminSettings } from './routes/admin_settings.js';
 import { verifyFirebase, updateProfile, checkUser, loginPin, getProfile, submitManualPayment } from './routes/auth.js';
 import { createFarm, getFarms, getFarmDetails, updateFarm, deleteFarm } from './routes/farms.js';
+import { getGlobalTasks, updateGlobalTask } from './routes/tasks.js';
 import { saveCropTimeline, searchCrops, getCropById, updateCropState, deleteCrop, completeCrop, updateCropStatusManually, addCropNote } from './routes/crops.js';
 import { predictCrop, suggestCrop } from './routes/crop_ai.js';
 import { analyzePublicCropImage, getPublicScanLogs } from './routes/public_crop_doctor.js';
@@ -17,21 +18,23 @@ import { getPackages, updatePackage, addPackage, deletePackage, getActiveSubscri
 import { runCropVerification } from './cron_verification.js';
 import { aiRouter } from './routes/ai_engine/index.js';
 import { handleCropChat } from './routes/ai_chat.js';
-import { getTransactions, addTransaction, updateTransaction, deleteTransaction } from './routes/transactions.js';
+import { getAllTransactions, getTransactions, addTransaction, updateTransaction, deleteTransaction } from './routes/transactions.js';
 import { getPlantGrid, generatePlantGrid, updateBedConfig, getPlantLogs, addPlantLog, uploadPlantImage, syncCropBeds, insertShiftPlant, deleteShiftPlant } from './routes/plants.js';
 import { generateCropReport } from './services/pdfReportGenerator.js';
 import { checkOverdueTasks } from './services/taskChecker.js';
 import { syncWeatherData, testWeatherSync } from './services/weatherSync.js';
+import { getWeather } from './routes/weather.js';
 import { cleanOldCropScanImages } from './services/r2_cleaner.js';
 import { resetMonthlyLimits } from './services/limitResetter.js';
 import { compressUncompressedImages, findOrphanImages, deleteOrphanImages } from './routes/admin_dbtools.js';
 import { checkAndSendPlantReminders } from './services/statusReminderService.js';
-
+import { checkAndSendTaskReminders } from './services/taskReminderService.js';
 
 const router = Router();
 
 // 1. System Health Check
 router.get('/api/health', () => Response.json({ status: 'ok', version: '1.0' }));
+router.get('/api/weather', getWeather);
 
 // 2. Admin Routes
 router.post('/api/admin/login', adminLogin);
@@ -115,6 +118,10 @@ router.get('/api/farms/:id', withAuth(['farmer']), getFarmDetails);
 router.put('/api/farms/:id', withAuth(['farmer']), updateFarm);
 router.delete('/api/farms/:id', withAuth(['farmer']), deleteFarm);
 
+// 3.5.1 Public Global Tasks Routes (Farmers only)
+router.get('/api/tasks', withAuth(['farmer']), getGlobalTasks);
+router.put('/api/tasks/:cropId/:taskId', withAuth(['farmer']), updateGlobalTask);
+
 // 3.6 Public Crop AI & Timeline Routes
 router.post('/api/public/crop-scan', withAuth(['farmer', 'admin']), analyzePublicCropImage);
 router.get('/api/public/crop-scans', withAuth(['farmer']), getPublicScanLogs);
@@ -156,6 +163,7 @@ router.put('/api/crops/:id/complete', withAuth(['farmer']), completeCrop);
 router.put('/api/crops/:id/status', withAuth(['farmer']), updateCropStatusManually);
 router.post('/api/crops/:id/notes', withAuth(['farmer']), addCropNote);
 router.get('/api/crops/:id/report', withAuth(['farmer']), generateCropReport);
+router.get('/api/transactions', withAuth(['farmer']), getAllTransactions);
 router.get('/api/crops/:id/transactions', withAuth(['farmer']), getTransactions);
 router.post('/api/crops/:id/transactions', withAuth(['farmer']), addTransaction);
 router.put('/api/crops/:id/transactions/:txId', withAuth(['farmer']), updateTransaction);
@@ -175,7 +183,15 @@ router.delete('/api/crops/:id/beds/:bedId/delete-shift', withAuth(['farmer']), d
 // 3.9 Testing Route for Reminders!
 router.get('/api/test-reminders', async (request, env) => {
     const isForce = new URL(request.url).searchParams.get('force') === 'true';
-    const result = await checkAndSendPlantReminders(env, isForce);
+    const type = new URL(request.url).searchParams.get('type') || 'plants';
+    
+    let result;
+    if (type === 'tasks') {
+        result = await checkAndSendTaskReminders(env, isForce);
+    } else {
+        result = await checkAndSendPlantReminders(env, isForce);
+    }
+    
     return new Response(JSON.stringify(result), { headers: { 'Content-Type': 'application/json' } });
 });
 
@@ -221,7 +237,8 @@ export default {
             syncWeatherData(env),
             cleanOldCropScanImages(env),
             resetMonthlyLimits(env),
-            checkAndSendPlantReminders(env)
+            checkAndSendPlantReminders(env),
+            checkAndSendTaskReminders(env)
         ]));
     }
 };

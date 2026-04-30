@@ -227,6 +227,12 @@ export const deleteCrop = async (request, env) => {
             }
         }
         
+        // Delete dependent records to satisfy foreign key constraints
+        await env.DB.prepare("DELETE FROM transactions WHERE crop_id = ?").bind(cropId).run();
+        await env.DB.prepare("DELETE FROM plant_logs WHERE bed_id IN (SELECT id FROM crop_beds WHERE crop_id = ?)").bind(cropId).run();
+        await env.DB.prepare("DELETE FROM crop_beds WHERE crop_id = ?").bind(cropId).run();
+        await env.DB.prepare("DELETE FROM tasks WHERE crop_id = ?").bind(cropId).run();
+
         await env.DB.prepare("DELETE FROM crops WHERE id = ?").bind(cropId).run();
         
         return Response.json({ success: true, message: 'Crop deleted completely along with all R2 media' });

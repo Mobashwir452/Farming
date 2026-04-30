@@ -35,7 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProfileInfo(farmer) {
         // Update standard user info
-        document.getElementById('userNameDisplay').innerHTML = farmer.name;
+        const nameDisplay = document.getElementById('userNameDisplay');
+        if (nameDisplay) {
+            nameDisplay.innerHTML = farmer.name;
+            nameDisplay.classList.remove('skeleton');
+            nameDisplay.style.width = 'auto';
+            nameDisplay.style.height = 'auto';
+        }
         document.getElementById('editName').value = farmer.name;
         
         const avatarEl = document.getElementById('userAvatar');
@@ -43,7 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
             avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.name)}&background=10b981&color=fff&size=150&bold=true`;
         }
 
-        document.getElementById('userPhoneDisplay').textContent = toBnNum(farmer.phone);
+        const phoneDisplay = document.getElementById('userPhoneDisplay');
+        if (phoneDisplay) {
+            phoneDisplay.textContent = toBnNum(farmer.phone);
+            phoneDisplay.classList.remove('skeleton');
+            phoneDisplay.style.width = 'auto';
+            phoneDisplay.style.height = 'auto';
+        }
         
         const editPhoneEl = document.getElementById('editPhone');
         if (editPhoneEl) {
@@ -59,6 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addrDisplay.textContent = 'ঠিকানা আপডেট করুন';
             editAddr.value = '';
         }
+        if (addrDisplay) {
+            addrDisplay.classList.remove('skeleton');
+            addrDisplay.style.width = 'auto';
+            addrDisplay.style.height = 'auto';
+        }
 
         const editEmail = document.getElementById('editEmail');
         if(editEmail) {
@@ -68,12 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Subscription Stats
         const type = farmer.subscription_level || 'free';
         const txtEl = document.getElementById('subscriptionStatusText');
-        if (txtEl) txtEl.textContent = type === 'free' ? 'ফ্রি ইউজার' : (type === 'ultra' ? 'আল্ট্রা ইউজার' : 'প্রো ইউজার');
+        if (txtEl) {
+            txtEl.textContent = type === 'free' ? 'ফ্রি ইউজার' : (type === 'ultra' ? 'আল্ট্রা ইউজার' : 'প্রো ইউজার');
+            txtEl.classList.remove('skeleton');
+            txtEl.style.width = 'auto';
+            txtEl.style.height = 'auto';
+        }
 
         // Farm count (from API or fallback to localStorage)
         const totalLands = farmer.total_lands !== undefined ? farmer.total_lands : (localStorage.getItem('agritech_total_farms') || 0);
         const totalLandsCountEl = document.getElementById('totalLandsCount');
-        if (totalLandsCountEl) totalLandsCountEl.textContent = `${toBnNum(totalLands)} টি`;
+        if (totalLandsCountEl) {
+            totalLandsCountEl.textContent = `${toBnNum(totalLands)} টি`;
+            totalLandsCountEl.classList.remove('skeleton');
+            totalLandsCountEl.style.width = 'auto';
+            totalLandsCountEl.style.height = 'auto';
+        }
 
         // Render Dynamic Subscription Panel
         const panel = document.getElementById('subscriptionDetailsPanel');

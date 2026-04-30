@@ -294,6 +294,12 @@ body {
     -webkit-touch-callout: none;
 }
 
+.plant-grid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .plant-chip {
     display: flex;
     flex-direction: column;
@@ -349,6 +355,59 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+}
+
+/* List View Styles */
+.plant-grid.list-view .plant-chip {
+    flex-direction: row;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 10px 14px;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    gap: 14px;
+    width: 100%;
+}
+
+.plant-grid.list-view .avatar-ring {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.plant-grid.list-view .chip-info {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.plant-grid.list-view .chip-id {
+    text-align: left;
+    font-size: 15px;
+    margin-top: 0;
+    margin-bottom: 2px;
+}
+
+.plant-grid.list-view .chip-variety {
+    text-align: left;
+    font-size: 12px;
+}
+
+.plant-grid.list-view .chip-note-preview {
+    font-size: 11px;
+    color: #64748B;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    max-width: fit-content;
 }
 
 /* Status Dots (Sleek Avatar Style) */

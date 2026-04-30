@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
@@ -31,9 +32,27 @@
     <main class="dashboard-container">
 
         <!-- Header Section for Khamar -->
-        <div class="khamar-page-header">
-            <h2>আমার খামার 🌾</h2>
-            <p>আপনার সকল জমির দৃশ্য এবং ফসলের সার্বিক অবস্থা একনজরে</p>
+        <div class="khamar-hero-section">
+            <div class="khero-bg-shapes">
+                <div class="khero-shape-1"></div>
+                <div class="khero-shape-2"></div>
+            </div>
+            
+            <div class="khero-content">
+                <div class="khero-text">
+                    <p class="khero-greeting" id="kheroGreeting">শুভ সকাল!</p>
+                    <h2 class="khero-title">আমার খামার</h2>
+                    <p class="khero-subtitle skeleton" id="kheroSubtitle" style="width: 180px; height: 16px; border-radius: 4px; margin-top: 8px;"></p>
+                </div>
+                
+                <a href="weather_details.html" class="khero-widget-glass" style="text-decoration:none;">
+                    <div class="khero-weather-icon skeleton skeleton-circle" id="kheroWeatherIcon" style="width: 24px; height: 24px;"></div>
+                    <div class="khero-weather-info" style="display: flex; flex-direction: column; gap: 4px;">
+                        <span class="khero-temp skeleton" id="kheroTemp" style="width: 30px; height: 14px; border-radius: 4px;"></span>
+                        <span class="khero-cond skeleton" id="kheroCond" style="width: 50px; height: 12px; border-radius: 4px;"></span>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- 1. EMPTY STATE (Hidden by default, shown via JS if no land) -->

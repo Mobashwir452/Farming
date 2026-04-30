@@ -131,11 +131,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await res.json();
         if (data.success && data.farm) {
             display.value = `${data.farm.name} (${data.farm.area_shotangsho} শতাংশ)`;
+            display.classList.remove('skeleton');
         } else {
             display.value = "জমির তথ্য পাওয়া যায়নি";
+            display.classList.remove('skeleton');
         }
     } catch (e) {
         display.value = "নেটওয়ার্ক সমস্যা";
+        display.classList.remove('skeleton');
     }
 
     const cropInput = document.getElementById('cropInput');

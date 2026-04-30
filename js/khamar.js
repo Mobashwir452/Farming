@@ -39,9 +39,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Initialize Hero Section Static data (Greeting)
+    const hour = new Date().getHours();
+    let greeting = 'স্বাগতম!';
+    if (hour >= 5 && hour < 12) greeting = 'শুভ সকাল 🌅';
+    else if (hour >= 12 && hour < 17) greeting = 'শুভ দুপুর ☀️';
+    else if (hour >= 17 && hour < 20) greeting = 'শুভ সন্ধ্যা 🌇';
+    else greeting = 'শুভ রাত্রি 🌙';
+    
+    const greetingEl = document.getElementById('kheroGreeting');
+    if(greetingEl) greetingEl.textContent = greeting;
+
+    // Fetch Weather for Hero
+    fetchHeroWeather();
+
     // 3. Fetch Farms dynamically
     loadFarms();
 });
+
+async function fetchHeroWeather() {
+    try {
+        const cacheKey = 'agritech_weather_cache_v2';
+        const cached = localStorage.getItem(cacheKey);
+        let data = null;
+        
+        if (cached) {
+            const parsedCache = JSON.parse(cached);
+            if (Date.now() - parsedCache.timestamp < 3600000) {
+                data = parsedCache.data;
+            }
+        }
+        
+        if (!data) {
+            const BASE_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+            const defLat = localStorage.getItem('default_lat') || '23.8103';
+            const defLon = localStorage.getItem('default_lon') || '90.4125';
+            
+            const res = await fetch(`${BASE_URL}/api/weather?lat=${defLat}&lon=${defLon}`);
+            data = await res.json();
+            
+            if (data.success) {
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    timestamp: Date.now(),
+                    data: data
+                }));
+            }
+        }
+        
+        if (data && data.success && data.current) {
+            const tempEl = document.getElementById('kheroTemp');
+            const condEl = document.getElementById('kheroCond');
+            const iconEl = document.getElementById('kheroWeatherIcon');
+            
+            if (tempEl) {
+                tempEl.textContent = Math.round(data.current.temp) + '°C';
+                tempEl.classList.remove('skeleton');
+                tempEl.style.width = 'auto';
+                tempEl.style.height = 'auto';
+            }
+            if (condEl) {
+                condEl.textContent = data.current.condition_bn || data.current.condition;
+                condEl.classList.remove('skeleton');
+                condEl.style.width = 'auto';
+                condEl.style.height = 'auto';
+            }
+            
+            if (iconEl && data.current.icon) {
+                 iconEl.classList.remove('skeleton', 'skeleton-circle');
+                 iconEl.style.width = 'auto';
+                 iconEl.style.height = 'auto';
+                 iconEl.innerHTML = `<img src="https://openweathermap.org/img/wn/${data.current.icon}.png" width="32" height="32" style="border-radius:50%;" />`;
+            }
+        }
+    } catch (e) {
+        console.error('Hero weather error:', e);
+    }
+}
 
 async function loadFarms() {
     const token = localStorage.getItem('farmer_jwt');
@@ -55,8 +128,11 @@ async function loadFarms() {
     const emptyState = document.getElementById('emptyState');
 
     try {
-        // Show loading state implicitly by clearing the container
-        listContainer.innerHTML = '<p style="text-align: center; padding: 20px;">লোড হচ্ছে...</p>';
+        // Show loading skeletons
+        listContainer.innerHTML = `
+            <div class="skeleton skeleton-card" style="margin-bottom:16px;"></div>
+            <div class="skeleton skeleton-card" style="margin-bottom:16px;"></div>
+        `;
 
         const response = await fetch(`${BASE_URL}/api/farms`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -70,6 +146,13 @@ async function loadFarms() {
             } else {
                 emptyState.style.display = 'none';
                 listContainer.style.display = 'flex';
+                
+                // Save the first farm's location as the global default for weather
+                if (data.farms[0].latitude && data.farms[0].longitude) {
+                    localStorage.setItem('default_lat', data.farms[0].latitude);
+                    localStorage.setItem('default_lon', data.farms[0].longitude);
+                }
+                
                 renderFarms(data.farms, listContainer);
             }
         } else {
@@ -83,59 +166,227 @@ async function loadFarms() {
 
 function renderFarms(farms, container) {
     container.innerHTML = '';
+    
+    // Update Hero Subtitle
+    const toBngDigits = (num) => String(num).split('').map(d => ({ '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' }[d] || d)).join('');
+    let totalFarms = farms.length;
+    let totalPendingGlobal = 0;
+    farms.forEach(f => {
+        (f.crops || []).forEach(crop => {
+            const allT = JSON.parse(crop.tasks_state_json || '[]');
+            allT.forEach(t => {
+                const s = t.status || (t.is_completed ? 'completed' : 'pending');
+                if (s === 'pending') totalPendingGlobal++;
+            });
+        });
+    });
+    
+    const heroSub = document.getElementById('kheroSubtitle');
+    if (heroSub) {
+        if (totalFarms > 0) {
+            heroSub.textContent = `আপনার ${toBngDigits(totalFarms)}টি জমিতে সর্বমোট ${toBngDigits(totalPendingGlobal)}টি কাজ বাকি আছে।`;
+        } else {
+            heroSub.textContent = 'আপনার এখনো কোনো জমি নেই। নিচে থেকে জমি যুক্ত করুন।';
+        }
+        heroSub.classList.remove('skeleton');
+        heroSub.style.width = 'auto';
+        heroSub.style.height = 'auto';
+    }
+
     farms.forEach((farm, index) => {
         const dropId = `drop_${farm.id}`;
+        const activeCrop = (farm.crops && farm.crops.length > 0) ? farm.crops[0] : null;
 
         // Define crop section markup depending on crop presence
         let cropHtml = ``;
-        if (farm.crop_name) {
-            let badgeClass = farm.crop_status === 'Healthy' ? '' : 'danger';
-            let statusText = farm.crop_status === 'Healthy' ? 'হেলদি' : (farm.crop_status === 'Warning' ? 'সতর্কতা' : 'রোগাক্রান্ত');
+        if (activeCrop) {
+            let badgeClass = activeCrop.status === 'Diseased' ? 'danger' : (activeCrop.status === 'Warning' ? 'warning' : 'success');
+            let statusText = activeCrop.status === 'Diseased' ? 'রোগাক্রান্ত' : (activeCrop.status === 'Warning' ? 'সতর্কতা' : 'হেলদি');
+
+            // --- Dynamic Calculations ---
+            let healthScore = 100;
+            let nextTaskText = 'AI প্রোফাইল পর্যবেক্ষণ করছে';
+            let nextTaskClass = 'success';
+            let harvestText = 'তথ্য নেই';
+            let progressWidth = 50;
+            let progressStage = 'লাইভ';
+
+            if (activeCrop.tasks_state_json) {
+                try {
+                    const allTasks = JSON.parse(activeCrop.tasks_state_json || '[]');
+                    let totalTasks = 0;
+                    let completedTasks = 0;
+                    let missedTasks = 0;
+                    let pendingTasks = [];
+                    let maxDay = 0;
+                    let sowingDate = farm.created_at;
+
+                    allTasks.forEach(task => {
+                        totalTasks++;
+                        
+                        const taskDateStr = task.due_date || task.date;
+                        const taskTitleStr = task.title || task.task_name || 'অজ্ঞাত কাজ';
+                        const taskStatus = task.status || (task.is_completed ? 'completed' : 'pending');
+                        const taskDay = parseInt(task.day_offset || task.day || 0);
+
+                        if (taskStatus === 'completed') {
+                            completedTasks++;
+                        } else if (taskStatus === 'pending') {
+                            const tDate = new Date(taskDateStr);
+                            tDate.setHours(23, 59, 59, 999);
+                            if (new Date() > tDate) {
+                                missedTasks++;
+                            } else {
+                                pendingTasks.push({
+                                    title: taskTitleStr,
+                                    due_date: taskDateStr
+                                });
+                            }
+                        }
+                        
+                        if (taskDay > maxDay) maxDay = taskDay;
+                        
+                        if (taskTitleStr && (taskTitleStr.includes('বপন') || taskTitleStr.includes('রোপণ') || taskTitleStr.includes('রোপন'))) {
+                            sowingDate = taskDateStr;
+                        }
+                    });
+
+                    // Health Score Logic (Penalty for missed tasks or disease)
+                    healthScore = 100 - (missedTasks * 5); 
+                    if (activeCrop.status === 'Diseased') healthScore -= 30;
+                    if (activeCrop.status === 'Warning') healthScore -= 15;
+                    if (healthScore < 0) healthScore = 0;
+                    if (healthScore > 100) healthScore = 100;
+
+                    // Next Task Logic
+                    if (pendingTasks.length > 0) {
+                        // Sort by date ascending
+                        pendingTasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                        const nextTask = pendingTasks[0];
+                        const tDate = new Date(nextTask.due_date);
+                        tDate.setHours(0, 0, 0, 0);
+                        const todayDate = new Date();
+                        todayDate.setHours(0, 0, 0, 0);
+                        const diffTime = tDate - todayDate;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays === 0) {
+                             nextTaskText = 'আজকের কাজ: ' + nextTask.title;
+                             nextTaskClass = 'warning';
+                        } else {
+                             nextTaskText = diffDays + ' দিন পর: ' + nextTask.title;
+                             nextTaskClass = 'success';
+                        }
+                    } else if (missedTasks > 0) {
+                        nextTaskText = 'কিছু কাজ মিস হয়েছে';
+                        nextTaskClass = 'danger';
+                    }
+
+                    // Harvest Date Logic
+                    if (sowingDate && maxDay > 0) {
+                        const sDate = new Date(sowingDate);
+                        sDate.setDate(sDate.getDate() + maxDay);
+                        
+                        const diffTime = sDate - new Date();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays > 0) {
+                            harvestText = `আর ${diffDays} দিন`;
+                            progressWidth = Math.min(100, Math.max(0, ((maxDay - diffDays) / maxDay) * 100));
+                        } else {
+                            harvestText = 'কর্তনের সময় হয়েছে';
+                            progressWidth = 100;
+                            progressStage = 'ম্যাচিউর';
+                        }
+                    }
+
+                } catch (e) {
+                    console.error("Error parsing tasks for farm", farm.id, e);
+                }
+            } else if (activeCrop.status === 'Diseased') {
+                healthScore = 60;
+                nextTaskText = 'পোকামাকড় স্ক্যান করুন';
+                nextTaskClass = 'danger';
+            }
 
             cropHtml = `
-                <div class="fc-crop-info">
-                    <div class="crop-image">
-                        <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=200&h=200" alt="${farm.crop_name}">
-                    </div>
-                    <div class="crop-details">
-                        <div class="crop-name-row">
-                            <h4 class="crop-name">${farm.crop_name}</h4>
-                            <span class="crop-badge ${badgeClass}">${statusText}</span>
+                <div class="premium-crop-section">
+                    <div class="pcs-header">
+                        <div class="pcs-image">
+                            <img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&q=80&w=200&h=200" alt="${activeCrop.crop_name}">
+                            <div class="pcs-health-badge ${healthScore >= 80 ? 'good' : (healthScore >= 50 ? 'avg' : 'bad')}">
+                                <span class="material-icons-round">health_and_safety</span>
+                                <span>${healthScore}%</span>
+                            </div>
                         </div>
-                        <div class="crop-progress-container">
-                            <div class="progress-info">
-                                <span class="progress-text">চলমান ফসল</span>
-                                <span class="progress-stage">লাইভ</span>
+                        <div class="pcs-info">
+                            <div class="pcs-title-row">
+                                <h4 class="pcs-crop-name" title="${activeCrop.crop_name}">${activeCrop.crop_name}</h4>
                             </div>
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fill ${badgeClass}" style="width: 50%;"></div>
+                            <div class="pcs-harvest-info">
+                                <div class="phi-left">
+                                    <span class="material-icons-round">timer</span>
+                                    <span>হারভেস্ট: ${harvestText}</span>
+                                </div>
+                                <div class="phi-right">
+                                    <span class="pcs-status ${badgeClass}">${statusText}</span>
+                                    <a href="weather_details.html?lat=${farm.lat || 23.8103}&lon=${farm.lng || 90.4125}" class="unified-weather-badge" id="weather_badge_${farm.id}">
+                                        <span class="weather-icon">☁️</span> 
+                                        <span class="weather-temp">--°</span>
+                                    </a>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pcs-progress">
+                        <div class="pcs-progress-header">
+                            <span class="pcs-progress-label">বৃদ্ধি পর্যায়</span>
+                            <span class="pcs-progress-stage">${progressStage}</span>
+                        </div>
+                        <div class="pcs-progress-track">
+                            <div class="pcs-progress-fill ${badgeClass}" style="width: ${progressWidth}%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="pcs-next-task ${nextTaskClass}">
+                        <div class="nt-icon">
+                            <span class="material-icons-round">${nextTaskClass === 'danger' ? 'warning' : 'event'}</span>
+                        </div>
+                        <div class="nt-content">
+                            <span class="nt-label">পরবর্তী কাজ</span>
+                            <span class="nt-value">${nextTaskText}</span>
+                        </div>
+                        <div class="nt-arrow">
+                            <span class="material-icons-round">chevron_right</span>
                         </div>
                     </div>
                 </div>
             `;
         } else {
             cropHtml = `
-                <div class="fc-empty-crop">
-                    <div class="empty-crop-content">
-                        <div class="empty-crop-icon">🌱</div>
-                        <div class="empty-crop-text">
-                            <h4>খালি জমি</h4>
-                            <p>বর্তমানে কোনো ফসল নেই</p>
-                        </div>
+                <div class="pcs-empty">
+                    <div class="pcs-empty-icon">
+                        <span class="material-icons-round">add_circle_outline</span>
                     </div>
-                    <button class="btn-outline-primary full-width" onclick="window.location.href='add_crop.html?farm_id=${farm.id}'; event.stopPropagation();">+ নতুন ফসল রোপণ করুন</button>
+                    <div class="pcs-empty-text">
+                        <h4>খালি জমি</h4>
+                        <p>নতুন ফসল রোপণ করে শুরু করুন</p>
+                    </div>
+                    <button class="pcs-btn-primary" onclick="window.location.href='add_crop.html?farm_id=${farm.id}'; event.stopPropagation();">
+                        ফসল যুক্ত করুন
+                    </button>
                 </div>
             `;
         }
 
         const card = `
-            <div class="farm-card" onclick="window.location.href='land_details.html?id=${farm.id}'">
+            <div class="farm-card premium-card" onclick="window.location.href='land_details.html?id=${farm.id}'">
                 <div class="fc-header">
                     <div class="fc-title-group">
                         <div class="fc-title-inner">
                             <h3>${farm.name}</h3>
-                            <span class="fc-area">${farm.area_shotangsho} শতাংশ</span>
+                            <span class="fc-area">${farm.area_shotangsho} শতক</span>
                         </div>
                     </div>
                     <div class="fc-actions-wrapper">
@@ -164,27 +415,62 @@ function renderFarms(farms, container) {
                 </div>
 
                 ${cropHtml}
-
-                <div class="fc-footer">
-                    ${farm.crop_name ? `
-                        <div class="fc-cta ${farm.crop_status !== 'Healthy' ? 'danger' : ''}">
-                            <div class="status-indicator ${farm.crop_status !== 'Healthy' ? 'danger' : ''}"></div>
-                            <span class="cta-text">AI প্রোফাইল পর্যবেক্ষণ করছে</span>
-                        </div>
-                    ` : `
-                        <div class="fc-cta">
-                            <span class="cta-text">জমি প্রস্তুত করুন</span>
-                        </div>
-                    `}
-                    <div class="fc-action">
-                        <span>টাইমলাইন</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </div>
-                </div>
             </div>
         `;
         container.innerHTML += card;
+        
+        // Fetch specific weather for this farm
+        if (activeCrop) {
+            fetchFarmWeather(farm.id, farm.lat, farm.lng);
+        }
     });
+}
+
+async function fetchFarmWeather(farmId, lat, lon) {
+    try {
+        const fetchLat = lat || 23.8103;
+        const fetchLon = lon || 90.4125;
+        const cacheKey = `agritech_weather_v2_${fetchLat}_${fetchLon}`;
+        let data = null;
+        
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+            const parsedCache = JSON.parse(cached);
+            if (Date.now() - parsedCache.timestamp < 3600000) {
+                data = parsedCache.data;
+            }
+        }
+        
+        if (!data) {
+            const BASE_URL = localStorage.getItem('API_URL') || 'https://agritech-backend.mobashwir9.workers.dev';
+            const res = await fetch(`${BASE_URL}/api/weather?lat=${fetchLat}&lon=${fetchLon}`);
+            data = await res.json();
+            if (data.success) {
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    timestamp: Date.now(),
+                    data: data
+                }));
+            }
+        }
+        
+        if (data && data.success && data.current) {
+            const badge = document.getElementById(`weather_badge_${farmId}`);
+            if (badge) {
+                const tempEl = badge.querySelector('.weather-temp');
+                const iconEl = badge.querySelector('.weather-icon');
+                if (tempEl) tempEl.textContent = Math.round(data.current.temp) + '°';
+                if (iconEl) {
+                    const iconCode = data.current.icon;
+                    if (iconCode.includes('n')) iconEl.textContent = '🌙';
+                    else if (['01d', '02d'].includes(iconCode)) iconEl.textContent = '☀️';
+                    else if (['09d', '10d', '11d'].includes(iconCode)) iconEl.textContent = '🌧️';
+                    else iconEl.textContent = '☁️';
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Farm weather error:', e);
+    }
 }
 
 // --- Farm Actions ---

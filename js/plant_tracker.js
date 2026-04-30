@@ -122,6 +122,38 @@ async function initApp() {
 }
 
 // ========================
+// View Mode Toggle (Grid/List)
+// ========================
+window.toggleViewMode = function() {
+    isListView = !isListView;
+    const iconBtn = document.getElementById('iconViewMode');
+    if (iconBtn) {
+        if (!isListView) {
+            // WE ARE IN GRID VIEW
+            // Show icon for List (3 lines) to indicate target action
+            iconBtn.innerHTML = `
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            `;
+        } else {
+            // WE ARE IN LIST VIEW
+            // Show icon for Grid (4 squares) to indicate target action
+            iconBtn.innerHTML = `
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            `;
+        }
+    }
+    renderBeds();
+};
+
+// ========================
 // Renders the bed list & chips
 // ========================
 function renderBeds() {
@@ -1222,6 +1254,8 @@ window.removePlantAvatar = function (event) {
         preview.src = 'https://placehold.co/100x100?text=Plant';
         preview.dataset.base64 = '';
         document.getElementById('bsImageInput').value = '';
+        const camInput = document.getElementById('bsCameraInput');
+        if(camInput) camInput.value = '';
         document.getElementById('bsAvatarRemove').style.display = 'none';
     });
 };
@@ -1382,9 +1416,15 @@ function populateTimeline(logs) {
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         ${log.date}
                     </span>
-                    <button onclick="deletePlantLog(${actualIndex})" style="border:none; background:#FFF1F2; color:#E11D48; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:14px; padding:0; transition: background 0.2s;" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'" title="ডিলিট">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        ${log.image_url ? `
+                        <button onclick="downloadImage('${log.image_url}')" style="border:none; background:#F1F5F9; color:#0EA5E9; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:14px; padding:0; transition: background 0.2s;" onmouseover="this.style.background='#E0F2FE'" onmouseout="this.style.background='#F1F5F9'" title="ডাউনলোড">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </button>` : ''}
+                        <button onclick="deletePlantLog(${actualIndex})" style="border:none; background:#FFF1F2; color:#E11D48; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:14px; padding:0; transition: background 0.2s;" onmouseover="this.style.background='#FFE4E6'" onmouseout="this.style.background='#FFF1F2'" title="ডিলিট">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
                 </div>
                 
                 ${log.image_url ? `<img src="${log.image_url}" onclick="openFullScreenImage('${log.image_url}')" style="width:100%; height:120px; object-fit:cover; border-radius:12px; margin-bottom:12px; cursor:zoom-in; border: 1px solid #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">` : ''}
@@ -1407,6 +1447,31 @@ function populateTimeline(logs) {
     });
     container.innerHTML = html;
 }
+
+window.downloadImage = async function(url) {
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const urlBlob = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = urlBlob;
+        a.download = `plant_update_${Date.now()}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(urlBlob);
+        document.body.removeChild(a);
+    } catch(e) {
+        // Fallback if fetch fails due to CORS
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `plant_update_${Date.now()}.jpg`;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+};
 
 window.deletePlantLog = function (logIndex) {
     if (!currentlyEditingPlant) return;
@@ -2384,3 +2449,34 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// ========================
+// Image Upload Action Sheet Logic (Apple Inspired)
+// ========================
+window.openImageUploadActionSheet = function() {
+    const preview = document.getElementById('bsAvatarPreview');
+    const removeBtn = document.getElementById('btnRemovePhotoAction');
+    
+    if (preview.src && !preview.src.includes('placehold.co')) {
+        removeBtn.style.display = 'flex';
+    } else {
+        removeBtn.style.display = 'none';
+    }
+    
+    document.getElementById('imageUploadActionSheetOverlay').style.display = 'block';
+    
+    // Slight delay for transition
+    setTimeout(() => {
+        document.getElementById('imageUploadActionSheetOverlay').style.opacity = '1';
+        document.getElementById('imageUploadActionSheet').style.bottom = '0';
+    }, 10);
+};
+
+window.closeImageUploadActionSheet = function() {
+    document.getElementById('imageUploadActionSheetOverlay').style.opacity = '0';
+    document.getElementById('imageUploadActionSheet').style.bottom = '-100%';
+    
+    setTimeout(() => {
+        document.getElementById('imageUploadActionSheetOverlay').style.display = 'none';
+    }, 300);
+};

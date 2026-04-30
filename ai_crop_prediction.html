@@ -18,69 +18,50 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/ai_crop_prediction.css">
 
+    <script type="module" src="js/components.js" defer></script>
     <script type="module" src="js/ai_crop_prediction.js" defer></script>
 </head>
 
 <body class="dashboard-body" style="background: #F8FAFC; padding-bottom: 100px;">
     <!-- Header -->
-    <header class="inner-header"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; padding: 0 16px; z-index: 100;">
-        <button class="btn-back" onclick="window.history.back()"
-            style="background: none; border: none; padding: 8px; margin-left: -8px; cursor: pointer; border-radius: 50%;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-        </button>
-        <h1 style="font-size: 18px; font-weight: 700; margin-left: 12px; color: var(--text-main);">এআই স্মার্ট এনালাইসিস
-        </h1>
-        <div
-            style="margin-left: auto; background: #ECFDF5; color: #10B981; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 4px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
+    <app-page-header page-title="এআই স্মার্ট এনালাইসিস">
+        <div slot="action" style="background: #ECFDF5; color: #10B981; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
             স্মার্ট প্ল্যান
         </div>
-    </header>
+    </app-page-header>
 
     <main class="prediction-content" style="padding-left: 16px; padding-right: 16px;">
         <!-- Top Info Context -->
         <div class="context-card">
             <div class="context-row">
                 <span class="context-label">জমি:</span>
-                <span class="context-val" id="farm-name-display">লোড হচ্ছে...</span>
+                <span class="context-val skeleton" id="farm-name-display" style="width: 100px; height: 14px; border-radius: 4px; display: inline-block;"></span>
             </div>
             <div class="context-row">
                 <span class="context-label">ফসল:</span>
-                <span class="context-val" id="crop-name-display">লোড হচ্ছে...</span>
+                <span class="context-val skeleton" id="crop-name-display" style="width: 80px; height: 14px; border-radius: 4px; display: inline-block;"></span>
             </div>
             <div class="context-row">
                 <span class="context-label">জাত:</span>
-                <span class="context-val" id="variety-name-display">লোড হচ্ছে...</span>
+                <span class="context-val skeleton" id="variety-name-display" style="width: 120px; height: 14px; border-radius: 4px; display: inline-block;"></span>
             </div>
         </div>
 
         <!-- Section Title -->
         <h2 class="section-title">সম্ভাব্য রূপরেখা</h2>
 
-        <div id="ai-loading-state" style="text-align: center; padding: 40px 20px;">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round"
-                style="animation: spin 1s linear infinite; color: var(--primary); margin-bottom: 16px;">
-                <line x1="12" y1="2" x2="12" y2="6"></line>
-                <line x1="12" y1="18" x2="12" y2="22"></line>
-                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                <line x1="2" y1="12" x2="6" y2="12"></line>
-                <line x1="18" y1="12" x2="22" y2="12"></line>
-                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-            </svg>
-            <h3 style="color: var(--text-main); font-size: 16px;">AI এনালাইসিস চলছে...</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">জমির আকার ও পরিবেশ অনুযায়ী সেরা
-                টাইমলাইন তৈরি হচ্ছে।</p>
+        <div id="ai-loading-state" style="padding: 10px 0;">
+            <div class="pred-card skeleton" style="height: 140px; margin-bottom: 16px; border: none; box-shadow: none;"></div>
+            <div class="pred-card skeleton" style="height: 180px; margin-bottom: 16px; border: none; box-shadow: none;"></div>
+            <div class="skeleton" style="height: 200px; border-radius: 12px; margin-bottom: 16px;"></div>
+
+            <div style="text-align: center; padding: 20px;">
+                <h3 id="gemini-loading-msg" style="color: var(--text-main); font-size: 16px; transition: opacity 0.3s;">এআই ডাটা সিঙ্ক হচ্ছে...</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">আপনার জমির জন্য সেরা পরিকল্পনা তৈরি হচ্ছে। দয়া করে অপেক্ষা করুন...</p>
+            </div>
         </div>
 
         <div id="ai-result-content" style="display: none;">

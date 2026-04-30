@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 
 <head>
@@ -23,24 +23,11 @@
 
 <body class="profile-body">
     <!-- Header -->
-    <header class="page-top-header"
-        style="position: sticky; top: 0; z-index: 100; background: white; padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-            <button class="back-btn" onclick="history.back()" aria-label="Go Back"
-                style="border: none; background: #F1F5F9; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </button>
-            <h2 style="font-size: 18px; margin:0; line-height: 1.2;">আমার প্রোফাইল</h2>
-        </div>
-        <button class="header-action-btn" id="btnEditProfileTop" aria-label="Edit Profile"
-            style="padding: 8px; border:none; background:none; cursor: pointer; color: var(--primary);">
+    <app-page-header page-title="আমার প্রোফাইল">
+        <button slot="action" class="header-action-btn" id="btnEditProfileTop" aria-label="Edit Profile" style="padding: 8px; border:none; background:none; cursor: pointer; color: var(--primary);">
             <span class="material-icons-round">edit</span>
         </button>
-    </header>
+    </app-page-header>
     <main class="profile-main">
         <!-- User Info Card -->
         <div class="user-profile-card">
@@ -51,13 +38,13 @@
                 </button>
             </div>
             <h2 class="user-name">
-                <span id="userNameDisplay">অপেক্ষা করুন...</span>
+                <span id="userNameDisplay" class="skeleton" style="width: 120px; height: 24px; border-radius: 4px; display: inline-block;"></span>
                 <span class="material-icons-round verified-badge" title="Verified">verified</span>
             </h2>
-            <p class="user-phone" id="userPhoneDisplay">...</p>
+            <p class="user-phone" id="userPhoneDisplay" class="skeleton" style="width: 100px; height: 16px; border-radius: 4px; margin-top: 8px;"></p>
             <p class="user-address">
                 <span class="material-icons-round" style="font-size: 16px;">location_on</span>
-                <span id="userAddressDisplay">ঠিকানা লোড হচ্ছে...</span>
+                <span id="userAddressDisplay" class="skeleton" style="width: 150px; height: 16px; border-radius: 4px; display: inline-block; vertical-align: middle;"></span>
             </p>
         </div>
 
@@ -69,7 +56,7 @@
                 </div>
                 <div class="stat-info">
                     <h5>মোট জমি</h5>
-                    <h3 id="totalLandsCount">০ শতাংশ</h3>
+                    <h3 id="totalLandsCount" class="skeleton" style="width: 80px; height: 20px; border-radius: 4px;"></h3>
                 </div>
             </div>
             <div class="stat-card">
@@ -78,7 +65,7 @@
                 </div>
                 <div class="stat-info">
                     <h5>সাবস্ক্রিপশন</h5>
-                    <h3 id="subscriptionStatusText">ফ্রি ইউজার</h3>
+                    <h3 id="subscriptionStatusText" class="skeleton" style="width: 80px; height: 20px; border-radius: 4px;"></h3>
                 </div>
             </div>
         </div>
